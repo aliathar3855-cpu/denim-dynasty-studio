@@ -4,10 +4,7 @@ import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import {
-  onAuthStateChanged,
-  signOut
-} from "firebase/auth";
+import { db } from "@/firebase/config";
 
 import {
   collection,
@@ -16,7 +13,7 @@ import {
   doc
 } from "firebase/firestore";
 
-import { auth, db } from "@/firebase/config";
+
 
 export default function DashboardPage() {
 
@@ -36,27 +33,22 @@ export default function DashboardPage() {
 
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  useEffect(() => {
+   useEffect(() => {
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const isAdmin = localStorage.getItem("admin");
 
-      if (!user) {
-
-        router.push("/admin");
+      if (isAdmin !== "true") {
+        router.push("/admin-login");
 
       } else {
 
         setCheckingAuth(false);
-
-        fetchProducts();
+         fetchProducts();
 
       }
 
-    });
+    },  [router]);
 
-    return () => unsubscribe();
-
-  }, [router]);
 
   const fetchProducts = async () => {
 
@@ -79,12 +71,9 @@ export default function DashboardPage() {
 
   };
 
-  const handleLogout = async () => {
-
-    await signOut(auth);
-
-    router.push("/admin");
-
+  const handleLogout = () => {
+    localStorage.removeItem("admin");
+    router.push("/admin-login");
   };
 
   const handleDelete = async (id: string) => {
