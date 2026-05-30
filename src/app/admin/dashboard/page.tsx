@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const [name, setName] = useState("");
@@ -67,12 +68,21 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-4 md:p-10">
+        <div className="flex items-center justify-between mb-8">
 
       <h1 className="text-3xl md:text-4xl font-bold mb-8">
         Admin Dashboard
       </h1>
 
-      <form
+      <button
+        onClick={logout}
+        className="bg-red-500 px-4 py-2 rounded-xl font-semibold" 
+        >
+        Logout
+        </button>
+        </div>
+
+   <form
         onSubmit={handleSubmit}
         className="max-w-xl space-y-6"
       >
