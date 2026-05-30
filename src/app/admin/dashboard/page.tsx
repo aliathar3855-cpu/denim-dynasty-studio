@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -64,6 +65,11 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+    const logout = () => {
+    localStorage.removeItem("admin");
+    router.push("/admin-login");
   };
 
   return (
