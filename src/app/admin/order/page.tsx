@@ -1,34 +1,72 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "@/firebase/config";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // FETCH ORDERS
   const fetchOrders = async () => {
-    const snap = await getDocs(collection(db, "orders"));
+    try {
+      setLoading(true);
 
-    const data = snap.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    }));
+      const snap = await onSnapshot(collection(db, "orders"));
 
-    setOrders(data);
+      const data = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+
+      // safe sort (avoid crash if createdAt missing)
+      data.sort((a: any, b: any) => {
+        const aTime = a.createdAt?.seconds || 0;
+        const bTime = b.createdAt?.seconds || 0;
+        return bTime - aTime;
+      });
+
+      setOrders(data);
+    } catch (err) {
+      console.error("Failed to fetch orders:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  // UPDATE STATUS
   const updateStatus = async (id: string, status: string) => {
-    await updateDoc(doc(db, "orders", id), {
-      status,
-    });
+    try {
+      await updateDoc(doc(db, "orders", id), { status });
 
-    fetchOrders();
+      // instant UI update
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === id ? { ...o, status } : o
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update status:", err);
+    }
   };
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        Loading orders...
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-black text-white p-6 md:p-10">
@@ -42,7 +80,7 @@ export default function AdminOrders() {
         {orders.map((order) => (
           <div
             key={order.id}
-            className="bg-zinc-900 p-6 rounded-2xl space-y-3"
+            className="bg-zinc-900 p-6 rounded-2xl space-y-4"
           >
 
             {/* CUSTOMER */}
@@ -75,32 +113,24 @@ export default function AdminOrders() {
             </div>
 
             {/* STATUS */}
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex items-center gap-4 flex-wrap">
 
               <span className="px-3 py-1 bg-zinc-800 rounded-full">
                 {order.status || "pending"}
               </span>
 
-              <button
-                onClick={() => updateStatus(order.id, "confirmed")}
-                className="px-3 py-1 bg-blue-600 rounded-xl"
+              <select
+                value={order.status || "pending"}
+                onChange={(e) =>
+                  updateStatus(order.id, e.target.value)
+                }
+                className="bg-zinc-800 px-3 py-2 rounded-xl"
               >
-                Confirm
-              </button>
-
-              <button
-                onClick={() => updateStatus(order.id, "shipped")}
-                className="px-3 py-1 bg-yellow-600 rounded-xl"
-              >
-                Ship
-              </button>
-
-              <button
-                onClick={() => updateStatus(order.id, "delivered")}
-                className="px-3 py-1 bg-green-600 rounded-xl"
-              >
-                Deliver
-              </button>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+              </select>
 
             </div>
 

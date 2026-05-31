@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/firebase/config";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export async function POST(req: Request) {
   try {
@@ -8,12 +8,17 @@ export async function POST(req: Request) {
 
     await addDoc(collection(db, "orders"), {
       ...data,
-      createdAt: new Date(),
+      createdAt: serverTimestamp(),
     });
 
     return NextResponse.json({ success: true });
 
   } catch (err) {
-    return NextResponse.json({ error: "failed" }, { status: 500 });
+    console.error(err);
+
+    return NextResponse.json(
+      { error: "failed to create order" },
+      { status: 500 }
+    );
   }
 }

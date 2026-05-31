@@ -1,10 +1,8 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { useRouter } from "next/navigation";
 
 export default function CartPage() {
-
   const {
     cart,
     removeFromCart,
@@ -12,18 +10,15 @@ export default function CartPage() {
     decreaseQuantity,
   } = useCart();
 
-  const router = useRouter();
-
   const totalPrice = cart.reduce(
     (total: number, item: any) =>
       total + item.price * item.quantity,
     0
   );
 
-  // ✅ CHECKOUT FUNCTION
+  // CHECKOUT FUNCTION
   const handleCheckout = async () => {
     try {
-
       const res = await fetch("/api/create-order", {
         method: "POST",
         headers: {
@@ -45,22 +40,40 @@ export default function CartPage() {
         order_id: order.id,
 
         method: {
-            upi: true,
-            card: true,
-            netbanking: true,
-            wallet: true,
+          upi: true,
+          card: true,
+          netbanking: true,
+          wallet: true,
         },
 
-        handler: function (response: any) {
+        handler: async function (response: any) {
+          try {
+            await fetch("/api/save-order", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                cart,
+                total: totalPrice,
+                paymentId: response.razorpay_payment_id,
+                status: "paid",
+              }),
+            });
+
+            // clear cart after success
+            localStorage.removeItem("cart");
+
             alert("Payment Successful!");
-            console.log(response);
+          } catch (err) {
+            console.log(err);
+          }
         },
 
         theme: {
-            color: "#000000",
+          color: "#000000",
         },
-        
-         };
+      };
 
       const razor = new (window as any).Razorpay(options);
       razor.open();
