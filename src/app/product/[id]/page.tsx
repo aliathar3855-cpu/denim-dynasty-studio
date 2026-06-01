@@ -92,37 +92,36 @@ export default function ProductPage() {
             {product.description}
           </p>
 
-        <button
+          <button
             onClick={() => {
-                addToCart({
+              addToCart({
                 id: product.id,
                 name: product.name,
                 price: product.price,
                 imageUrl: product.imageUrl,
                 quantity: 1,
-                });
+              });
 
-                setShowToast(true);
+              setShowToast(true);
 
-                setTimeout(() => {
+              setTimeout(() => {
                 setShowToast(false);
-                }, 1500);
+              }, 1500);
             }}
             className="mt-8 bg-white text-black py-4 px-8 rounded-xl font-bold hover:bg-gray-200 transition"
-            >
+          >
             Add To Cart
-            </button>
+          </button>
 
         </div>
 
       </div>
 
-       {showToast && (
+      {showToast && (
         <div className="fixed bottom-10 right-10 bg-green-500 text-black px-6 py-3 rounded-xl font-bold shadow-lg z-50">
           Added to Cart ✅
         </div>
       )}
-
 
     </main>
   );

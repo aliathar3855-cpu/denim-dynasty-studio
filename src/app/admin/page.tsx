@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { db, auth } from "@/firebase/config";
 
 import {
@@ -255,14 +256,22 @@ export default function DashboardPage() {
                 {product.category}
               </p>
 
-              <button
-                onClick={() =>
-                  handleDelete(product.id)
-                }
-                className="mt-5 w-full bg-red-500 py-3 rounded-xl font-semibold"
-              >
-                Delete Product
-              </button>
+              <div className="flex gap-3 mt-5">
+                <Link
+                  href={`/admin/edit-product/${product.id}`}
+                  className="flex-1 bg-white text-black py-3 rounded-xl font-semibold text-center hover:bg-gray-200 transition flex items-center justify-center text-sm"
+                >
+                  Edit Product
+                </Link>
+                <button
+                  onClick={() =>
+                    handleDelete(product.id)
+                  }
+                  className="flex-1 bg-red-500 py-3 rounded-xl font-semibold hover:bg-red-600 transition text-sm"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         ))}

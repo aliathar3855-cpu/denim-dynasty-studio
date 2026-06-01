@@ -9,6 +9,7 @@ export default function CheckoutPage() {
   const [total, setTotal] = useState(0);
 
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
@@ -29,10 +30,22 @@ export default function CheckoutPage() {
     setTotal(totalPrice);
   }, []);
 
+  // GENERATE UNIQUE ORDER NUMBER
+  const generateOrderNumber = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
+    for (let i = 0; i < 8; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `DDS-${result}`;
+  };
+
   // SAVE ORDER TO FIRESTORE
   const saveOrder = async (paymentId?: string, status = "pending") => {
-    await addDoc(collection(db, "orders"), {
-      customer: { name, phone, address, city, pincode },
+    const orderNumber = generateOrderNumber();
+    const docRef = await addDoc(collection(db, "orders"), {
+      orderNumber,
+      customer: { name, email, phone, address, city, pincode },
       products: cartItems,
       total,
       paymentMethod,
@@ -40,10 +53,22 @@ export default function CheckoutPage() {
       status,
       createdAt: new Date(),
     });
+
+    try {
+      fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: docRef.id, action: "placed" }),
+      });
+    } catch (err) {
+      console.error("Email notification error:", err);
+    }
+
+    return orderNumber;
   };
 
   const handlePlaceOrder = async () => {
-    if (!name || !phone || !address || !city || !pincode) {
+    if (!name || !email || !phone || !address || !city || !pincode) {
       alert("Please fill all fields");
       return;
     }
@@ -51,12 +76,13 @@ export default function CheckoutPage() {
     try {
       // COD ORDER
       if (paymentMethod === "cod") {
-        await saveOrder(undefined, "cod");
+        const orderNumber = await saveOrder(undefined, "cod");
 
         localStorage.removeItem("cart");
         setCartItems([]);
 
-        alert("COD Order placed");
+        alert(`COD Order placed! Order Number: ${orderNumber}`);
+        window.location.href = `/success?orderNumber=${orderNumber}`;
         return;
       }
 
@@ -86,7 +112,7 @@ export default function CheckoutPage() {
 
         handler: async function (response: any) {
           try {
-            await saveOrder(
+            const orderNumber = await saveOrder(
               response.razorpay_payment_id,
               "paid"
             );
@@ -94,9 +120,9 @@ export default function CheckoutPage() {
             localStorage.removeItem("cart");
             setCartItems([]);
 
-            alert("Payment Successful!");
+            alert(`Payment Successful! Order Number: ${orderNumber}`);
 
-            window.location.href = "/success";
+            window.location.href = `/success?orderNumber=${orderNumber}`;
 
           } catch (err) {
             console.error("Order saving failed:", err);
@@ -142,6 +168,15 @@ export default function CheckoutPage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="w-full p-4 bg-zinc-900 rounded-xl"
+          />
+
+          <input
+            placeholder="Email Address"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-4 bg-zinc-900 rounded-xl"
+            required
           />
 
           <textarea

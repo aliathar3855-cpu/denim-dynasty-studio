@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { auth } from "@/firebase/config";
+import { signOut } from "firebase/auth";
+import AdminGuard from "@/components/AdminGuard";
 
 export default function DashboardPage() {
   const [name, setName] = useState("");
@@ -67,91 +70,97 @@ export default function DashboardPage() {
     }
   };
 
-    const logout = () => {
-    localStorage.removeItem("admin");
-    router.push("/admin-login");
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/admin/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-4 md:p-10">
-        <div className="flex items-center justify-between mb-8">
+    <AdminGuard>
+      <main className="min-h-screen bg-black text-white p-4 md:p-10">
+          <div className="flex items-center justify-between mb-8">
 
-      <h1 className="text-3xl md:text-4xl font-bold mb-8">
-        Admin Dashboard
-      </h1>
+        <h1 className="text-3xl md:text-4xl font-bold mb-8">
+          Admin Dashboard
+        </h1>
 
-      <button
-        onClick={logout}
-        className="bg-red-500 px-4 py-2 rounded-xl font-semibold" 
-        >
-        Logout
-        </button>
-        </div>
-
-   <form
-        onSubmit={handleSubmit}
-        className="max-w-xl space-y-6"
-      >
-
-        {/* NAME */}
-        <input
-          type="text"
-          placeholder="Product Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
-        />
-
-        {/* PRICE */}
-        <input
-          type="number"
-          placeholder="Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
-        />
-
-        {/* CATEGORY */}
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
-        >
-          <option value="">Select Category</option>
-          <option value="T-Shirt">T-Shirt</option>
-          <option value="Shirt">Shirt</option>
-          <option value="Pant">Pant</option>
-          <option value="Track Pant">Track Pant</option>
-          <option value="Cord Set">Cord Set</option>
-        </select>
-
-        {/* DESCRIPTION */}
-        <textarea
-          placeholder="Product Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-4 rounded-xl bg-zinc-900 outline-none h-32"
-        />
-
-        {/* IMAGE */}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e: any) => setImage(e.target.files[0])}
-          className="w-full p-4 rounded-xl bg-zinc-900"
-        />
-
-        {/* SUBMIT */}
         <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-gray-200 transition"
+          onClick={logout}
+          className="bg-red-500 px-4 py-2 rounded-xl font-semibold" 
+          >
+          Logout
+          </button>
+          </div>
+
+     <form
+          onSubmit={handleSubmit}
+          className="max-w-xl space-y-6"
         >
-          {loading ? "Uploading..." : "Add Product"}
-        </button>
 
-      </form>
+          {/* NAME */}
+          <input
+            type="text"
+            placeholder="Product Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
+          />
 
-    </main>
+          {/* PRICE */}
+          <input
+            type="number"
+            placeholder="Price"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
+          />
+
+          {/* CATEGORY */}
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
+          >
+            <option value="">Select Category</option>
+            <option value="T-Shirt">T-Shirt</option>
+            <option value="Shirt">Shirt</option>
+            <option value="Pant">Pant</option>
+            <option value="Track Pant">Track Pant</option>
+            <option value="Cord Set">Cord Set</option>
+          </select>
+
+          {/* DESCRIPTION */}
+          <textarea
+            placeholder="Product Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full p-4 rounded-xl bg-zinc-900 outline-none h-32"
+          />
+
+          {/* IMAGE */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e: any) => setImage(e.target.files[0])}
+            className="w-full p-4 rounded-xl bg-zinc-900"
+          />
+
+          {/* SUBMIT */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-gray-200 transition"
+          >
+            {loading ? "Uploading..." : "Add Product"}
+          </button>
+
+        </form>
+
+      </main>
+    </AdminGuard>
   );
 }

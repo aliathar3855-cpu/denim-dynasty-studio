@@ -13,8 +13,11 @@ import { useCart } from "@/context/CartContext";
 export default function Home() {
 
   const [products, setProducts] = useState<any[]>([]);
-
   const { addToCart, cart } = useCart();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("default");
 
   const categories = [
     "Cord Set",
@@ -60,6 +63,28 @@ export default function Home() {
 
   }, []);
 
+  const filteredProducts = products
+    .filter((product) => {
+      const nameMatch = product.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      const descMatch = product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = nameMatch || descMatch;
+
+      const matchesCategory =
+        selectedCategory === "All" ||
+        product.category?.toLowerCase() === selectedCategory.toLowerCase();
+
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (sortBy === "low-to-high") {
+        return Number(a.price) - Number(b.price);
+      }
+      if (sortBy === "high-to-low") {
+        return Number(b.price) - Number(a.price);
+      }
+      return 0;
+    });
+
   return (
     <main className="bg-black text-white min-h-screen">
 
@@ -75,6 +100,8 @@ export default function Home() {
           <a href="#">Home</a>
 
           <a href="#products">Shop</a>
+
+          <Link href="/order-tracking" className="hover:text-zinc-300 transition">Track Order</Link>
 
           <a href="#">Contact</a>
 
@@ -141,63 +168,122 @@ export default function Home() {
       {/* Products */}
       <section
         id="products"
-        className="px-8 pb-24"
+        className="px-8 pb-24 max-w-6xl mx-auto"
       >
 
         <h3 className="text-4xl font-bold mb-12 text-center">
           Featured Products
         </h3>
 
-        <div className="grid md:grid-cols-3 gap-8">
-
-          {products.map((product) => (
-
-            <div
-              key={product.id}
-              className="bg-zinc-900 rounded-3xl overflow-hidden hover:scale-105 transition"
-            >
-
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-full h-[350px] object-cover"
+        {/* Search, Filter, Sort Controls */}
+        <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-3xl p-6 md:p-8 backdrop-blur-sm space-y-6 mb-12">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            {/* Search Bar */}
+            <div className="w-full md:w-1/2 relative">
+              <input
+                type="text"
+                placeholder="Search premium streetwear..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3.5 bg-black border border-zinc-800 rounded-2xl text-sm focus:border-zinc-700 outline-none transition"
               />
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg">🔍</span>
+            </div>
 
-              <div className="p-6">
+            {/* Price Sort Dropdown */}
+            <div className="w-full md:w-1/4">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full px-4 py-3.5 bg-black border border-zinc-800 rounded-2xl text-sm text-zinc-400 focus:border-zinc-700 outline-none transition cursor-pointer"
+              >
+                <option value="default">Sort: Recommended</option>
+                <option value="low-to-high">Price: Low to High</option>
+                <option value="high-to-low">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
 
-                <h4 className="text-2xl font-semibold">
-                  {product.name}
-                </h4>
-
-                <p className="text-gray-400 mt-2">
-                  ₹{product.price}
-                </p>
-
-                <div className="flex gap-3 mt-5">
-
+          {/* Category Tabs */}
+          <div className="border-t border-zinc-800/60 pt-6">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 mb-3 px-1">Filter Categories</p>
+            <div className="flex gap-2.5 overflow-x-auto pb-3 md:pb-0 md:flex-wrap no-scrollbar">
+              {["All", ...categories].map((cat) => {
+                const isActive = selectedCategory.toLowerCase() === cat.toLowerCase();
+                return (
                   <button
-                    onClick={() => addToCart(product)}
-                    className="flex-1 bg-white text-black py-3 rounded-xl font-semibold hover:bg-gray-200 transition"
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`whitespace-nowrap px-5 py-2.5 rounded-full text-xs font-semibold border transition cursor-pointer ${
+                      isActive
+                        ? "bg-white text-black border-white font-bold"
+                        : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+                    }`}
                   >
-                    Add To Cart
+                    {cat}
                   </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
-                  <Link
-                    href={`/product/${product.id}`}
-                    className="flex-1 bg-zinc-800 py-3 rounded-xl font-semibold text-center hover:bg-zinc-700 transition"
-                  >
-                    View
-                  </Link>
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-20 bg-zinc-900/10 border border-zinc-800/40 rounded-3xl">
+            <p className="text-zinc-500 text-lg">No premium streetwear products found matching your search filters.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-8">
+
+            {filteredProducts.map((product) => (
+
+              <div
+                key={product.id}
+                className="bg-zinc-900 rounded-3xl overflow-hidden hover:scale-105 transition"
+              >
+
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-[350px] object-cover"
+                />
+
+                <div className="p-6">
+
+                  <h4 className="text-2xl font-semibold">
+                    {product.name}
+                  </h4>
+
+                  <p className="text-gray-400 mt-2">
+                    ₹{product.price}
+                  </p>
+
+                  <div className="flex gap-3 mt-5">
+
+                    <button
+                      onClick={() => addToCart(product)}
+                      className="flex-1 bg-white text-black py-3 rounded-xl font-semibold hover:bg-gray-200 transition"
+                    >
+                      Add To Cart
+                    </button>
+
+                    <Link
+                      href={`/product/${product.id}`}
+                      className="flex-1 bg-zinc-800 py-3 rounded-xl font-semibold text-center hover:bg-zinc-700 transition"
+                    >
+                      View
+                    </Link>
+
+                  </div>
 
                 </div>
 
               </div>
 
-            </div>
+            ))}
 
-          ))}
-
-        </div>
+          </div>
+        )}
 
       </section>
 

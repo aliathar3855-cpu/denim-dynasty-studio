@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // Products collection:
+    // - Anyone can read/view products
+    // - Only logged-in admin users can write (create, update, delete)
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders collection:
+    // - Anyone can create an order (during guest checkout) and fetch a single order by ID
+    // - Only logged-in admin users can list all, update (e.g. status changes), or delete orders
+    match /orders/{orderId} {
+      allow create, get: if true;
+      allow list, update, delete: if isAdmin();
+    }
+  }
+}
