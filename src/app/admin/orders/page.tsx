@@ -133,28 +133,28 @@ export default function AdminOrdersPage() {
 
   return (
     <AdminGuard>
-      <main className="min-h-screen bg-black text-white p-6 md:p-10 font-sans">
+      <main className="min-h-screen bg-white text-[#111111] p-6 md:p-10 font-sans max-w-6xl mx-auto">
         
         {/* Navigation & Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 border-b border-zinc-800 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 border-b border-neutral-200 pb-6">
           <div>
-            <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-gray-200 to-zinc-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-black tracking-tight text-[#111111]">
               Order Management
             </h1>
-            <p className="text-zinc-500 text-sm mt-1">
+            <p className="text-[#666666] text-sm mt-1">
               View customer details, update tracking statuses, and analyze business metrics.
             </p>
           </div>
           <div className="flex gap-4">
             <button
               onClick={() => router.push("/admin")}
-              className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800 px-5 py-2.5 rounded-xl font-semibold transition text-sm"
+              className="bg-[#f8f8f8] border border-neutral-200 hover:bg-neutral-100 hover:border-neutral-300 px-5 py-2.5 rounded-xl font-semibold transition text-sm cursor-pointer text-[#111111]"
             >
               Manage Products
             </button>
             <button
               onClick={handleLogout}
-              className="bg-red-950 border border-red-800 hover:bg-red-900 text-red-200 px-5 py-2.5 rounded-xl font-semibold transition text-sm"
+              className="border border-red-200 text-red-600 hover:bg-red-50 px-5 py-2.5 rounded-xl font-semibold transition text-sm cursor-pointer"
             >
               Logout
             </button>
@@ -163,50 +163,50 @@ export default function AdminOrdersPage() {
 
         {/* Dashboard Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
-          <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 backdrop-blur-sm">
-            <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Total Orders</p>
-            <p className="text-3xl font-bold mt-2 text-white">{totalOrders}</p>
+          <div className="bg-[#f8f8f8] border border-neutral-200 rounded-3xl p-6 shadow-sm">
+            <p className="text-xs text-[#666666] font-bold uppercase tracking-wider">Total Orders</p>
+            <p className="text-3xl font-black mt-2 text-[#111111]">{totalOrders}</p>
           </div>
-          <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 backdrop-blur-sm">
-            <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Total Revenue</p>
-            <p className="text-3xl font-bold mt-2 text-green-400">₹{totalRevenue}</p>
+          <div className="bg-[#f8f8f8] border border-neutral-200 rounded-3xl p-6 shadow-sm">
+            <p className="text-xs text-[#666666] font-bold uppercase tracking-wider">Total Revenue</p>
+            <p className="text-3xl font-black mt-2 text-green-600">₹{totalRevenue}</p>
           </div>
-          <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 backdrop-blur-sm">
-            <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Active/Pending</p>
-            <p className="text-3xl font-bold mt-2 text-yellow-400">{pendingOrders}</p>
+          <div className="bg-[#f8f8f8] border border-neutral-200 rounded-3xl p-6 shadow-sm">
+            <p className="text-xs text-[#666666] font-bold uppercase tracking-wider">Active/Pending</p>
+            <p className="text-3xl font-black mt-2 text-amber-600">{pendingOrders}</p>
           </div>
-          <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-3xl p-6 backdrop-blur-sm">
-            <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Delivered</p>
-            <p className="text-3xl font-bold mt-2 text-blue-400">{completedOrders}</p>
+          <div className="bg-[#f8f8f8] border border-neutral-200 rounded-3xl p-6 shadow-sm">
+            <p className="text-xs text-[#666666] font-bold uppercase tracking-wider">Delivered</p>
+            <p className="text-3xl font-black mt-2 text-blue-600">{completedOrders}</p>
           </div>
         </div>
 
         {/* Orders Table Section */}
-        <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl overflow-hidden backdrop-blur-sm">
-          <div className="px-6 py-5 border-b border-zinc-800/80 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Recent Invoices</h2>
+        <div className="bg-white border border-neutral-200 rounded-3xl overflow-hidden shadow-sm">
+          <div className="px-6 py-5 border-b border-neutral-200 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-[#111111]">Recent Invoices</h2>
             <button
               onClick={fetchOrders}
-              className="text-xs text-zinc-400 hover:text-white transition flex items-center gap-1"
+              className="text-xs text-[#666666] hover:text-[#111111] transition flex items-center gap-1 cursor-pointer"
             >
               🔄 Refresh List
             </button>
           </div>
 
           {loading ? (
-            <div className="p-20 text-center text-zinc-400">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-4"></div>
+            <div className="p-20 text-center text-[#666666]">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-black mb-4"></div>
               <p className="text-lg">Fetching orders from database...</p>
             </div>
           ) : orders.length === 0 ? (
-            <div className="p-20 text-center text-zinc-500">
+            <div className="p-20 text-center text-neutral-400">
               <p className="text-2xl font-bold">No orders found</p>
               <p className="text-sm mt-1">Orders placed by customers will appear here.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-zinc-950/60 text-xs text-zinc-400 uppercase border-b border-zinc-800/80">
+                <thead className="bg-[#f8f8f8] text-xs text-[#666666] uppercase border-b border-neutral-200">
                   <tr>
                     <th className="px-6 py-4">Customer</th>
                     <th className="px-6 py-4">Date</th>
@@ -216,7 +216,7 @@ export default function AdminOrdersPage() {
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800/60">
+                <tbody className="divide-y divide-neutral-200">
                   {orders.map((order) => {
                     const isExpanded = expandedOrderId === order.id;
                     const c = order.customer || {};
@@ -224,40 +224,40 @@ export default function AdminOrdersPage() {
                     return (
                       <tr
                         key={order.id}
-                        className={`hover:bg-zinc-900/30 transition-colors ${
-                          isExpanded ? "bg-zinc-900/20" : ""
+                        className={`hover:bg-neutral-50/50 transition-colors ${
+                          isExpanded ? "bg-neutral-50" : ""
                         }`}
                       >
                         {/* Customer Column */}
                         <td className="px-6 py-4">
                           {order.orderNumber && (
-                            <span className="text-[10px] font-mono bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded text-zinc-300 font-bold block w-max mb-1">
+                            <span className="text-[10px] font-mono bg-[#f8f8f8] border border-neutral-200 px-2 py-0.5 rounded text-[#111111] font-bold block w-max mb-1">
                               {order.orderNumber}
                             </span>
                           )}
-                          <div className="font-semibold text-white">{c.name || "N/A"}</div>
-                          <div className="text-zinc-500 text-xs">{c.phone || "No phone"}</div>
+                          <div className="font-semibold text-[#111111]">{c.name || "N/A"}</div>
+                          <div className="text-[#666666] text-xs">{c.phone || "No phone"}</div>
                         </td>
 
                         {/* Date Column */}
-                        <td className="px-6 py-4 text-zinc-300">
+                        <td className="px-6 py-4 text-[#111111]">
                           {formatDate(order.createdAt)}
                         </td>
 
                         {/* Payment Column */}
                         <td className="px-6 py-4">
-                          <span className="capitalize px-2.5 py-1 rounded-full text-xs font-semibold bg-zinc-800 text-zinc-300 border border-zinc-700">
+                          <span className="capitalize px-2.5 py-1 rounded-full text-xs font-semibold bg-white text-[#111111] border border-neutral-200">
                             {order.paymentMethod === "cod" ? "COD" : "Online"}
                           </span>
                           {order.paymentId && (
-                            <div className="text-zinc-500 text-[10px] mt-1 truncate max-w-[120px]">
+                            <div className="text-[#666666] text-[10px] mt-1 truncate max-w-[120px]">
                               {order.paymentId}
                             </div>
                           )}
                         </td>
 
                         {/* Amount Column */}
-                        <td className="px-6 py-4 font-bold text-white">
+                        <td className="px-6 py-4 font-bold text-[#111111]">
                           ₹{order.total || 0}
                         </td>
 
@@ -269,18 +269,18 @@ export default function AdminOrdersPage() {
                             onChange={(e) => handleStatusChange(order.id, e.target.value)}
                             className={`text-xs font-semibold px-2.5 py-1 rounded-full border outline-none cursor-pointer transition ${
                               order.status === "delivered"
-                                ? "bg-green-950/40 text-green-300 border-green-800"
+                                ? "bg-green-50 text-green-750 border-green-200"
                                 : order.status === "shipped"
-                                ? "bg-blue-950/40 text-blue-300 border-blue-800"
+                                ? "bg-blue-50 text-blue-750 border-blue-200"
                                 : order.status === "processing"
-                                ? "bg-purple-950/40 text-purple-300 border-purple-800"
-                                : "bg-yellow-950/40 text-yellow-300 border-yellow-800"
+                                ? "bg-purple-50 text-purple-750 border-purple-200"
+                                : "bg-amber-50 text-amber-750 border-amber-200"
                             }`}
                           >
-                            <option value="pending" className="bg-black text-white">Pending</option>
-                            <option value="processing" className="bg-black text-white">Processing</option>
-                            <option value="shipped" className="bg-black text-white">Shipped</option>
-                            <option value="delivered" className="bg-black text-white">Delivered</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
                           </select>
                         </td>
 
@@ -289,14 +289,14 @@ export default function AdminOrdersPage() {
                           <div className="flex items-center justify-end gap-3">
                             <button
                               onClick={() => toggleExpandOrder(order.id)}
-                              className="text-xs text-zinc-400 hover:text-white transition font-medium"
+                              className="text-xs text-[#666666] hover:text-[#111111] transition font-semibold cursor-pointer"
                             >
                               {isExpanded ? "Collapse" : "Details"}
                             </button>
                             <button
                               onClick={() => handleDeleteOrder(order.id)}
                               disabled={updatingId === order.id}
-                              className="text-xs text-red-500 hover:text-red-400 transition font-medium"
+                              className="text-xs text-red-650 hover:text-red-800 transition font-semibold cursor-pointer"
                             >
                               Delete
                             </button>
@@ -324,15 +324,15 @@ export default function AdminOrdersPage() {
             const c = selectedOrder.customer || {};
 
             return (
-              <div className="mt-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 animate-fadeIn">
-                <div className="flex justify-between items-start border-b border-zinc-800 pb-5 mb-6">
+              <div className="mt-8 bg-[#f8f8f8] border border-neutral-200 rounded-3xl p-6 md:p-8 animate-fadeIn">
+                <div className="flex justify-between items-start border-b border-neutral-200 pb-5 mb-6">
                   <div>
-                    <h3 className="text-xl font-bold">Order Details</h3>
-                    <p className="text-xs text-zinc-500 mt-1">ID: {selectedOrder.id}</p>
+                    <h3 className="text-xl font-bold text-[#111111]">Order Details</h3>
+                    <p className="text-xs text-[#666666] mt-1">ID: {selectedOrder.id}</p>
                   </div>
                   <button
                     onClick={() => setExpandedOrderId(null)}
-                    className="text-zinc-400 hover:text-white text-sm"
+                    className="text-[#666666] hover:text-black text-sm cursor-pointer"
                   >
                     Close ✕
                   </button>
@@ -341,21 +341,21 @@ export default function AdminOrdersPage() {
                 <div className="grid md:grid-cols-2 gap-8">
                   {/* Customer Information Card */}
                   <div className="space-y-4">
-                    <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
+                    <h4 className="text-sm font-semibold uppercase tracking-wider text-[#666666]">
                       Customer & Shipping Details
                     </h4>
-                    <div className="bg-black/40 border border-zinc-800/60 rounded-2xl p-5 space-y-3">
+                    <div className="bg-white border border-neutral-200 rounded-2xl p-5 space-y-3">
                       <div>
-                        <span className="text-xs text-zinc-500 block">Recipient Name</span>
-                        <span className="text-sm font-semibold">{c.name || "N/A"}</span>
+                        <span className="text-xs text-[#666666] block">Recipient Name</span>
+                        <span className="text-sm font-semibold text-[#111111]">{c.name || "N/A"}</span>
                       </div>
                       <div>
-                        <span className="text-xs text-zinc-500 block">Phone Connection</span>
-                        <span className="text-sm font-semibold">{c.phone || "N/A"}</span>
+                        <span className="text-xs text-[#666666] block">Phone Connection</span>
+                        <span className="text-sm font-semibold text-[#111111]">{c.phone || "N/A"}</span>
                       </div>
                       <div>
-                        <span className="text-xs text-zinc-500 block">Address Info</span>
-                        <span className="text-sm font-semibold leading-relaxed">
+                        <span className="text-xs text-[#666666] block">Address Info</span>
+                        <span className="text-sm font-semibold text-[#111111] leading-relaxed">
                           {c.address || "N/A"}, {c.city || "N/A"} - {c.pincode || "N/A"}
                         </span>
                       </div>
@@ -364,30 +364,30 @@ export default function AdminOrdersPage() {
 
                   {/* Cart Items List */}
                   <div>
-                    <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 mb-4">
+                    <h4 className="text-sm font-semibold uppercase tracking-wider text-[#666666] mb-4">
                       Items Ordered
                     </h4>
                     <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                       {(selectedOrder.products || []).map((item: any, idx: number) => (
                         <div
                           key={idx}
-                          className="flex items-center gap-4 bg-black/40 border border-zinc-800/60 rounded-2xl p-4"
+                          className="flex items-center gap-4 bg-white border border-neutral-200 rounded-2xl p-4"
                         >
                           <img
                             src={item.imageUrl}
                             alt={item.name}
-                            className="w-16 h-16 object-cover rounded-xl border border-zinc-800"
+                            className="w-16 h-16 object-cover rounded-xl border border-neutral-200"
                           />
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm text-white truncate">
+                            <p className="font-semibold text-sm text-[#111111] truncate">
                               {item.name}
                             </p>
-                            <p className="text-xs text-zinc-500 mt-1">
+                            <p className="text-xs text-[#666666] mt-1">
                               Qty: {item.quantity} × ₹{item.price}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold text-sm text-white">
+                            <p className="font-bold text-sm text-[#111111]">
                               ₹{item.price * item.quantity}
                             </p>
                           </div>
@@ -395,9 +395,9 @@ export default function AdminOrdersPage() {
                       ))}
                     </div>
 
-                    <div className="border-t border-zinc-800 pt-4 mt-4 flex justify-between items-center px-2">
-                      <span className="text-zinc-400 font-semibold">Aggregate Invoice</span>
-                      <span className="text-2xl font-extrabold text-white">
+                    <div className="border-t border-neutral-200 pt-4 mt-4 flex justify-between items-center px-2">
+                      <span className="text-[#666666] font-semibold">Aggregate Invoice</span>
+                      <span className="text-2xl font-extrabold text-[#111111]">
                         ₹{selectedOrder.total || 0}
                       </span>
                     </div>

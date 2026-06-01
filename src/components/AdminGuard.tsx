@@ -29,8 +29,11 @@ export default function AdminGuard({
 
   if (loading) {
     return (
-      <div className="text-white p-6">
-        Checking access...
+      <div className="min-h-screen bg-white text-[#111111] p-6 flex items-center justify-center font-sans">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-black mb-4"></div>
+          <p className="text-neutral-500 text-sm">Checking authentication access...</p>
+        </div>
       </div>
     );
   }

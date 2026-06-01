@@ -81,85 +81,106 @@ export default function DashboardPage() {
 
   return (
     <AdminGuard>
-      <main className="min-h-screen bg-black text-white p-4 md:p-10">
-          <div className="flex items-center justify-between mb-8">
+      <main className="min-h-screen bg-white text-[#111111] p-6 md:p-12 font-sans max-w-xl mx-auto">
+        <div className="flex items-center justify-between mb-8 border-b border-neutral-200 pb-5">
+          <h1 className="text-3xl md:text-4xl font-black text-[#111111] tracking-tight">
+            Admin Dashboard
+          </h1>
 
-        <h1 className="text-3xl md:text-4xl font-bold mb-8">
-          Admin Dashboard
-        </h1>
-
-        <button
-          onClick={logout}
-          className="bg-red-500 px-4 py-2 rounded-xl font-semibold" 
+          <button
+            onClick={logout}
+            className="border border-red-200 text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl font-semibold transition text-sm cursor-pointer"
           >
-          Logout
+            Logout
           </button>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+        >
+          {/* NAME */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+              Product Name
+            </label>
+            <input
+              type="text"
+              placeholder="Product Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition"
+            />
           </div>
 
-     <form
-          onSubmit={handleSubmit}
-          className="max-w-xl space-y-6"
-        >
-
-          {/* NAME */}
-          <input
-            type="text"
-            placeholder="Product Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
-          />
-
           {/* PRICE */}
-          <input
-            type="number"
-            placeholder="Price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
-          />
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+              Price (INR)
+            </label>
+            <input
+              type="number"
+              placeholder="Price"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition"
+            />
+          </div>
 
           {/* CATEGORY */}
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
-          >
-            <option value="">Select Category</option>
-            <option value="T-Shirt">T-Shirt</option>
-            <option value="Shirt">Shirt</option>
-            <option value="Pant">Pant</option>
-            <option value="Track Pant">Track Pant</option>
-            <option value="Cord Set">Cord Set</option>
-          </select>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+              Category
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition cursor-pointer"
+            >
+              <option value="">Select Category</option>
+              <option value="T-Shirt">T-Shirt</option>
+              <option value="Shirt">Shirt</option>
+              <option value="Pant">Pant</option>
+              <option value="Track Pant">Track Pant</option>
+              <option value="Cord Set">Cord Set</option>
+            </select>
+          </div>
 
           {/* DESCRIPTION */}
-          <textarea
-            placeholder="Product Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-4 rounded-xl bg-zinc-900 outline-none h-32"
-          />
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+              Description
+            </label>
+            <textarea
+              placeholder="Product Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition h-32"
+            />
+          </div>
 
           {/* IMAGE */}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e: any) => setImage(e.target.files[0])}
-            className="w-full p-4 rounded-xl bg-zinc-900"
-          />
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+              Product Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e: any) => setImage(e.target.files[0])}
+              className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-sm text-[#666666]"
+            />
+          </div>
 
           {/* SUBMIT */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-gray-200 transition"
+            className="w-full bg-[#111111] text-white px-8 py-4 rounded-xl font-bold hover:bg-neutral-800 transition cursor-pointer shadow-md"
           >
             {loading ? "Uploading..." : "Add Product"}
           </button>
-
         </form>
-
       </main>
     </AdminGuard>
   );

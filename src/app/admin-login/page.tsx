@@ -22,10 +22,10 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-      <div className="bg-zinc-900 p-8 rounded-3xl w-full max-w-md">
+    <main className="min-h-screen bg-white text-[#111111] flex items-center justify-center px-6 font-sans">
+      <div className="bg-[#f8f8f8] border border-neutral-200 p-8 rounded-3xl w-full max-w-md shadow-sm">
 
-        <h1 className="text-4xl font-bold mb-8 text-center">
+        <h1 className="text-4xl font-black mb-8 text-center text-[#111111] tracking-tight">
           Admin Login
         </h1>
 
@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
           placeholder="Admin Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-4 rounded-xl bg-zinc-800 mb-4 outline-none"
+          className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] mb-4 outline-none focus:border-neutral-500 transition"
         />
 
         <input
@@ -42,12 +42,12 @@ export default function AdminLoginPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-4 rounded-xl bg-zinc-800 mb-6 outline-none"
+          className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] mb-6 outline-none focus:border-neutral-500 transition"
         />
 
         <button
           onClick={handleLogin}
-          className="w-full bg-white text-black py-4 rounded-xl font-bold"
+          className="w-full bg-[#111111] text-white py-4 rounded-xl font-bold hover:bg-neutral-800 transition shadow-md cursor-pointer"
         >
           Login
         </button>

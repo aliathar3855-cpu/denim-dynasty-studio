@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import Link from "next/link";
 
 export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState<any[]>([]);
@@ -145,9 +146,19 @@ export default function CheckoutPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-6 md:p-10">
+    <main className="min-h-screen bg-white text-[#111111] p-6 md:p-12 font-sans max-w-5xl mx-auto">
 
-      <h1 className="text-4xl font-bold mb-10">
+      {/* Top Navbar */}
+      <nav className="flex items-center justify-between mb-10 border-b border-neutral-200 pb-5">
+        <Link href="/" className="text-xl font-bold tracking-wide text-[#111111]">
+          DENIM DYNASTY STUDIO
+        </Link>
+        <Link href="/cart" className="text-sm text-neutral-500 hover:text-black transition">
+          ➔ Back to Cart
+        </Link>
+      </nav>
+
+      <h1 className="text-4xl font-black mb-10 tracking-tight text-[#111111]">
         Checkout
       </h1>
 
@@ -160,14 +171,14 @@ export default function CheckoutPage() {
             placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full p-4 bg-zinc-900 rounded-xl"
+            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
           />
 
           <input
             placeholder="Phone"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full p-4 bg-zinc-900 rounded-xl"
+            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
           />
 
           <input
@@ -175,7 +186,7 @@ export default function CheckoutPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-4 bg-zinc-900 rounded-xl"
+            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
             required
           />
 
@@ -183,21 +194,21 @@ export default function CheckoutPage() {
             placeholder="Address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full p-4 bg-zinc-900 rounded-xl h-28"
+            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition h-28"
           />
 
           <input
             placeholder="City"
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            className="w-full p-4 bg-zinc-900 rounded-xl"
+            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
           />
 
           <input
             placeholder="Pincode"
             value={pincode}
             onChange={(e) => setPincode(e.target.value)}
-            className="w-full p-4 bg-zinc-900 rounded-xl"
+            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
           />
 
           {/* PAYMENT */}
@@ -207,8 +218,8 @@ export default function CheckoutPage() {
               onClick={() => setPaymentMethod("online")}
               className={
                 paymentMethod === "online"
-                  ? "bg-white text-black px-4 py-2 rounded-xl"
-                  : "bg-zinc-800 px-4 py-2 rounded-xl"
+                  ? "bg-[#111111] text-white px-5 py-2.5 rounded-xl font-bold border border-black cursor-pointer"
+                  : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-black hover:border-neutral-400 transition cursor-pointer"
               }
             >
               Pay Online
@@ -218,11 +229,11 @@ export default function CheckoutPage() {
               onClick={() => setPaymentMethod("cod")}
               className={
                 paymentMethod === "cod"
-                  ? "bg-white text-black px-4 py-2 rounded-xl"
-                  : "bg-zinc-800 px-4 py-2 rounded-xl"
+                  ? "bg-[#111111] text-white px-5 py-2.5 rounded-xl font-bold border border-black cursor-pointer"
+                  : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-black hover:border-neutral-400 transition cursor-pointer"
               }
             >
-              COD
+              COD (Cash on Delivery)
             </button>
 
           </div>
@@ -230,22 +241,25 @@ export default function CheckoutPage() {
         </div>
 
         {/* SUMMARY */}
-        <div className="bg-zinc-900 p-6 rounded-3xl">
+        <div className="bg-[#f8f8f8] border border-neutral-200 p-6 rounded-2xl">
+
+          <h3 className="text-lg font-bold text-[#111111] mb-6">Order Review</h3>
 
           {cartItems.map((item, i) => (
-            <div key={i} className="flex justify-between mb-4">
-              <span>{item.name}</span>
-              <span>₹{item.price * item.quantity}</span>
+            <div key={i} className="flex justify-between mb-4 text-[#666666] font-medium text-sm">
+              <span>{item.name} (x{item.quantity})</span>
+              <span className="text-[#111111] font-semibold">₹{item.price * item.quantity}</span>
             </div>
           ))}
 
-          <div className="border-t pt-4 mt-4 text-xl font-bold">
-            Total: ₹{total}
+          <div className="border-t border-neutral-200 pt-4 mt-4 text-xl font-black text-[#111111] flex justify-between">
+            <span>Total:</span>
+            <span>₹{total}</span>
           </div>
 
           <button
             onClick={handlePlaceOrder}
-            className="w-full mt-6 bg-white text-black py-3 rounded-xl font-bold"
+            className="w-full mt-6 bg-[#111111] text-white py-4 rounded-xl font-bold hover:bg-neutral-800 transition shadow-md cursor-pointer"
           >
             Place Order
           </button>

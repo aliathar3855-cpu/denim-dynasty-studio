@@ -22,17 +22,17 @@ export default function AdminLogin() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center">
+    <main className="min-h-screen bg-white text-[#111111] flex items-center justify-center font-sans">
 
-      <div className="bg-zinc-900 p-10 rounded-2xl w-[400px] space-y-4">
+      <div className="bg-[#f8f8f8] border border-neutral-200 p-10 rounded-2xl w-[400px] space-y-4 shadow-sm">
 
-        <h1 className="text-3xl font-bold">Admin Login</h1>
+        <h1 className="text-3xl font-black text-[#111111] tracking-tight">Admin Login</h1>
 
         <input
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 rounded-xl bg-black"
+          className="w-full p-3 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition"
         />
 
         <input
@@ -40,12 +40,12 @@ export default function AdminLogin() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 rounded-xl bg-black"
+          className="w-full p-3 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition"
         />
 
         <button
           onClick={handleLogin}
-          className="w-full bg-white text-black py-3 rounded-xl font-bold"
+          className="w-full bg-[#111111] text-white py-3 rounded-xl font-bold hover:bg-neutral-800 transition shadow-md cursor-pointer"
         >
           Login
         </button>

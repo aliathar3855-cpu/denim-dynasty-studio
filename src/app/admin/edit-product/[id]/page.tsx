@@ -110,9 +110,9 @@ export default function EditProductPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+      <main className="min-h-screen bg-white text-[#111111] flex items-center justify-center font-sans">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-4"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-black mb-4"></div>
           <h1 className="text-xl font-bold">Loading Product Data...</h1>
         </div>
       </main>
@@ -121,31 +121,31 @@ export default function EditProductPage() {
 
   return (
     <AdminGuard>
-      <main className="min-h-screen bg-black text-white p-6 md:p-10 font-sans">
+      <main className="min-h-screen bg-white text-[#111111] p-6 md:p-10 font-sans max-w-2xl mx-auto">
         
         {/* Header */}
-        <div className="max-w-2xl mx-auto mb-8 flex items-center justify-between border-b border-zinc-800 pb-5">
+        <div className="max-w-2xl mx-auto mb-8 flex items-center justify-between border-b border-neutral-200 pb-5">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-gray-200 to-zinc-500 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-black tracking-tight text-[#111111]">
               Edit Product
             </h1>
-            <p className="text-zinc-500 text-sm mt-1">Modify details for this merchandise item.</p>
+            <p className="text-[#666666] text-sm mt-1">Modify details for this merchandise item.</p>
           </div>
           <button
             onClick={() => router.push("/admin")}
-            className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 px-4 py-2 rounded-xl text-sm font-semibold transition"
+            className="bg-[#f8f8f8] border border-neutral-200 hover:bg-neutral-100 hover:border-neutral-300 px-4 py-2 rounded-xl text-sm font-semibold transition text-[#111111] cursor-pointer"
           >
             Back to Dashboard
           </button>
         </div>
 
         {/* Form Container */}
-        <div className="max-w-2xl mx-auto bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 md:p-8 backdrop-blur-sm">
+        <div className="max-w-2xl mx-auto bg-white border border-neutral-200 shadow-sm rounded-3xl p-6 md:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* NAME */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
                 Product Name *
               </label>
               <input
@@ -153,14 +153,14 @@ export default function EditProductPage() {
                 placeholder="Product Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-850 outline-none focus:border-zinc-700 transition"
+                className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition"
                 required
               />
             </div>
 
             {/* PRICE */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
                 Price (INR) *
               </label>
               <input
@@ -168,20 +168,20 @@ export default function EditProductPage() {
                 placeholder="Price"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-850 outline-none focus:border-zinc-700 transition"
+                className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition"
                 required
               />
             </div>
 
             {/* CATEGORY */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
                 Category *
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-850 outline-none focus:border-zinc-700 transition text-zinc-300"
+                className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition cursor-pointer"
                 required
               >
                 <option value="">Select Category</option>
@@ -196,48 +196,48 @@ export default function EditProductPage() {
 
             {/* DESCRIPTION */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
                 Product Description
               </label>
               <textarea
                 placeholder="Product Description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-850 outline-none focus:border-zinc-700 transition h-32"
+                className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition h-32"
               />
             </div>
 
             {/* IMAGE PREVIEWS & FILE INPUT */}
             <div className="grid md:grid-cols-2 gap-6 items-end">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
                   Current Image
                 </label>
                 {currentImageUrl ? (
                   <img
                     src={currentImageUrl}
                     alt="Current Product"
-                    className="w-full h-40 object-cover rounded-2xl border border-zinc-800"
+                    className="w-full h-40 object-cover rounded-2xl border border-neutral-200"
                   />
                 ) : (
-                  <div className="w-full h-40 bg-zinc-900 rounded-2xl border border-zinc-800 flex items-center justify-center text-zinc-650 text-xs">
+                  <div className="w-full h-40 bg-[#f8f8f8] rounded-2xl border border-neutral-200 flex items-center justify-center text-[#666666] text-xs">
                     No image available
                   </div>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
                   New Preview
                 </label>
                 {previewUrl ? (
                   <img
                     src={previewUrl}
                     alt="New Preview"
-                    className="w-full h-40 object-cover rounded-2xl border border-zinc-800 border-dashed"
+                    className="w-full h-40 object-cover rounded-2xl border border-neutral-300 border-dashed"
                   />
                 ) : (
-                  <div className="w-full h-40 bg-zinc-900/20 rounded-2xl border border-zinc-800 border-dashed flex items-center justify-center text-zinc-500 text-xs">
+                  <div className="w-full h-40 bg-[#f8f8f8]/50 rounded-2xl border border-neutral-300 border-dashed flex items-center justify-center text-neutral-400 text-xs">
                     Optional Image Update
                   </div>
                 )}
@@ -245,14 +245,14 @@ export default function EditProductPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
                 Upload New Image
               </label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-850 text-sm text-zinc-400"
+                className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-sm text-[#666666]"
               />
             </div>
 
@@ -260,11 +260,11 @@ export default function EditProductPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-gray-200 transition text-center flex items-center justify-center disabled:opacity-50"
+              className="w-full bg-[#111111] text-white py-4 rounded-xl font-bold hover:bg-neutral-800 transition text-center flex items-center justify-center disabled:opacity-50 cursor-pointer shadow-md"
             >
               {submitting ? (
                 <>
-                  <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2"></div>
+                  <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Updating Product...
                 </>
               ) : (
