@@ -58,7 +58,7 @@ export default function ShippingPolicyPage() {
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-black">4. Tracking Your Shipment</h3>
             <p>
-              Once your shipment has been picked up by our logistics partner, you will receive an email and/or SMS containing your Tracking Reference Number. You can check the current transit status of your package at any time via our <Link href="/order-tracking" className="text-black font-semibold underline hover:text-[#666666]">Order Tracking Page</Link>.
+              Once your shipment has been picked up by our logistics partner, you will receive an email and/or SMS containing your Order Reference Number. You can check the current transit status of your package at any time via our <Link href="/my-orders" className="text-black font-semibold underline hover:text-[#666666]">My Orders Dashboard</Link>.
             </p>
           </div>
 

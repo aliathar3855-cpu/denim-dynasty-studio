@@ -80,8 +80,8 @@ export default function Home() {
           <Link href="/#products" className="text-[#666666] hover:text-[#111111] transition">Shop</Link>
           <Link href="/about" className="text-[#666666] hover:text-[#111111] transition">About</Link>
           <Link href="/contact" className="text-[#666666] hover:text-[#111111] transition">Contact</Link>
-          <Link href="/order-tracking" className="text-[#666666] hover:text-[#111111] transition">
-            Track Order
+          <Link href="/my-orders" className="text-[#666666] hover:text-[#111111] transition">
+            My Orders
           </Link>
           <Link
             href="/cart"

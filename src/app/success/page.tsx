@@ -32,10 +32,10 @@ function SuccessPageContent() {
             {orderNumber}
           </p>
           <Link
-            href={`/order-tracking?orderNumber=${orderNumber}`}
+            href={`/my-orders/${orderNumber}`}
             className="inline-block mt-4 text-xs text-neutral-600 hover:text-black font-bold transition hover:underline"
           >
-            Track Status Now ➔
+            View Order Status ➔
           </Link>
         </div>
       )}

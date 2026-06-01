@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     let subject = "";
     let html = "";
 
-    const trackingUrl = `${req.headers.get("origin") || "http://localhost:3000"}/order-tracking?orderNumber=${orderNumber}`;
+    const trackingUrl = `${req.headers.get("origin") || "http://localhost:3000"}/my-orders/${orderNumber}`;
 
     if (action === "placed") {
       subject = `Denim Dynasty Studio: Order Received! (${orderNumber})`;

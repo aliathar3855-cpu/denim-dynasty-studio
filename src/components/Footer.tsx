@@ -33,7 +33,7 @@ export default function Footer() {
               <Link href="/contact" className="hover:text-black transition">Contact Support</Link>
             </li>
             <li>
-              <Link href="/order-tracking" className="hover:text-black transition">Track Your Order</Link>
+              <Link href="/my-orders" className="hover:text-black transition">My Orders</Link>
             </li>
           </ul>
         </div>
