@@ -50,7 +50,7 @@ export default function CartPage() {
         <div className="grid gap-8">
           {cart.map((item: any) => (
             <div
-              key={item.id}
+              key={`${item.id}-${item.selectedSize || ""}`}
               className="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-center"
             >
               <img
@@ -64,13 +64,19 @@ export default function CartPage() {
                   {item.name}
                 </h2>
 
+                {item.selectedSize && (
+                  <p className="text-xs text-[#666666] mt-1 font-semibold">
+                    Size: <span className="text-[#111111] font-bold">{item.selectedSize}</span>
+                  </p>
+                )}
+
                 <p className="text-[#666666] mt-2 text-lg font-semibold">
                   ₹{item.price}
                 </p>
 
                 <div className="flex items-center justify-center md:justify-start gap-4 mt-6">
                   <button
-                    onClick={() => decreaseQuantity(item.id)}
+                    onClick={() => decreaseQuantity(item.id, item.selectedSize)}
                     className="bg-[#111111] text-white w-10 h-10 rounded-full text-xl font-bold hover:bg-neutral-800 transition flex items-center justify-center cursor-pointer"
                   >
                     -
@@ -81,7 +87,7 @@ export default function CartPage() {
                   </span>
 
                   <button
-                    onClick={() => increaseQuantity(item.id)}
+                    onClick={() => increaseQuantity(item.id, item.selectedSize)}
                     className="bg-[#111111] text-white w-10 h-10 rounded-full text-xl font-bold hover:bg-neutral-800 transition flex items-center justify-center cursor-pointer"
                   >
                     +
@@ -95,7 +101,7 @@ export default function CartPage() {
                 </p>
 
                 <button
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => removeFromCart(item.id, item.selectedSize)}
                   className="border border-red-200 text-red-600 hover:bg-red-50 px-5 py-2.5 rounded-xl font-semibold transition text-sm cursor-pointer"
                 >
                   Remove

@@ -465,7 +465,12 @@ export default function CheckoutPage() {
 
           {cartItems.map((item, i) => (
             <div key={i} className="flex justify-between mb-4 text-[#666666] font-medium text-sm">
-              <span>{item.name} (x{item.quantity})</span>
+              <div>
+                <span>{item.name} (x{item.quantity})</span>
+                {item.selectedSize && (
+                  <span className="block text-xs text-neutral-400 mt-0.5">Size: {item.selectedSize}</span>
+                )}
+              </div>
               <span className="text-[#111111] font-semibold">₹{item.price * item.quantity}</span>
             </div>
           ))}

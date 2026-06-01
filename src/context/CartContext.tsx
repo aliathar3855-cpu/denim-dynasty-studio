@@ -63,14 +63,14 @@ export const CartProvider = ({
   const addToCart = (product: any) => {
 
     const existingProduct = cart.find(
-      (item) => item.id === product.id
+      (item) => item.id === product.id && item.selectedSize === product.selectedSize
     );
 
     if (existingProduct) {
 
       const updatedCart = cart.map((item) => {
 
-        if (item.id === product.id) {
+        if (item.id === product.id && item.selectedSize === product.selectedSize) {
 
           return {
             ...item,
@@ -101,10 +101,10 @@ export const CartProvider = ({
   };
 
   // Remove item
-  const removeFromCart = (id: string) => {
+  const removeFromCart = (id: string, selectedSize?: string) => {
 
     const updatedCart = cart.filter(
-      (item) => item.id !== id
+      (item) => !(item.id === id && item.selectedSize === selectedSize)
     );
 
     setCart(updatedCart);
@@ -112,11 +112,11 @@ export const CartProvider = ({
   };
 
   // Increase quantity
-  const increaseQuantity = (id: string) => {
+  const increaseQuantity = (id: string, selectedSize?: string) => {
 
     const updatedCart = cart.map((item) => {
 
-      if (item.id === id) {
+      if (item.id === id && item.selectedSize === selectedSize) {
 
         return {
           ...item,
@@ -134,11 +134,11 @@ export const CartProvider = ({
   };
 
   // Decrease quantity
-  const decreaseQuantity = (id: string) => {
+  const decreaseQuantity = (id: string, selectedSize?: string) => {
 
     const updatedCart = cart.map((item) => {
 
-      if (item.id === id) {
+      if (item.id === id && item.selectedSize === selectedSize) {
 
         return {
           ...item,

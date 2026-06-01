@@ -12,6 +12,9 @@ export async function POST(req: Request) {
     const price = formData.get("price") as string;
     const category = formData.get("category") as string;
     const description = (formData.get("description") as string) || "";
+    const sizeType = (formData.get("sizeType") as string) || "";
+    const sizesStr = (formData.get("sizes") as string) || "[]";
+    const sizes = JSON.parse(sizesStr);
 
     if (!id || !name || !price || !category) {
       return NextResponse.json(
@@ -58,6 +61,8 @@ export async function POST(req: Request) {
       price: Number(price),
       category,
       description,
+      sizeType,
+      sizes,
       updatedAt: new Date(),
     };
 

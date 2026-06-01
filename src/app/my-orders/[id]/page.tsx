@@ -272,6 +272,11 @@ export default function OrderDetailsPage() {
                     <p className="text-xs text-[#666666] mt-1 font-medium">
                       ₹{item.price} × {item.quantity}
                     </p>
+                    {item.selectedSize && (
+                      <p className="text-xs text-[#999999] mt-0.5 font-bold">
+                        Size: {item.selectedSize}
+                      </p>
+                    )}
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-sm text-[#111111]">

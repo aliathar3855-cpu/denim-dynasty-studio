@@ -12,8 +12,19 @@ export default function DashboardPage() {
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
+  const [sizeType, setSizeType] = useState("");
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const letterSizesList = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+  const numericSizesList = ["28", "30", "32", "34", "36", "38", "40", "42", "44"];
+
+  const handleSizeToggle = (size: string) => {
+    setSelectedSizes((prev) =>
+      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
+    );
+  };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -38,6 +49,8 @@ export default function DashboardPage() {
       formData.append("price", price);
       formData.append("category", category);
       formData.append("description", description);
+      formData.append("sizeType", sizeType);
+      formData.append("sizes", JSON.stringify(selectedSizes));
 
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -55,6 +68,8 @@ export default function DashboardPage() {
         setCategory("");
         setDescription("");
         setImage(null);
+        setSizeType("");
+        setSelectedSizes([]);
 
         // refresh products if needed
         window.location.reload();
@@ -158,6 +173,56 @@ export default function DashboardPage() {
               className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition h-32"
             />
           </div>
+
+          {/* SIZE MANAGEMENT */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+              Size Type
+            </label>
+            <select
+              value={sizeType}
+              onChange={(e) => {
+                setSizeType(e.target.value);
+                setSelectedSizes([]);
+              }}
+              className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition cursor-pointer"
+            >
+              <option value="">No Sizes (One Size / Free Size)</option>
+              <option value="letter">Letter Sizes (XS, S, M, L, ...)</option>
+              <option value="numeric">Numeric Sizes (28, 30, 32, ...)</option>
+            </select>
+          </div>
+
+          {sizeType && (
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-3">
+                Select Available Sizes
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {(sizeType === "letter" ? letterSizesList : numericSizesList).map((size) => {
+                  const isChecked = selectedSizes.includes(size);
+                  return (
+                    <label
+                      key={size}
+                      className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center gap-2 select-none ${
+                        isChecked
+                          ? "bg-[#111111] text-white border-black"
+                          : "bg-white text-[#666666] border-neutral-200 hover:border-neutral-400"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => handleSizeToggle(size)}
+                        className="hidden"
+                      />
+                      {size}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* IMAGE */}
           <div>

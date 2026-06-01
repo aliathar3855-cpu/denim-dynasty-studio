@@ -11,6 +11,9 @@ export async function POST(req: Request) {
     const price = formData.get("price") as string;
     const category = formData.get("category") as string;
     const description = (formData.get("description") as string) || "";
+    const sizeType = (formData.get("sizeType") as string) || "";
+    const sizesStr = (formData.get("sizes") as string) || "[]";
+    const sizes = JSON.parse(sizesStr);
 
     if (!file || !name || !price || !category) {
       return NextResponse.json(
@@ -53,6 +56,8 @@ export async function POST(req: Request) {
       category,
       description,
       imageUrl,
+      sizeType,
+      sizes,
       createdAt: new Date(),
     });
 

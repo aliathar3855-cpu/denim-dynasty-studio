@@ -385,6 +385,11 @@ export default function AdminOrdersPage() {
                             <p className="text-xs text-[#666666] mt-1">
                               Qty: {item.quantity} × ₹{item.price}
                             </p>
+                            {item.selectedSize && (
+                              <p className="text-xs text-[#999999] mt-0.5 font-bold">
+                                Size: {item.selectedSize}
+                              </p>
+                            )}
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-sm text-[#111111]">

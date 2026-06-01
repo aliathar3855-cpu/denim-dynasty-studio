@@ -13,7 +13,8 @@ export default function ProductPage() {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const { addToCart, cart } = useCart();
+  const { addToCart, cart, showToast } = useCart();
+  const [selectedSize, setSelectedSize] = useState("");
 
   // Reviews State
   const [reviews, setReviews] = useState<any[]>([]);
@@ -241,14 +242,47 @@ export default function ProductPage() {
             {product.description}
           </p>
 
+          {/* Sizes Selector */}
+          {product.sizes && product.sizes.length > 0 && (
+            <div className="mt-6">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-3">
+                Select Size *
+              </label>
+              <div className="flex flex-wrap gap-2.5">
+                {product.sizes.map((size: string) => {
+                  const isSelected = selectedSize === size;
+                  return (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`px-5 py-2.5 rounded-xl border text-xs font-bold transition cursor-pointer select-none ${
+                        isSelected
+                          ? "bg-[#111111] text-white border-black font-extrabold"
+                          : "bg-white border-neutral-200 text-[#666666] hover:text-[#111111] hover:border-neutral-400"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <button
             onClick={() => {
+              if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+                showToast("Please select a size", "error");
+                return;
+              }
+
               addToCart({
                 id: product.id,
                 name: product.name,
                 price: product.price,
                 imageUrl: product.imageUrl,
                 quantity: 1,
+                selectedSize: selectedSize || null,
               });
             }}
             className="mt-8 bg-[#111111] text-white py-4 px-8 rounded-xl font-bold hover:bg-neutral-800 transition shadow-md cursor-pointer"
