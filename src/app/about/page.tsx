@@ -51,6 +51,22 @@ export default function AboutPage() {
           </p>
         </section>
 
+        {/* Social Card */}
+        <div className="my-10 bg-[#f8f8f8] border border-neutral-200/80 p-8 rounded-3xl text-center space-y-4">
+          <h3 className="text-xl font-bold text-[#111111]">Join Our Community</h3>
+          <p className="text-sm max-w-xl mx-auto text-[#666666] leading-relaxed">
+            Follow us on Instagram for the latest product releases, size guides, behind-the-scenes content at our Kolkata workshop, and streetwear styling inspiration.
+          </p>
+          <a
+            href="https://www.instagram.com/denimdynastystudio?utm_source=qr&igsh=dWZiYTZqNjF4ODNm"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F56040] hover:opacity-90 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition text-sm cursor-pointer"
+          >
+            📸 Follow @denimdynastystudio
+          </a>
+        </div>
+
         <div className="text-center pt-8">
           <Link href="/#products" className="inline-block bg-[#111111] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-neutral-800 transition">
             Explore Collection

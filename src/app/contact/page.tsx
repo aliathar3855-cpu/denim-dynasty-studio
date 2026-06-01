@@ -80,14 +80,24 @@ export default function ContactPage() {
                 <span className="text-lg font-bold text-black">+91 7003951437</span>
               </div>
               
-              <a
-                href="https://wa.me/917003951437"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-xl shadow-md transition text-sm cursor-pointer"
-              >
-                💬 Chat on WhatsApp
-              </a>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href="https://wa.me/917003951437"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-xl shadow-md transition text-sm cursor-pointer whitespace-nowrap"
+                >
+                  💬 Chat on WhatsApp
+                </a>
+                <a
+                  href="https://www.instagram.com/denimdynastystudio?utm_source=qr&igsh=dWZiYTZqNjF4ODNm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F56040] hover:opacity-90 text-white font-bold px-6 py-3 rounded-xl shadow-md transition text-sm cursor-pointer whitespace-nowrap"
+                >
+                  📸 Follow on Instagram
+                </a>
+              </div>
             </div>
           </div>
         </div>

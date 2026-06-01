@@ -83,9 +83,12 @@ export default function Footer() {
         <div>
           © {new Date().getFullYear()} Denim Dynasty Studio. All rights reserved.
         </div>
-        <div className="flex gap-6 font-semibold">
+        <div className="flex gap-6 font-semibold flex-wrap justify-center md:justify-end">
           <a href="https://wa.me/917003951437" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700 transition flex items-center gap-1">
             💬 Connect on WhatsApp
+          </a>
+          <a href="https://www.instagram.com/denimdynastystudio?utm_source=qr&igsh=dWZiYTZqNjF4ODNm" target="_blank" rel="noopener noreferrer" className="text-[#E1306C] hover:opacity-80 transition flex items-center gap-1">
+            📸 Follow on Instagram
           </a>
         </div>
       </div>
