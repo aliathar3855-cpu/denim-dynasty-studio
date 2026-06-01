@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "@/firebase/config";
+import { db, auth } from "@/firebase/config";
+
 import {
   collection,
   getDocs,
   deleteDoc,
   doc,
 } from "firebase/firestore";
+
+import {
+  onAuthStateChanged,
+  signOut,
+} from "firebase/auth";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -18,51 +24,72 @@ export default function DashboardPage() {
   const [image, setImage] = useState<File | null>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [category, setCategory] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // AUTH CHECK
-  useEffect(() => {
-    const isAdmin = localStorage.getItem("admin");
-
-    if (isAdmin !== "true") {
-      router.push("/admin-login");
-    } else {
-      setCheckingAuth(false);
-      fetchProducts();
-    }
-  }, []);
-
   // FETCH PRODUCTS
   const fetchProducts = async () => {
-    const querySnapshot = await getDocs(collection(db, "products"));
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "products")
+      );
 
-    const productList: any[] = [];
+      const productList: any[] = [];
 
-    querySnapshot.forEach((docItem) => {
-      productList.push({
-        id: docItem.id,
-        ...docItem.data(),
+      querySnapshot.forEach((docItem) => {
+        productList.push({
+          id: docItem.id,
+          ...docItem.data(),
+        });
       });
-    });
 
-    setProducts(productList);
+      setProducts(productList);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
+  // AUTH CHECK
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (user) => {
+        if (!user) {
+          router.push("/admin/login");
+        } else {
+          setCheckingAuth(false);
+          fetchProducts();
+        }
+      }
+    );
+
+    return () => unsubscribe();
+  }, [router]);
+
   // LOGOUT
-  const handleLogout = () => {
-    localStorage.removeItem("admin");
-    router.push("/admin-login");
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push("/admin/login");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // DELETE PRODUCT
   const handleDelete = async (id: string) => {
-    const confirmDelete = confirm("Delete this product?");
+    const confirmDelete = confirm(
+      "Delete this product?"
+    );
+
     if (!confirmDelete) return;
 
     try {
       await deleteDoc(doc(db, "products", id));
+
       alert("Product Deleted");
+
       fetchProducts();
     } catch (error) {
       console.error(error);
@@ -83,6 +110,7 @@ export default function DashboardPage() {
       setLoading(true);
 
       const formData = new FormData();
+
       formData.append("file", image);
       formData.append("name", name);
       formData.append("price", price);
@@ -143,14 +171,18 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* FORM */}
-      <form onSubmit={handleSubmit} className="max-w-xl space-y-6 mb-16">
-
+      {/* PRODUCT FORM */}
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-xl space-y-6 mb-16"
+      >
         <input
           type="text"
           placeholder="Product Name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) =>
+            setName(e.target.value)
+          }
           className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
         />
 
@@ -158,13 +190,17 @@ export default function DashboardPage() {
           type="number"
           placeholder="Price"
           value={price}
-          onChange={(e) => setPrice(e.target.value)}
+          onChange={(e) =>
+            setPrice(e.target.value)
+          }
           className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
         />
 
         <input
           type="file"
-          onChange={(e: any) => setImage(e.target.files[0])}
+          onChange={(e: any) =>
+            setImage(e.target.files[0])
+          }
           className="w-full p-4 rounded-xl bg-zinc-900"
         />
 
@@ -172,7 +208,9 @@ export default function DashboardPage() {
           type="text"
           placeholder="Category"
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          onChange={(e) =>
+            setCategory(e.target.value)
+          }
           className="w-full p-4 rounded-xl bg-zinc-900 outline-none"
         />
 
@@ -181,7 +219,9 @@ export default function DashboardPage() {
           disabled={loading}
           className="bg-white text-black px-8 py-4 rounded-xl font-bold"
         >
-          {loading ? "Uploading..." : "Add Product"}
+          {loading
+            ? "Uploading..."
+            : "Add Product"}
         </button>
       </form>
 
@@ -191,7 +231,6 @@ export default function DashboardPage() {
       </h2>
 
       <div className="grid md:grid-cols-3 gap-8">
-
         {products.map((product) => (
           <div
             key={product.id}
@@ -199,6 +238,7 @@ export default function DashboardPage() {
           >
             <img
               src={product.imageUrl}
+              alt={product.name}
               className="w-full h-[300px] object-cover"
             />
 
@@ -211,11 +251,17 @@ export default function DashboardPage() {
                 ₹{product.price}
               </p>
 
+              <p className="text-gray-500 mt-1">
+                {product.category}
+              </p>
+
               <button
-                onClick={() => handleDelete(product.id)}
+                onClick={() =>
+                  handleDelete(product.id)
+                }
                 className="mt-5 w-full bg-red-500 py-3 rounded-xl font-semibold"
               >
-                Delete
+                Delete Product
               </button>
             </div>
           </div>

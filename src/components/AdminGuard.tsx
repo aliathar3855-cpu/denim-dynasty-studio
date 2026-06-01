@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { listenToAuth } from "@/firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/firebase/config";
 import { useRouter } from "next/navigation";
 
 export default function AdminGuard({
@@ -13,19 +14,24 @@ export default function AdminGuard({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = listenToAuth((user) => {
+    const unsub = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        router.push("/admin/login");
+        setTimeout(() => {
+          router.push("/admin/login");
+        }, 0);
       }
+
       setLoading(false);
     });
 
     return () => unsub();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (
-      <div className="text-white p-6">Checking access...</div>
+      <div className="text-white p-6">
+        Checking access...
+      </div>
     );
   }
 
