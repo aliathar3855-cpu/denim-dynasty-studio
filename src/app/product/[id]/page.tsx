@@ -191,7 +191,7 @@ export default function ProductPage() {
           </div>
         </Link>
         <div className="flex gap-6 items-center">
-          <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">
+          <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
             ➔ Back to Shop
           </Link>
           <Link
@@ -199,7 +199,7 @@ export default function ProductPage() {
             className="bg-[#111111] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-neutral-800 transition whitespace-nowrap flex items-center gap-2 text-sm"
           >
             <span>Cart</span>
-            <span className="bg-white text-[#111111] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+            <span className="bg-[#38BDF8] text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
               {cart.reduce((sum: number, item: any) => sum + item.quantity, 0)}
             </span>
           </Link>
@@ -224,7 +224,7 @@ export default function ProductPage() {
           <div className="flex items-center gap-2 mt-4 text-sm">
             {totalReviews > 0 ? (
               <>
-                <span className="text-[#111111] font-bold">
+                <span className="text-[#38BDF8] font-bold">
                   {"★".repeat(Math.round(Number(averageRating)))}
                   {"☆".repeat(5 - Math.round(Number(averageRating)))}
                 </span>
@@ -279,8 +279,8 @@ export default function ProductPage() {
                       onClick={() => setSelectedSize(size)}
                       className={`px-5 py-2.5 rounded-xl border text-xs font-bold transition cursor-pointer select-none ${
                         isSelected
-                          ? "bg-[#111111] text-white border-black font-extrabold"
-                          : "bg-white border-neutral-200 text-[#666666] hover:text-[#111111] hover:border-neutral-400"
+                          ? "bg-[#38BDF8] text-black border-[#38BDF8] font-extrabold"
+                          : "bg-white border-neutral-200 text-[#666666] hover:text-[#38BDF8] hover:border-[#38BDF8]/40"
                       }`}
                     >
                       {size}
@@ -307,7 +307,7 @@ export default function ProductPage() {
                 selectedSize: selectedSize || null,
               });
             }}
-            className="mt-8 bg-[#111111] text-white py-4 px-8 rounded-xl font-bold hover:bg-neutral-800 transition shadow-md cursor-pointer"
+            className="mt-8 bg-[#38BDF8] text-black py-4 px-8 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition shadow-md cursor-pointer"
           >
             Add To Cart
           </button>
@@ -330,7 +330,7 @@ export default function ProductPage() {
               <p className="text-sm font-semibold text-[#666666] mt-1">
                 out of 5.0 stars
               </p>
-              <div className="flex items-center gap-1.5 mt-2 text-xl text-[#111111]">
+              <div className="flex items-center gap-1.5 mt-2 text-xl text-[#38BDF8]">
                 {"★".repeat(Math.round(Number(averageRating)))}
                 {"☆".repeat(5 - Math.round(Number(averageRating)))}
               </div>
@@ -349,7 +349,7 @@ export default function ProductPage() {
                     <span className="w-12 whitespace-nowrap font-medium">{stars} star</span>
                     <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-[#111111] rounded-full transition-all duration-500" 
+                        className="h-full bg-[#38BDF8] rounded-full transition-all duration-500" 
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
@@ -398,9 +398,9 @@ export default function ProductPage() {
                             <span className="font-bold text-[#111111] text-sm block">
                               {review.customerName}
                             </span>
-                            <div className="flex items-center gap-1 mt-1 text-xs text-[#111111]">
+                            <div className="flex items-center gap-1 mt-1 text-xs text-[#38BDF8]">
                               {"★".repeat(Number(review.rating))}
-                              {"☆".repeat(5 - Number(review.rating))}
+                              <span className="text-neutral-300">{"☆".repeat(5 - Number(review.rating))}</span>
                             </div>
                           </div>
                           <span className="text-xs text-neutral-400 font-medium">
@@ -455,7 +455,7 @@ export default function ProductPage() {
                           className="text-2xl cursor-pointer focus:outline-none transition-transform hover:scale-110"
                         >
                           {star <= newReviewRating ? (
-                            <span className="text-[#111111]">★</span>
+                            <span className="text-[#38BDF8]">★</span>
                           ) : (
                             <span className="text-neutral-300">★</span>
                           )}
@@ -480,7 +480,7 @@ export default function ProductPage() {
                   <button
                     type="submit"
                     disabled={submittingReview}
-                    className="w-full bg-[#111111] text-white py-3.5 rounded-xl font-bold hover:bg-neutral-800 transition text-sm cursor-pointer disabled:opacity-50"
+                    className="w-full bg-[#38BDF8] text-black py-3.5 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition text-sm cursor-pointer disabled:opacity-50 shadow-sm"
                   >
                     {submittingReview ? "Submitting..." : "Submit Review"}
                   </button>

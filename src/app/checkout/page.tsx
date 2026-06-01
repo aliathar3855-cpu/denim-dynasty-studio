@@ -242,7 +242,7 @@ export default function CheckoutPage() {
         },
 
         theme: {
-          color: "#000000",
+          color: "#38BDF8",
         },
       };
 
@@ -284,7 +284,7 @@ export default function CheckoutPage() {
             />
           </div>
         </Link>
-        <Link href="/cart" className="text-sm text-neutral-500 hover:text-black transition">
+        <Link href="/cart" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
           ➔ Back to Cart
         </Link>
       </nav>
@@ -308,7 +308,7 @@ export default function CheckoutPage() {
                 placeholder="First Name *"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition ${
                   errors.firstName ? "border-red-550" : "border-neutral-300"
                 }`}
               />
@@ -319,7 +319,7 @@ export default function CheckoutPage() {
                 placeholder="Last Name *"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition ${
                   errors.lastName ? "border-red-550" : "border-neutral-300"
                 }`}
               />
@@ -335,7 +335,7 @@ export default function CheckoutPage() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, "").slice(0, 10))}
-                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition ${
                   errors.phone ? "border-red-550" : "border-neutral-300"
                 }`}
               />
@@ -347,7 +347,7 @@ export default function CheckoutPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition ${
                   errors.email ? "border-red-550" : "border-neutral-300"
                 }`}
               />
@@ -361,7 +361,7 @@ export default function CheckoutPage() {
               placeholder="Address Line 1 (Flat, House no., Building, Street) *"
               value={addressLine1}
               onChange={(e) => setAddressLine1(e.target.value)}
-              className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+              className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition ${
                 errors.addressLine1 ? "border-red-550" : "border-neutral-300"
               }`}
             />
@@ -373,7 +373,7 @@ export default function CheckoutPage() {
             placeholder="Address Line 2 (Area, Colony, Road, Sector) (Optional)"
             value={addressLine2}
             onChange={(e) => setAddressLine2(e.target.value)}
-            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition"
+            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition"
           />
 
           {/* Landmark & Pincode */}
@@ -382,7 +382,7 @@ export default function CheckoutPage() {
               placeholder="Landmark (Optional)"
               value={landmark}
               onChange={(e) => setLandmark(e.target.value)}
-              className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition"
+              className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition"
             />
             <div>
               <div className="relative">
@@ -391,7 +391,7 @@ export default function CheckoutPage() {
                   type="text"
                   value={pincode}
                   onChange={(e) => setPincode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
-                  className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                  className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition ${
                     errors.pincode ? "border-red-550" : "border-neutral-300"
                   }`}
                 />
@@ -412,7 +412,7 @@ export default function CheckoutPage() {
                 placeholder="City/District *"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition ${
                   errors.city ? "border-red-550" : "border-neutral-300"
                 }`}
               />
@@ -423,7 +423,7 @@ export default function CheckoutPage() {
                 placeholder="State *"
                 value={state}
                 onChange={(e) => setState(e.target.value)}
-                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition ${
                   errors.state ? "border-red-550" : "border-neutral-300"
                 }`}
               />
@@ -444,7 +444,7 @@ export default function CheckoutPage() {
               placeholder="Order Notes (e.g. instruction for delivery, apartment access code, bulk preferences) (Optional)"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition h-24 resize-none"
+              className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-[#38BDF8] text-sm text-[#111111] transition h-24 resize-none"
             />
           </div>
 
@@ -458,8 +458,8 @@ export default function CheckoutPage() {
                 onClick={() => setPaymentMethod("online")}
                 className={
                   paymentMethod === "online"
-                    ? "bg-[#111111] text-white px-5 py-2.5 rounded-xl font-bold border border-black cursor-pointer text-sm"
-                    : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-black hover:border-neutral-400 transition cursor-pointer text-sm"
+                    ? "bg-[#38BDF8] text-black px-5 py-2.5 rounded-xl font-bold border border-[#38BDF8] cursor-pointer text-sm shadow-sm"
+                    : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-[#38BDF8] hover:border-[#38BDF8]/40 transition cursor-pointer text-sm"
                 }
               >
                 Pay Online
@@ -469,8 +469,8 @@ export default function CheckoutPage() {
                 onClick={() => setPaymentMethod("cod")}
                 className={
                   paymentMethod === "cod"
-                    ? "bg-[#111111] text-white px-5 py-2.5 rounded-xl font-bold border border-black cursor-pointer text-sm"
-                    : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-black hover:border-neutral-400 transition cursor-pointer text-sm"
+                    ? "bg-[#38BDF8] text-black px-5 py-2.5 rounded-xl font-bold border border-[#38BDF8] cursor-pointer text-sm shadow-sm"
+                    : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-[#38BDF8] hover:border-[#38BDF8]/40 transition cursor-pointer text-sm"
                 }
               >
                 COD (Cash on Delivery)
@@ -504,7 +504,7 @@ export default function CheckoutPage() {
 
           <button
             onClick={handlePlaceOrder}
-            className="w-full mt-6 bg-[#111111] text-white py-4 rounded-xl font-bold hover:bg-neutral-800 transition shadow-md cursor-pointer text-sm"
+            className="w-full mt-6 bg-[#38BDF8] text-black py-4 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition shadow-md cursor-pointer text-sm"
           >
             Place Order
           </button>
@@ -518,7 +518,7 @@ export default function CheckoutPage() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           
           <div className="flex items-center gap-3 justify-center lg:justify-start">
-            <div className="text-[#111111] shrink-0">
+            <div className="text-[#38BDF8] shrink-0">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5a1.5 1.5 0 0 1 1.5 1.5v12a1.5 1.5 0 0 1-1.5 1.5H3.75a1.5 1.5 0 0 1-1.5-1.5V6a1.5 1.5 0 0 1 1.5-1.5Zm6.45 6.45a2.886 2.886 0 0 0 0 4.1M13.75 12h.008v.008h-.008V12Zm0 2.25h.008v.008h-.008v-.008ZM12 18a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0-9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"></path>
               </svg>
@@ -529,7 +529,7 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex items-center gap-3 justify-center lg:justify-start">
-            <div className="text-[#111111] shrink-0">
+            <div className="text-[#38BDF8] shrink-0">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.129-1.125V11.25c0-.447-.266-.852-.676-1.03l-2.456-1.07A1.125 1.125 0 0 0 14.25 9.75h-2.25V4.625c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h1.5"></path>
               </svg>
@@ -540,7 +540,7 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex items-center gap-3 justify-center lg:justify-start">
-            <div className="text-[#111111] shrink-0">
+            <div className="text-[#38BDF8] shrink-0">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"></path>
               </svg>
@@ -551,7 +551,7 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex items-center gap-3 justify-center lg:justify-start">
-            <div className="text-[#111111] shrink-0">
+            <div className="text-[#38BDF8] shrink-0">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"></path>
               </svg>

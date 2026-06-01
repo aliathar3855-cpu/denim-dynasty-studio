@@ -138,7 +138,7 @@ export default function OrderDetailsPage() {
           <p className="text-sm text-[#666666] leading-relaxed">{error || "The order could not be located."}</p>
           <Link
             href="/my-orders"
-            className="inline-block bg-[#111111] text-white px-6 py-3 rounded-xl text-xs font-bold hover:bg-neutral-800 transition"
+            className="inline-block bg-[#38BDF8] text-black px-6 py-3 rounded-xl text-xs font-bold hover:bg-[#0ea5e9] hover:text-white transition shadow-sm"
           >
             Back to My Orders
           </Link>
@@ -180,11 +180,11 @@ export default function OrderDetailsPage() {
           </div>
         </Link>
         <div className="flex gap-4 items-center">
-          <Link href="/my-orders" className="text-sm text-neutral-500 hover:text-black transition">
+          <Link href="/my-orders" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
             My Orders
           </Link>
           <span className="text-neutral-300">|</span>
-          <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">
+          <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
             Shop
           </Link>
         </div>
@@ -222,7 +222,7 @@ export default function OrderDetailsPage() {
                       status === "completed"
                         ? "bg-green-50 border-green-600 text-green-700"
                         : status === "active"
-                        ? "bg-blue-50 border-blue-600 text-blue-700 animate-pulse"
+                        ? "bg-sky-50 border-[#38BDF8] text-sky-605 animate-pulse font-extrabold"
                         : "bg-white border-neutral-300 text-neutral-400"
                     }`}
                   >

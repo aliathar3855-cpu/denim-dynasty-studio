@@ -33,7 +33,7 @@ export default function AboutPage() {
             />
           </div>
         </Link>
-        <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">
+        <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
           ➔ Back to Shop
         </Link>
       </nav>
@@ -90,7 +90,7 @@ export default function AboutPage() {
         </div>
 
         <div className="text-center pt-8">
-          <Link href="/#products" className="inline-block bg-[#111111] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-neutral-800 transition">
+          <Link href="/#products" className="inline-block bg-[#38BDF8] text-black px-8 py-3.5 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition shadow-sm">
             Explore Collection
           </Link>
         </div>

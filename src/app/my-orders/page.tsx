@@ -86,7 +86,7 @@ export default function MyOrdersPage() {
   const getStatusLabel = (status: string) => {
     const s = (status || "pending").toLowerCase();
     if (s === "delivered") return { text: "Delivered", class: "bg-green-50 text-green-700 border-green-200" };
-    if (s === "shipped") return { text: "Shipped", class: "bg-blue-50 text-blue-700 border-blue-200" };
+    if (s === "shipped") return { text: "Shipped", class: "bg-sky-50 text-sky-600 border-sky-200" };
     if (s === "processing") return { text: "Processing", class: "bg-purple-50 text-purple-700 border-purple-200" };
     return { text: "Order Placed", class: "bg-amber-50 text-amber-700 border-amber-200" };
   };
@@ -120,7 +120,7 @@ export default function MyOrdersPage() {
             />
           </div>
         </Link>
-        <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">
+        <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
           ➔ Back to Shop
         </Link>
       </nav>
@@ -147,7 +147,7 @@ export default function MyOrdersPage() {
                 placeholder="e.g. 7003951437"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full p-4 text-sm rounded-xl bg-white border border-neutral-300 outline-none focus:border-neutral-500 text-[#111111] transition"
+                className="w-full p-4 text-sm rounded-xl bg-white border border-neutral-300 outline-none focus:border-[#38BDF8] text-[#111111] transition"
                 required
               />
             </div>
@@ -161,7 +161,7 @@ export default function MyOrdersPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#111111] text-white py-3.5 rounded-xl font-bold hover:bg-neutral-800 transition text-center flex items-center justify-center disabled:opacity-50 text-sm cursor-pointer"
+              className="w-full bg-[#38BDF8] text-black py-3.5 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition text-center flex items-center justify-center disabled:opacity-50 text-sm cursor-pointer shadow-sm"
             >
               {loading ? (
                 <>
@@ -232,7 +232,7 @@ export default function MyOrdersPage() {
                           <td className="px-6 py-4 text-right">
                             <Link
                               href={`/my-orders/${order.id}`}
-                              className="inline-block bg-[#111111] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-neutral-800 transition"
+                              className="inline-block bg-[#38BDF8] text-black px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#0ea5e9] hover:text-white transition shadow-sm"
                             >
                               View Details
                             </Link>
@@ -282,7 +282,7 @@ export default function MyOrdersPage() {
                       <div className="pt-2">
                         <Link
                           href={`/my-orders/${order.id}`}
-                          className="block text-center bg-[#111111] text-white py-3 rounded-xl text-xs font-bold hover:bg-neutral-800 transition shadow-sm"
+                          className="block text-center bg-[#38BDF8] text-black py-3 rounded-xl text-xs font-bold hover:bg-[#0ea5e9] hover:text-white transition shadow-sm"
                         >
                           View Details
                         </Link>

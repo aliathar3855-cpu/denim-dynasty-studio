@@ -11,7 +11,7 @@ function SuccessPageContent() {
 
   return (
     <div className="text-center bg-[#f8f8f8] border border-neutral-200 p-10 rounded-3xl max-w-md w-full shadow-sm">
-      <div className="text-green-600 text-6xl mb-4 font-bold">
+      <div className="text-[#38BDF8] text-6xl mb-4 font-bold">
         ✓
       </div>
 
@@ -33,7 +33,7 @@ function SuccessPageContent() {
           </p>
           <Link
             href={`/my-orders/${orderNumber}`}
-            className="inline-block mt-4 text-xs text-neutral-600 hover:text-black font-bold transition hover:underline"
+            className="inline-block mt-4 text-xs text-neutral-600 hover:text-[#38BDF8] font-bold transition hover:underline"
           >
             View Order Status ➔
           </Link>
@@ -42,7 +42,7 @@ function SuccessPageContent() {
 
       <button
         onClick={() => router.push("/")}
-        className="w-full bg-[#111111] text-white py-3.5 rounded-xl font-bold hover:bg-neutral-800 transition cursor-pointer"
+        className="w-full bg-[#38BDF8] text-black py-3.5 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition cursor-pointer shadow-sm"
       >
         Continue Shopping
       </button>

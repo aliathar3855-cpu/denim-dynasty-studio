@@ -50,7 +50,7 @@ export default function CartPage() {
             />
           </div>
         </Link>
-        <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">
+        <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
           ➔ Back to Shop
         </Link>
       </nav>
@@ -64,7 +64,7 @@ export default function CartPage() {
           <h2 className="text-2xl font-bold text-[#666666] mb-6">
             Your cart is empty
           </h2>
-          <Link href="/" className="bg-[#111111] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-neutral-800 transition">
+          <Link href="/" className="bg-[#38BDF8] text-black px-8 py-3.5 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition shadow-md">
             Start Shopping
           </Link>
         </div>
@@ -99,7 +99,7 @@ export default function CartPage() {
                 <div className="flex items-center justify-center md:justify-start gap-4 mt-6">
                   <button
                     onClick={() => decreaseQuantity(item.id, item.selectedSize)}
-                    className="bg-[#111111] text-white w-10 h-10 rounded-full text-xl font-bold hover:bg-neutral-800 transition flex items-center justify-center cursor-pointer"
+                    className="bg-[#111111] text-white w-10 h-10 rounded-full text-xl font-bold hover:bg-[#38BDF8] hover:text-black transition flex items-center justify-center cursor-pointer"
                   >
                     -
                   </button>
@@ -110,7 +110,7 @@ export default function CartPage() {
 
                   <button
                     onClick={() => increaseQuantity(item.id, item.selectedSize)}
-                    className="bg-[#111111] text-white w-10 h-10 rounded-full text-xl font-bold hover:bg-neutral-800 transition flex items-center justify-center cursor-pointer"
+                    className="bg-[#111111] text-white w-10 h-10 rounded-full text-xl font-bold hover:bg-[#38BDF8] hover:text-black transition flex items-center justify-center cursor-pointer"
                   >
                     +
                   </button>
@@ -139,7 +139,7 @@ export default function CartPage() {
 
             <button
               onClick={() => router.push("/checkout")}
-              className="mt-6 bg-[#111111] text-white px-8 py-4 rounded-xl font-bold hover:bg-neutral-800 transition cursor-pointer"
+              className="mt-6 bg-[#38BDF8] text-black px-8 py-4 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition cursor-pointer shadow-md"
             >
               Proceed To Checkout
             </button>

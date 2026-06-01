@@ -55,7 +55,7 @@ export default function ContactPage() {
             />
           </div>
         </Link>
-        <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">
+        <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
           ➔ Back to Shop
         </Link>
       </nav>
@@ -144,7 +144,7 @@ export default function ContactPage() {
                   placeholder="e.g. Rahul Sharma"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full p-4 text-sm bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
+                  className="w-full p-4 text-sm bg-white border border-neutral-300 rounded-xl outline-none focus:border-[#38BDF8] text-[#111111] transition"
                   required
                 />
               </div>
@@ -158,7 +158,7 @@ export default function ContactPage() {
                   placeholder="e.g. rahul@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-4 text-sm bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
+                  className="w-full p-4 text-sm bg-white border border-neutral-300 rounded-xl outline-none focus:border-[#38BDF8] text-[#111111] transition"
                   required
                 />
               </div>
@@ -171,14 +171,14 @@ export default function ContactPage() {
                   placeholder="Tell us what you're looking for..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full p-4 text-sm bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition h-32"
+                  className="w-full p-4 text-sm bg-white border border-neutral-300 rounded-xl outline-none focus:border-[#38BDF8] text-[#111111] transition h-32"
                   required
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-[#111111] text-white py-4 rounded-xl font-bold hover:bg-neutral-800 transition shadow-md cursor-pointer"
+                className="w-full bg-[#38BDF8] text-black py-4 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition shadow-md cursor-pointer"
               >
                 Send Message
               </button>

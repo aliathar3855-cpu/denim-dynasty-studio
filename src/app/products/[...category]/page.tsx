@@ -134,7 +134,7 @@ export default function CategoryProducts() {
           </div>
         </Link>
         <div className="flex gap-6 items-center">
-          <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">
+          <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
             ➔ Back to Shop
           </Link>
           <Link
@@ -142,7 +142,7 @@ export default function CategoryProducts() {
             className="bg-[#111111] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-neutral-800 transition whitespace-nowrap flex items-center gap-2 text-sm"
           >
             <span>Cart</span>
-            <span className="bg-white text-[#111111] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+            <span className="bg-[#38BDF8] text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
               {cart.reduce((sum: number, item: any) => sum + item.quantity, 0)}
             </span>
           </Link>
@@ -184,7 +184,7 @@ export default function CategoryProducts() {
 
                 <Link
                   href={`/product/${product.id}`}
-                  className="mt-4 block w-full bg-[#111111] text-white py-3 rounded-xl font-bold text-center hover:bg-neutral-800 transition text-sm cursor-pointer"
+                  className="mt-4 block w-full bg-[#38BDF8] text-black py-3 rounded-xl font-bold text-center hover:bg-[#0ea5e9] hover:text-white transition text-sm cursor-pointer shadow-sm"
                 >
                   View Product
                 </Link>
