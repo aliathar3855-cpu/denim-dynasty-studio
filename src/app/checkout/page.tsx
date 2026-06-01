@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCart } from "@/context/CartContext";
 
 export default function CheckoutPage() {
+  const router = useRouter();
+  const { showToast } = useCart();
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
 
@@ -176,7 +180,7 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
-      alert("Please fix all validation errors before proceeding.");
+      showToast("Please fix all validation errors before proceeding.", "error");
       return;
     }
 
@@ -188,8 +192,8 @@ export default function CheckoutPage() {
         localStorage.removeItem("cart");
         setCartItems([]);
 
-        alert(`COD Order placed! Order Number: ${orderNumber}`);
-        window.location.href = `/success?orderNumber=${orderNumber}`;
+        showToast("Order placed successfully!", "success");
+        router.push(`/my-orders/${orderNumber}`);
         return;
       }
 
@@ -227,13 +231,12 @@ export default function CheckoutPage() {
             localStorage.removeItem("cart");
             setCartItems([]);
 
-            alert(`Payment Successful! Order Number: ${orderNumber}`);
-
-            window.location.href = `/success?orderNumber=${orderNumber}`;
+            showToast("Payment successful! Order placed.", "success");
+            router.push(`/my-orders/${orderNumber}`);
 
           } catch (err) {
             console.error("Order saving failed:", err);
-            alert("Payment succeeded but order saving failed.");
+            showToast("Payment succeeded but order saving failed.", "error");
           }
         },
 
@@ -247,7 +250,7 @@ export default function CheckoutPage() {
 
     } catch (err) {
       console.log(err);
-      alert("Something went wrong while placing order.");
+      showToast("Something went wrong while placing order.", "error");
     }
   };
 

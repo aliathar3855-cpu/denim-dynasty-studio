@@ -85,9 +85,12 @@ export default function Home() {
           </Link>
           <Link
             href="/cart"
-            className="bg-[#111111] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-neutral-800 transition whitespace-nowrap"
+            className="bg-[#111111] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-neutral-800 transition whitespace-nowrap flex items-center gap-2"
           >
-            Cart ({cart.length})
+            <span>Cart</span>
+            <span className="bg-white text-[#111111] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+              {cart.reduce((sum: number, item: any) => sum + item.quantity, 0)}
+            </span>
           </Link>
         </div>
       </nav>

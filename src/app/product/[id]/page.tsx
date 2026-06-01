@@ -13,8 +13,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const { addToCart } = useCart();
-  const [showToast, setShowToast] = useState(false);
+  const { addToCart, cart } = useCart();
 
   // Reviews State
   const [reviews, setReviews] = useState<any[]>([]);
@@ -163,14 +162,25 @@ export default function ProductPage() {
   return (
     <main className="min-h-screen bg-white text-[#111111] p-6 md:p-10 font-sans">
       
-      {/* Top Navbar Back Link */}
+      {/* Top Navbar */}
       <nav className="flex items-center justify-between max-w-5xl mx-auto mb-10 border-b border-neutral-200 pb-5">
         <Link href="/" className="text-xl font-bold tracking-wide text-[#111111]">
           DENIM DYNASTY STUDIO
         </Link>
-        <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">
-          ➔ Back to Shop
-        </Link>
+        <div className="flex gap-6 items-center">
+          <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">
+            ➔ Back to Shop
+          </Link>
+          <Link
+            href="/cart"
+            className="bg-[#111111] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-neutral-800 transition whitespace-nowrap flex items-center gap-2 text-sm"
+          >
+            <span>Cart</span>
+            <span className="bg-white text-[#111111] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+              {cart.reduce((sum: number, item: any) => sum + item.quantity, 0)}
+            </span>
+          </Link>
+        </div>
       </nav>
 
       <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto items-center">
@@ -240,12 +250,6 @@ export default function ProductPage() {
                 imageUrl: product.imageUrl,
                 quantity: 1,
               });
-
-              setShowToast(true);
-
-              setTimeout(() => {
-                setShowToast(false);
-              }, 1500);
             }}
             className="mt-8 bg-[#111111] text-white py-4 px-8 rounded-xl font-bold hover:bg-neutral-800 transition shadow-md cursor-pointer"
           >
@@ -430,12 +434,6 @@ export default function ProductPage() {
           </div>
         </div>
       </section>
-
-      {showToast && (
-        <div className="fixed bottom-10 right-10 bg-green-600 text-white px-6 py-3.5 rounded-xl font-bold shadow-lg z-50">
-          Added to Cart ✅
-        </div>
-      )}
 
     </main>
   );

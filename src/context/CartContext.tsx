@@ -13,9 +13,13 @@ export const CartProvider = ({
   children,
 }: {
   children: React.ReactNode;
-}) => {
+ }) => {
 
   const [cart, setCart] = useState<any[]>([]);
+
+  // Toast notifications state
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"success" | "error" | "info">("success");
 
   // Load cart from localStorage
   useEffect(() => {
@@ -39,6 +43,21 @@ export const CartProvider = ({
     );
 
   }, [cart]);
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+  };
+
+  // Auto-hide toast after 3 seconds
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => {
+        setToastMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   // Add to cart
   const addToCart = (product: any) => {
@@ -78,6 +97,7 @@ export const CartProvider = ({
 
     }
 
+    showToast("Product added to cart", "success");
   };
 
   // Remove item
@@ -143,9 +163,27 @@ export const CartProvider = ({
         removeFromCart,
         increaseQuantity,
         decreaseQuantity,
+        showToast,
       }}
     >
       {children}
+
+      {/* Global Luxury Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-10 right-10 bg-[#111111] text-white px-6 py-4 rounded-xl font-bold shadow-2xl z-[9999] transition-all duration-300 flex items-center gap-3 border border-neutral-800 text-sm animate-fadeIn">
+          {toastType === "success" && (
+            <span className="w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-black">
+              ✓
+            </span>
+          )}
+          {toastType === "error" && (
+            <span className="w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-black">
+              !
+            </span>
+          )}
+          <span className="tracking-wide text-white">{toastMessage}</span>
+        </div>
+      )}
     </CartContext.Provider>
   );
 
