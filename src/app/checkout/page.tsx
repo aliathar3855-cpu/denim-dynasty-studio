@@ -9,12 +9,23 @@ export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  // Expanded fields for production-ready checkout
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
+  const [email, setEmail] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [landmark, setLandmark] = useState("");
   const [pincode, setPincode] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [country] = useState("India"); // Default India, readonly
+  const [notes, setNotes] = useState("");
+
+  // Validation errors & loading state
+  const [errors, setErrors] = useState<any>({});
+  const [autofilling, setAutofilling] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState("online");
 
@@ -31,6 +42,43 @@ export default function CheckoutPage() {
     setTotal(totalPrice);
   }, []);
 
+  // Autofill City & State when 6-digit Pincode is entered
+  useEffect(() => {
+    const autoFillLocation = async () => {
+      const cleanPin = pincode.replace(/[^0-9]/g, "");
+      if (cleanPin.length === 6) {
+        setAutofilling(true);
+        try {
+          const res = await fetch(`https://api.postalpincode.in/pincode/${cleanPin}`);
+          const data = await res.json();
+          if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice) {
+            const office = data[0].PostOffice[0];
+            if (office.District) {
+              setCity(office.District);
+            }
+            if (office.State) {
+              setState(office.State);
+            }
+            // Clear pincode error if details were retrieved
+            setErrors((prev: any) => {
+              const copy = { ...prev };
+              delete copy.pincode;
+              delete copy.city;
+              delete copy.state;
+              return copy;
+            });
+          }
+        } catch (err) {
+          console.error("Postal Pincode API lookup error:", err);
+        } finally {
+          setAutofilling(false);
+        }
+      }
+    };
+
+    autoFillLocation();
+  }, [pincode]);
+
   // GENERATE UNIQUE ORDER NUMBER
   const generateOrderNumber = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -41,12 +89,70 @@ export default function CheckoutPage() {
     return `DDS-${result}`;
   };
 
+  // Form level validations
+  const validateForm = () => {
+    const newErrors: any = {};
+    
+    if (!firstName.trim()) newErrors.firstName = "First name is required";
+    if (!lastName.trim()) newErrors.lastName = "Last name is required";
+
+    const cleanPhone = phone.replace(/[^0-9]/g, "");
+    if (!cleanPhone) {
+      newErrors.phone = "Phone number is required";
+    } else if (cleanPhone.length !== 10) {
+      newErrors.phone = "Phone number must be exactly 10 digits";
+    }
+
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      newErrors.email = "Invalid email format";
+    }
+
+    if (!addressLine1.trim()) newErrors.addressLine1 = "Address is required";
+
+    const cleanPin = pincode.replace(/[^0-9]/g, "");
+    if (!cleanPin) {
+      newErrors.pincode = "Pincode is required";
+    } else if (cleanPin.length !== 6) {
+      newErrors.pincode = "Pincode must be exactly 6 digits";
+    }
+
+    if (!city.trim()) newErrors.city = "City/District is required";
+    if (!state.trim()) newErrors.state = "State is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // SAVE ORDER TO FIRESTORE
   const saveOrder = async (paymentId?: string, status = "pending") => {
     const orderNumber = generateOrderNumber();
+    
+    // Synthesize name and address for full backwards compatibility
+    const fullName = `${firstName.trim()} ${lastName.trim()}`;
+    const fullAddress = `${addressLine1.trim()}${
+      addressLine2.trim() ? ", " + addressLine2.trim() : ""
+    }${landmark.trim() ? " (Landmark: " + landmark.trim() + ")" : ""}`;
+
     const docRef = await addDoc(collection(db, "orders"), {
       orderNumber,
-      customer: { name, email, phone, address, city, pincode },
+      customer: {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        name: fullName, // legacy compatibility
+        email: email.trim(),
+        phone: phone.replace(/[^0-9]/g, ""),
+        addressLine1: addressLine1.trim(),
+        addressLine2: addressLine2.trim(),
+        landmark: landmark.trim(),
+        address: fullAddress, // legacy compatibility
+        pincode: pincode.replace(/[^0-9]/g, ""),
+        city: city.trim(),
+        state: state.trim(),
+        country,
+        notes: notes.trim(),
+      },
       products: cartItems,
       total,
       paymentMethod,
@@ -69,8 +175,8 @@ export default function CheckoutPage() {
   };
 
   const handlePlaceOrder = async () => {
-    if (!name || !email || !phone || !address || !city || !pincode) {
-      alert("Please fill all fields");
+    if (!validateForm()) {
+      alert("Please fix all validation errors before proceeding.");
       return;
     }
 
@@ -141,7 +247,7 @@ export default function CheckoutPage() {
 
     } catch (err) {
       console.log(err);
-      alert("Something went wrong");
+      alert("Something went wrong while placing order.");
     }
   };
 
@@ -166,82 +272,191 @@ export default function CheckoutPage() {
 
         {/* FORM */}
         <div className="space-y-5">
+          <h2 className="text-lg font-bold tracking-tight text-neutral-800 border-b border-neutral-100 pb-2 mb-4">
+            Billing & Shipping Details
+          </h2>
 
+          {/* First & Last Name */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <input
+                placeholder="First Name *"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                  errors.firstName ? "border-red-550" : "border-neutral-300"
+                }`}
+              />
+              {errors.firstName && <span className="text-red-650 text-[10px] block mt-1 ml-1">{errors.firstName}</span>}
+            </div>
+            <div>
+              <input
+                placeholder="Last Name *"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                  errors.lastName ? "border-red-550" : "border-neutral-300"
+                }`}
+              />
+              {errors.lastName && <span className="text-red-650 text-[10px] block mt-1 ml-1">{errors.lastName}</span>}
+            </div>
+          </div>
+
+          {/* Phone & Email */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <input
+                placeholder="Phone (10 Digits) *"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, "").slice(0, 10))}
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                  errors.phone ? "border-red-550" : "border-neutral-300"
+                }`}
+              />
+              {errors.phone && <span className="text-red-650 text-[10px] block mt-1 ml-1">{errors.phone}</span>}
+            </div>
+            <div>
+              <input
+                placeholder="Email Address *"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                  errors.email ? "border-red-550" : "border-neutral-300"
+                }`}
+              />
+              {errors.email && <span className="text-red-650 text-[10px] block mt-1 ml-1">{errors.email}</span>}
+            </div>
+          </div>
+
+          {/* Address Line 1 */}
+          <div>
+            <input
+              placeholder="Address Line 1 (Flat, House no., Building, Street) *"
+              value={addressLine1}
+              onChange={(e) => setAddressLine1(e.target.value)}
+              className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                errors.addressLine1 ? "border-red-550" : "border-neutral-300"
+              }`}
+            />
+            {errors.addressLine1 && <span className="text-red-650 text-[10px] block mt-1 ml-1">{errors.addressLine1}</span>}
+          </div>
+
+          {/* Address Line 2 */}
           <input
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
+            placeholder="Address Line 2 (Area, Colony, Road, Sector) (Optional)"
+            value={addressLine2}
+            onChange={(e) => setAddressLine2(e.target.value)}
+            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition"
           />
 
+          {/* Landmark & Pincode */}
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              placeholder="Landmark (Optional)"
+              value={landmark}
+              onChange={(e) => setLandmark(e.target.value)}
+              className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition"
+            />
+            <div>
+              <div className="relative">
+                <input
+                  placeholder="Pincode (6 Digits) *"
+                  type="text"
+                  value={pincode}
+                  onChange={(e) => setPincode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
+                  className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                    errors.pincode ? "border-red-550" : "border-neutral-300"
+                  }`}
+                />
+                {autofilling && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400 font-semibold animate-pulse">
+                    Autofilling...
+                  </span>
+                )}
+              </div>
+              {errors.pincode && <span className="text-red-650 text-[10px] block mt-1 ml-1">{errors.pincode}</span>}
+            </div>
+          </div>
+
+          {/* City & State */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <input
+                placeholder="City/District *"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                  errors.city ? "border-red-550" : "border-neutral-300"
+                }`}
+              />
+              {errors.city && <span className="text-red-650 text-[10px] block mt-1 ml-1">{errors.city}</span>}
+            </div>
+            <div>
+              <input
+                placeholder="State *"
+                value={state}
+                onChange={(e) => setState(e.target.value)}
+                className={`w-full p-4 bg-white border rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition ${
+                  errors.state ? "border-red-550" : "border-neutral-300"
+                }`}
+              />
+              {errors.state && <span className="text-red-650 text-[10px] block mt-1 ml-1">{errors.state}</span>}
+            </div>
+          </div>
+
+          {/* Country (Default India, disabled) */}
           <input
-            placeholder="Phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
+            value={country}
+            disabled
+            className="w-full p-4 bg-neutral-100 border border-neutral-300 rounded-xl outline-none text-sm text-neutral-500 transition cursor-not-allowed"
           />
 
-          <input
-            placeholder="Email Address"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
-            required
-          />
+          {/* Order Notes */}
+          <div>
+            <textarea
+              placeholder="Order Notes (e.g. instruction for delivery, apartment access code, bulk preferences) (Optional)"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-sm text-[#111111] transition h-24 resize-none"
+            />
+          </div>
 
-          <textarea
-            placeholder="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition h-28"
-          />
+          {/* PAYMENT OPTIONS */}
+          <div className="pt-2">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#666666] mb-3">
+              Payment Method
+            </label>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setPaymentMethod("online")}
+                className={
+                  paymentMethod === "online"
+                    ? "bg-[#111111] text-white px-5 py-2.5 rounded-xl font-bold border border-black cursor-pointer text-sm"
+                    : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-black hover:border-neutral-400 transition cursor-pointer text-sm"
+                }
+              >
+                Pay Online
+              </button>
 
-          <input
-            placeholder="City"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
-          />
-
-          <input
-            placeholder="Pincode"
-            value={pincode}
-            onChange={(e) => setPincode(e.target.value)}
-            className="w-full p-4 bg-white border border-neutral-300 rounded-xl outline-none focus:border-neutral-500 text-[#111111] transition"
-          />
-
-          {/* PAYMENT */}
-          <div className="flex gap-4 mt-4">
-
-            <button
-              onClick={() => setPaymentMethod("online")}
-              className={
-                paymentMethod === "online"
-                  ? "bg-[#111111] text-white px-5 py-2.5 rounded-xl font-bold border border-black cursor-pointer"
-                  : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-black hover:border-neutral-400 transition cursor-pointer"
-              }
-            >
-              Pay Online
-            </button>
-
-            <button
-              onClick={() => setPaymentMethod("cod")}
-              className={
-                paymentMethod === "cod"
-                  ? "bg-[#111111] text-white px-5 py-2.5 rounded-xl font-bold border border-black cursor-pointer"
-                  : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-black hover:border-neutral-400 transition cursor-pointer"
-              }
-            >
-              COD (Cash on Delivery)
-            </button>
-
+              <button
+                onClick={() => setPaymentMethod("cod")}
+                className={
+                  paymentMethod === "cod"
+                    ? "bg-[#111111] text-white px-5 py-2.5 rounded-xl font-bold border border-black cursor-pointer text-sm"
+                    : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-black hover:border-neutral-400 transition cursor-pointer text-sm"
+                }
+              >
+                COD (Cash on Delivery)
+              </button>
+            </div>
           </div>
 
         </div>
 
         {/* SUMMARY */}
-        <div className="bg-[#f8f8f8] border border-neutral-200 p-6 rounded-2xl">
+        <div className="bg-[#f8f8f8] border border-neutral-200 p-6 rounded-2xl h-max sticky top-5">
 
           <h3 className="text-lg font-bold text-[#111111] mb-6">Order Review</h3>
 
@@ -259,7 +474,7 @@ export default function CheckoutPage() {
 
           <button
             onClick={handlePlaceOrder}
-            className="w-full mt-6 bg-[#111111] text-white py-4 rounded-xl font-bold hover:bg-neutral-800 transition shadow-md cursor-pointer"
+            className="w-full mt-6 bg-[#111111] text-white py-4 rounded-xl font-bold hover:bg-neutral-800 transition shadow-md cursor-pointer text-sm"
           >
             Place Order
           </button>
