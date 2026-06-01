@@ -6,6 +6,7 @@ import { doc, getDoc, collection, query, where, getDocs, addDoc, orderBy } from 
 import { db } from "@/firebase/config";
 import { useCart } from "@/context/CartContext";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -164,9 +165,30 @@ export default function ProductPage() {
     <main className="min-h-screen bg-white text-[#111111] p-6 md:p-10 font-sans">
       
       {/* Top Navbar */}
-      <nav className="flex items-center justify-between max-w-5xl mx-auto mb-10 border-b border-neutral-200 pb-5">
-        <Link href="/" className="text-xl font-bold tracking-wide text-[#111111]">
-          DENIM DYNASTY STUDIO
+      <nav className="flex items-center justify-between mb-10 border-b border-neutral-200 pb-5">
+        <Link href="/" className="flex items-center shrink-0">
+          {/* Full Logo - Desktop and Tablet */}
+          <div className="hidden sm:block">
+            <Image
+              src="/logo-full.png"
+              alt="Denim Dynasty Studio"
+              width={200}
+              height={50}
+              priority
+              className="w-auto h-9 md:h-11 object-contain"
+            />
+          </div>
+          {/* Icon Logo - Mobile */}
+          <div className="block sm:hidden">
+            <Image
+              src="/logo-icon.png"
+              alt="Denim Dynasty Studio"
+              width={50}
+              height={50}
+              priority
+              className="w-10 h-10 object-contain"
+            />
+          </div>
         </Link>
         <div className="flex gap-6 items-center">
           <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">

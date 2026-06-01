@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 
@@ -259,8 +260,29 @@ export default function CheckoutPage() {
 
       {/* Top Navbar */}
       <nav className="flex items-center justify-between mb-10 border-b border-neutral-200 pb-5">
-        <Link href="/" className="text-xl font-bold tracking-wide text-[#111111]">
-          DENIM DYNASTY STUDIO
+        <Link href="/" className="flex items-center shrink-0">
+          {/* Full Logo - Desktop and Tablet */}
+          <div className="hidden sm:block">
+            <Image
+              src="/logo-full.png"
+              alt="Denim Dynasty Studio"
+              width={200}
+              height={50}
+              priority
+              className="w-auto h-9 md:h-11 object-contain"
+            />
+          </div>
+          {/* Icon Logo - Mobile */}
+          <div className="block sm:hidden">
+            <Image
+              src="/logo-icon.png"
+              alt="Denim Dynasty Studio"
+              width={50}
+              height={50}
+              priority
+              className="w-10 h-10 object-contain"
+            />
+          </div>
         </Link>
         <Link href="/cart" className="text-sm text-neutral-500 hover:text-black transition">
           ➔ Back to Cart

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { db } from "../firebase/config";
 import { collection, getDocs } from "firebase/firestore";
 import { useCart } from "@/context/CartContext";
@@ -71,9 +72,30 @@ export default function Home() {
 
       {/* Navbar */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-neutral-200">
-        <h1 className="text-2xl font-bold tracking-wide text-[#111111]">
-          DENIM DYNASTY STUDIO
-        </h1>
+        <Link href="/" className="flex items-center shrink-0">
+          {/* Full Logo - Desktop and Tablet */}
+          <div className="hidden sm:block">
+            <Image
+              src="/logo-full.png"
+              alt="Denim Dynasty Studio"
+              width={200}
+              height={50}
+              priority
+              className="w-auto h-9 md:h-11 object-contain"
+            />
+          </div>
+          {/* Icon Logo - Mobile */}
+          <div className="block sm:hidden">
+            <Image
+              src="/logo-icon.png"
+              alt="Denim Dynasty Studio"
+              width={50}
+              height={50}
+              priority
+              className="w-10 h-10 object-contain"
+            />
+          </div>
+        </Link>
 
         <div className="flex flex-wrap gap-4 md:gap-6 text-sm items-center justify-end">
           <Link href="/" className="text-[#666666] hover:text-[#111111] transition">Home</Link>
@@ -118,19 +140,36 @@ export default function Home() {
 
       {/* Categories */}
       <section className="px-8 py-16 max-w-6xl mx-auto">
-        <h3 className="text-3xl font-bold mb-10 text-center text-[#111111]">
+        <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111]">
           Shop By Category
         </h3>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {categories.map((item) => (
+          {[
+            { name: "Cord Set", image: "/category-boys-cordset.png" },
+            { name: "Shirt", image: "/category-boys-shirts.png" },
+            { name: "T-Shirt", image: "/category-boys-tshirts.png" },
+            { name: "Pant", image: "/category-boys-pants.png" },
+            { name: "Track Pant", image: "/category-boys-trackpant.png" },
+            { name: "3/4 Pant", image: "/category-boys-threequarterpant.png" },
+          ].map((cat) => (
             <Link
-              key={item}
-              href={`/products/${item.toLowerCase()}`}
+              key={cat.name}
+              href={`/products/${encodeURIComponent(cat.name.toLowerCase())}`}
+              className="group relative h-[220px] md:h-[280px] overflow-hidden rounded-3xl border border-neutral-200 shadow-sm block cursor-pointer"
             >
-              <div className="bg-[#f8f8f8] border border-neutral-200/60 hover:bg-neutral-100 hover:scale-[1.02] transition rounded-2xl p-8 text-center cursor-pointer">
-                <h4 className="text-xl font-bold text-[#111111]">
-                  {item}
+              <div className="absolute inset-0 bg-neutral-100 animate-pulse group-hover:scale-105 transition-transform duration-700 ease-out z-0" />
+              <Image
+                src={cat.image}
+                alt={cat.name}
+                fill
+                sizes="(max-width: 768px) 50vw, 33vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out z-10"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent z-20 transition-opacity duration-300 group-hover:opacity-90" />
+              <div className="absolute inset-0 flex flex-col justify-end p-6 z-30">
+                <h4 className="text-white text-lg md:text-xl font-bold tracking-wide text-center">
+                  {cat.name}
                 </h4>
               </div>
             </Link>
