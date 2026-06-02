@@ -12,6 +12,8 @@ export default function CartPage() {
     removeFromCart,
     increaseQuantity,
     decreaseQuantity,
+    clearCart,
+    showToast,
   } = useCart();
 
   const router = useRouter();
@@ -109,12 +111,23 @@ export default function CartPage() {
               Grand Total: ₹{totalPrice}
             </h2>
 
-            <button
-              onClick={() => router.push("/checkout")}
-              className="mt-6 bg-[#38BDF8] text-black px-8 py-4 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition cursor-pointer shadow-md"
-            >
-              Proceed To Checkout
-            </button>
+            <div className="flex flex-wrap gap-4 mt-6">
+              <button
+                onClick={() => router.push("/checkout")}
+                className="bg-[#38BDF8] text-black px-8 py-4 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition cursor-pointer shadow-md select-none"
+              >
+                Proceed To Checkout
+              </button>
+              <button
+                onClick={() => {
+                  clearCart();
+                  showToast("Cart cleared", "success");
+                }}
+                className="bg-white border border-neutral-300 text-neutral-600 px-8 py-4 rounded-xl font-bold hover:bg-neutral-100 hover:text-black transition cursor-pointer select-none animate-fadeIn"
+              >
+                Clear Cart
+              </button>
+            </div>
           </div>
         </div>
       )}

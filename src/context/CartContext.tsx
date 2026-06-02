@@ -21,14 +21,34 @@ export interface CartItem {
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: any) => void;
-  removeFromCart: (id: string, selectedSize?: string) => void;
-  increaseQuantity: (id: string, selectedSize?: string) => void;
-  decreaseQuantity: (id: string, selectedSize?: string) => void;
+  removeFromCart: (id: string, selectedSize: string) => void;
+  increaseQuantity: (id: string, selectedSize: string) => void;
+  decreaseQuantity: (id: string, selectedSize: string) => void;
   clearCart: () => void;
   showToast: (message: string, type?: "success" | "error" | "info") => void;
 }
 
 const CartContext = createContext<CartContextType | null>(null);
+
+// Helper function to validate a cart item structure and detect corruption or missing size
+const isValidCartItem = (item: any): boolean => {
+  if (!item || typeof item !== "object") return false;
+  if (typeof item.id !== "string" || !item.id) return false;
+  if (typeof item.name !== "string" || !item.name) return false;
+  
+  const price = Number(item.price);
+  if (isNaN(price) || price < 0) return false;
+  
+  const quantity = Number(item.quantity);
+  if (isNaN(quantity) || quantity <= 0) return false;
+
+  const image = item.image || item.imageUrl;
+  if (typeof image !== "string" || !image) return false;
+
+  if (typeof item.selectedSize !== "string" || !item.selectedSize.trim()) return false;
+
+  return true;
+};
 
 export const CartProvider = ({
   children,
@@ -38,10 +58,35 @@ export const CartProvider = ({
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load cart from localStorage once on mount
+  // Load cart from localStorage once on mount, running migration logic to purge legacy/corrupted items
   useEffect(() => {
     const stored = localStorage.getItem("cart");
-    if (stored) setCart(JSON.parse(stored));
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          // Filter and clean items matching target schema
+          const migrated = parsed.filter(isValidCartItem).map((item) => ({
+            id: item.id,
+            name: item.name,
+            price: Number(item.price),
+            image: item.image || item.imageUrl || "",
+            imageUrl: item.image || item.imageUrl || "",
+            quantity: Number(item.quantity),
+            selectedSize: item.selectedSize,
+          }));
+          setCart(migrated);
+          // If items were removed/migrated, update localStorage immediately to sync state
+          if (migrated.length !== parsed.length) {
+            localStorage.setItem("cart", JSON.stringify(migrated));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to parse and migrate cart from localStorage:", err);
+        setCart([]);
+        localStorage.setItem("cart", JSON.stringify([]));
+      }
+    }
     setIsLoaded(true);
   }, []);
 
@@ -68,7 +113,12 @@ export const CartProvider = ({
     const name = product.name;
     const price = Number(product.price);
     const image = product.image || product.imageUrl || "";
-    const selectedSize = product.selectedSize || "";
+    
+    // Automatically assign a size if missing or invalid (e.g. for one-size products)
+    let selectedSize = product.selectedSize;
+    if (typeof selectedSize !== "string" || !selectedSize.trim()) {
+      selectedSize = "One Size";
+    }
 
     setCart((prevCart) => {
       const existing = prevCart.find(
@@ -101,7 +151,7 @@ export const CartProvider = ({
   };
 
   // Remove item
-  const removeFromCart = (id: string, selectedSize: string = "") => {
+  const removeFromCart = (id: string, selectedSize: string) => {
     setCart((prevCart) =>
       prevCart.filter(
         (item) => !(item.id === id && item.selectedSize === selectedSize)
@@ -110,7 +160,7 @@ export const CartProvider = ({
   };
 
   // Increase quantity
-  const increaseQuantity = (id: string, selectedSize: string = "") => {
+  const increaseQuantity = (id: string, selectedSize: string) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
         item.id === id && item.selectedSize === selectedSize
@@ -121,7 +171,7 @@ export const CartProvider = ({
   };
 
   // Decrease quantity
-  const decreaseQuantity = (id: string, selectedSize: string = "") => {
+  const decreaseQuantity = (id: string, selectedSize: string) => {
     setCart((prevCart) =>
       prevCart
         .map((item) =>
