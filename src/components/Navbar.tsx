@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -13,6 +13,11 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const totalItems = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
+
+  // Close the mobile menu drawer automatically on route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   const navLinks = [
     { label: "Home", href: "/" },
@@ -32,10 +37,17 @@ export default function Navbar() {
     return pathname.startsWith(href);
   };
 
+  const handleMobileLinkClick = () => {
+    // Delay setting state to false to allow browser/router to capture the navigation click
+    setTimeout(() => {
+      setIsOpen(false);
+    }, 150);
+  };
+
   return (
     <nav className="border-b border-neutral-200 bg-white sticky top-0 z-50 backdrop-blur-md bg-white/95 w-full">
       <div className="flex items-center justify-between px-6 py-4 md:px-8 md:py-5 max-w-7xl mx-auto">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0" onClick={() => setIsOpen(false)}>
+        <Link href="/" className="flex items-center gap-2.5 shrink-0" onClick={handleMobileLinkClick}>
           <Image
             src={brandConfig.logoPath}
             alt={brandConfig.brandName}
@@ -86,7 +98,7 @@ export default function Navbar() {
         <div className="flex md:hidden items-center gap-4">
           <Link
             href="/cart"
-            onClick={() => setIsOpen(false)}
+            onClick={handleMobileLinkClick}
             className="relative bg-[#111111] hover:bg-neutral-800 text-white p-2.5 rounded-full font-semibold transition flex items-center justify-center select-none"
           >
             <span className="relative flex items-center text-base">
@@ -118,7 +130,7 @@ export default function Navbar() {
               <Link
                 key={link.label}
                 href={link.href}
-                onClick={() => setIsOpen(false)}
+                onClick={handleMobileLinkClick}
                 className={`py-4.5 px-6 border-b border-neutral-100 last:border-b-0 text-sm font-bold transition-all duration-205 cursor-pointer ${
                   active ? "text-[#38BDF8] bg-sky-50/20" : "text-[#111111] hover:text-[#38BDF8] hover:bg-neutral-50"
                 }`}

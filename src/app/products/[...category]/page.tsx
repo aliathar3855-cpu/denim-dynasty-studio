@@ -124,19 +124,23 @@ export default function CategoryProducts() {
           {products.map((product) => (
             <div
               key={product.id}
-              className="bg-white border border-neutral-200/80 rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full"
+              className="bg-white border border-neutral-200/80 rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full group"
             >
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-full h-[250px] object-cover"
-              />
+              <Link href={`/product/${product.id}`} className="block cursor-pointer overflow-hidden">
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-[250px] object-cover hover:scale-[1.02] transition-transform duration-300"
+                />
+              </Link>
 
               <div className="p-5 flex flex-col flex-1 justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-[#111111] line-clamp-1">
-                    {product.name}
-                  </h2>
+                  <Link href={`/product/${product.id}`} className="block cursor-pointer hover:text-[#38BDF8] transition-colors">
+                    <h2 className="text-lg font-bold text-[#111111] line-clamp-1">
+                      {product.name}
+                    </h2>
+                  </Link>
                   <p className="text-[#666666] mt-2 font-semibold text-sm">
                     ₹{product.price}
                   </p>
