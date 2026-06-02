@@ -151,30 +151,12 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex gap-2.5 mt-5">
-            <button
-              onClick={() => {
-                if (isOutOfStock) return;
-                addToCart({
-                  id: p.id,
-                  name: p.name,
-                  price: p.price,
-                  image: p.imageUrl,
-                  imageUrl: p.imageUrl,
-                  quantity: 1,
-                  selectedSize: p.sizes?.[0] || null,
-                });
-              }}
-              disabled={isOutOfStock}
-              className="flex-1 bg-[#38BDF8] disabled:bg-neutral-250 disabled:text-neutral-450 text-black py-2.5 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition text-xs tracking-wider uppercase cursor-pointer shadow-sm select-none"
-            >
-              {isOutOfStock ? "Sold Out" : "Add To Cart"}
-            </button>
+          <div className="mt-5">
             <Link
               href={`/product/${p.id}`}
-              className="flex-1 bg-[#f8f8f8] text-[#111111] border border-neutral-250 py-2.5 rounded-xl font-bold text-center hover:bg-neutral-100 transition text-xs tracking-wider uppercase"
+              className="block w-full bg-[#38BDF8] text-black py-3 rounded-xl font-bold text-center hover:bg-[#0ea5e9] hover:text-white transition text-xs tracking-wider uppercase shadow-sm select-none"
             >
-              Details
+              View Product
             </Link>
           </div>
         </div>
