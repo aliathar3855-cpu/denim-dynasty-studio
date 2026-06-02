@@ -5,8 +5,10 @@ import Link from "next/link";
 import AdminGuard from "@/components/AdminGuard";
 import { getProducts, deleteProduct, Product } from "@/lib/products";
 import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export default function ProductListPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,6 +34,7 @@ export default function ProductListPage() {
       await deleteProduct(id);
       toast.success("Product deleted successfully");
       fetchProducts();
+      router.refresh();
     } catch (err) {
       console.error(err);
       toast.error("Delete failed");

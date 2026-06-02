@@ -7,6 +7,8 @@ import {
   useState,
 } from "react";
 import { toast } from "react-hot-toast";
+import { db } from "@/firebase/config";
+import { collection, getDocs } from "firebase/firestore";
 
 export interface CartItem {
   id: string;
@@ -61,12 +63,13 @@ export const CartProvider = ({
   // Load cart from localStorage once on mount, running migration logic to purge legacy/corrupted items
   useEffect(() => {
     const stored = localStorage.getItem("cart");
+    let currentCart: CartItem[] = [];
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
           // Filter and clean items matching target schema
-          const migrated = parsed.filter(isValidCartItem).map((item) => ({
+          currentCart = parsed.filter(isValidCartItem).map((item) => ({
             id: item.id,
             name: item.name,
             price: Number(item.price),
@@ -75,10 +78,10 @@ export const CartProvider = ({
             quantity: Number(item.quantity),
             selectedSize: item.selectedSize,
           }));
-          setCart(migrated);
+          setCart(currentCart);
           // If items were removed/migrated, update localStorage immediately to sync state
-          if (migrated.length !== parsed.length) {
-            localStorage.setItem("cart", JSON.stringify(migrated));
+          if (currentCart.length !== parsed.length) {
+            localStorage.setItem("cart", JSON.stringify(currentCart));
           }
         }
       } catch (err) {
@@ -88,6 +91,25 @@ export const CartProvider = ({
       }
     }
     setIsLoaded(true);
+
+    // Verify product IDs against active Firestore products list and purge deleted ones
+    const verifyAndPurgeDeleted = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "products"));
+        const activeIds = new Set(snapshot.docs.map((doc) => doc.id));
+        setCart((prevCart) => {
+          const verified = prevCart.filter((item) => activeIds.has(item.id));
+          if (verified.length !== prevCart.length) {
+            localStorage.setItem("cart", JSON.stringify(verified));
+            return verified;
+          }
+          return prevCart;
+        });
+      } catch (firestoreErr) {
+        console.error("Failed to verify cart items with Firestore:", firestoreErr);
+      }
+    };
+    verifyAndPurgeDeleted();
   }, []);
 
   // Save cart to localStorage whenever it changes, but only after it's loaded

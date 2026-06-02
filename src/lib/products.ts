@@ -114,10 +114,15 @@ export const detectCategory = (name: string): string => {
  */
 export const getProducts = async (): Promise<Product[]> => {
   const productsRef = collection(db, "products");
-  const q = query(productsRef, orderBy("createdAt", "desc"));
-  const snapshot = await getDocs(q);
+  const snapshot = await getDocs(productsRef);
 
-  return snapshot.docs.map((doc) => normalizeProduct(doc.id, doc.data()));
+  return snapshot.docs
+    .map((doc) => normalizeProduct(doc.id, doc.data()))
+    .sort((a, b) => {
+      const aTime = a.createdAt?.seconds || 0;
+      const bTime = b.createdAt?.seconds || 0;
+      return bTime - aTime;
+    });
 };
 
 /**

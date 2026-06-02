@@ -83,7 +83,7 @@ export default function CheckoutPage() {
         }
 
         // Enrich items list
-        const enriched: EnrichedCartItem[] = await Promise.all(
+        const resolved = await Promise.all(
           storedCart.map(async (item: any) => {
             const productId = item.id || item.productId;
             const product = await getProductById(productId);
@@ -97,17 +97,11 @@ export default function CheckoutPage() {
                 quantity: item.quantity || 1,
               };
             }
-            // Fallback to localStorage data if Firestore product lookup fails
-            return {
-              productId,
-              name: item.name || "Unknown Product",
-              price: Number(item.price) || 0,
-              image: item.image || "",
-              selectedSize: item.selectedSize || "",
-              quantity: item.quantity || 1,
-            };
+            return null;
           })
         );
+
+        const enriched = resolved.filter((item): item is EnrichedCartItem => item !== null);
 
         setCartItems(enriched);
         const totalPrice = enriched.reduce((sum, item) => sum + item.price * item.quantity, 0);

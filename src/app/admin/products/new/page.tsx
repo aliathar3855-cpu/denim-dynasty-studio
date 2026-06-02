@@ -149,6 +149,7 @@ export default function NewProductPage() {
       // Revoke preview URLs
       uploadPreviews.forEach((url) => URL.revokeObjectURL(url));
 
+      router.refresh();
       router.push("/admin/products");
     } catch (error: any) {
       console.error("Error adding product:", error);
