@@ -16,13 +16,41 @@ import {
 export interface Product {
   id?: string;
   name: string;
+  description: string;
   price: number;
   category: string;
   images: string[];
+  imageUrl?: string;
   sizeType: "LETTER" | "NUMERIC";
   sizes: string[];
   createdAt?: Timestamp;
 }
+
+/**
+ * Normalizes a product retrieved from Firestore to ensure backward and forward compatibility
+ * between single-image (imageUrl) and multi-image (images) schemas.
+ */
+const normalizeProduct = (docId: string, data: any): Product => {
+  const images = Array.isArray(data.images)
+    ? data.images
+    : data.imageUrl
+    ? [data.imageUrl]
+    : [];
+  const imageUrl = data.imageUrl || images[0] || "";
+
+  return {
+    id: docId,
+    name: data.name || "",
+    description: data.description || "",
+    price: Number(data.price) || 0,
+    category: data.category || "",
+    images,
+    imageUrl,
+    sizeType: data.sizeType || "LETTER",
+    sizes: data.sizes || [],
+    createdAt: data.createdAt,
+  };
+};
 
 /**
  * Automatically detects product category based on product name keywords.
@@ -31,19 +59,19 @@ export const detectCategory = (name: string): string => {
   const nameLower = name.toLowerCase();
 
   if (nameLower.includes("cord")) {
-    return "cordset";
+    return "cord set";
   }
   if (nameLower.includes("tshirt") || nameLower.includes("t-shirt")) {
-    return "tshirt";
+    return "t-shirt";
   }
   if (nameLower.includes("shirt")) {
     return "shirt";
   }
   if (nameLower.includes("track")) {
-    return "trackpant";
+    return "track pant";
   }
   if (nameLower.includes("3/4")) {
-    return "3/4pant";
+    return "3/4 pant";
   }
   if (nameLower.includes("pant")) {
     return "pant";
@@ -60,10 +88,7 @@ export const getProducts = async (): Promise<Product[]> => {
   const q = query(productsRef, orderBy("createdAt", "desc"));
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...(doc.data() as Omit<Product, "id">),
-  }));
+  return snapshot.docs.map((doc) => normalizeProduct(doc.id, doc.data()));
 };
 
 /**
@@ -74,20 +99,17 @@ export const getProductById = async (id: string): Promise<Product | null> => {
   const snapshot = await getDoc(docRef);
 
   if (snapshot.exists()) {
-    return {
-      id: snapshot.id,
-      ...(snapshot.data() as Omit<Product, "id">),
-    };
+    return normalizeProduct(snapshot.id, snapshot.data());
   }
 
   return null;
 };
 
 /**
- * Saves a new product to Firestore, auto-generating the category.
+ * Saves a new product to Firestore.
  */
 export const addProduct = async (
-  productData: Omit<Product, "id" | "category" | "createdAt">
+  productData: Omit<Product, "id" | "createdAt">
 ): Promise<string> => {
   const productsRef = collection(db, "products");
 
@@ -102,13 +124,13 @@ export const addProduct = async (
     throw new Error("Product with this name already exists.");
   }
 
-  const category = detectCategory(productData.name);
-
   const docRef = await addDoc(productsRef, {
     name: productData.name.trim(),
+    description: productData.description?.trim() || "",
     price: Number(productData.price),
-    category,
+    category: productData.category?.trim() || detectCategory(productData.name),
     images: productData.images,
+    imageUrl: productData.images[0] || "",
     sizeType: productData.sizeType,
     sizes: productData.sizes,
     createdAt: serverTimestamp(),
@@ -129,10 +151,19 @@ export const updateProduct = async (
 
   if (productData.name) {
     updatePayload.name = productData.name.trim();
-    updatePayload.category = detectCategory(productData.name);
+  }
+  if (productData.description !== undefined) {
+    updatePayload.description = productData.description.trim();
+  }
+  if (productData.category) {
+    updatePayload.category = productData.category.trim();
   }
   if (productData.price !== undefined) {
     updatePayload.price = Number(productData.price);
+  }
+  if (productData.images) {
+    updatePayload.images = productData.images;
+    updatePayload.imageUrl = productData.images[0] || "";
   }
 
   await updateDoc(docRef, updatePayload);

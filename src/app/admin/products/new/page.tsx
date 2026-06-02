@@ -14,7 +14,9 @@ const NUMERIC_SIZES = ["28", "30", "32", "34", "36", "38", "40", "42", "44"];
 export default function NewProductPage() {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [category, setCategory] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadPreviews, setUploadPreviews] = useState<string[]>([]);
@@ -75,6 +77,10 @@ export default function NewProductPage() {
       toast.error("Please enter a valid price.");
       return;
     }
+    if (!category) {
+      toast.error("Please select a product category.");
+      return;
+    }
     if (images.length === 0) {
       toast.error("Please upload at least one product image.");
       return;
@@ -89,7 +95,9 @@ export default function NewProductPage() {
 
       const productPayload = {
         name: name.trim(),
+        description: description.trim(),
         price: Number(price),
+        category: category,
         images,
         sizeType,
         sizes: selectedSizes,
@@ -97,7 +105,7 @@ export default function NewProductPage() {
 
       await addProduct(productPayload);
 
-      toast.success("Product added successfully");
+      toast.success("Product Added Successfully");
       router.push("/admin/products");
     } catch (error: any) {
       console.error("Error adding product:", error);
@@ -148,6 +156,19 @@ export default function NewProductPage() {
               />
             </div>
 
+            {/* Description */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+                Product Description
+              </label>
+              <textarea
+                placeholder="Describe your premium streetwear items..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition h-32 resize-none text-sm font-medium"
+              />
+            </div>
+
             {/* Price */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
@@ -161,6 +182,27 @@ export default function NewProductPage() {
                 className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition font-medium text-sm"
                 required
               />
+            </div>
+
+            {/* Category dropdown */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+                Category
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition cursor-pointer font-bold text-sm"
+                required
+              >
+                <option value="">Select Category</option>
+                <option value="t-shirt">T-Shirt</option>
+                <option value="shirt">Shirt</option>
+                <option value="pant">Pant</option>
+                <option value="track pant">Track Pant</option>
+                <option value="3/4 pant">3/4 Pant</option>
+                <option value="cord set">Cord Set</option>
+              </select>
             </div>
 
             {/* Product Images Upload */}
