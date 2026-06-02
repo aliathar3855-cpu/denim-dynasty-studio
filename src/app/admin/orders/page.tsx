@@ -16,6 +16,73 @@ import { signOut } from "firebase/auth";
 import AdminGuard from "@/components/AdminGuard";
 import { toast } from "react-hot-toast";
 
+const normalizeOrder = (docId: string, data: any) => {
+  let name = "";
+  let phone = "";
+  let address = "";
+  let city = "";
+  let pincode = "";
+  let email = "";
+
+  if (data.customer) {
+    name = data.customer.name || `${data.customer.firstName || ""} ${data.customer.lastName || ""}`.trim();
+    phone = data.customer.phone || "";
+    address = data.customer.address || `${data.customer.addressLine1 || ""}${data.customer.addressLine2 ? ", " + data.customer.addressLine2 : ""}`.trim();
+    city = data.customer.city || "";
+    pincode = data.customer.pincode || "";
+    email = data.customer.email || "";
+  } else if (data.userDetails) {
+    name = `${data.userDetails.firstName || ""} ${data.userDetails.lastName || ""}`.trim();
+    phone = data.userDetails.phone || "";
+    address = `${data.userDetails.address1 || ""}${data.userDetails.address2 ? ", " + data.userDetails.address2 : ""}`.trim();
+    city = data.userDetails.city || "";
+    pincode = data.userDetails.pincode || "";
+    email = data.userDetails.email || "";
+  }
+
+  let productsList = [];
+  if (Array.isArray(data.products)) {
+    productsList = data.products.map((p: any) => ({
+      name: p.name || "",
+      imageUrl: p.imageUrl || p.image || "",
+      price: Number(p.price) || 0,
+      quantity: Number(p.quantity) || 1,
+      selectedSize: p.selectedSize || ""
+    }));
+  } else if (Array.isArray(data.items)) {
+    productsList = data.items.map((p: any) => ({
+      name: p.name || "",
+      imageUrl: p.image || p.imageUrl || "",
+      price: Number(p.price) || 0,
+      quantity: Number(p.quantity) || 1,
+      selectedSize: p.selectedSize || ""
+    }));
+  }
+
+  const status = (data.status || data.orderStatus || "pending").toLowerCase();
+  const total = Number(data.total || data.totalAmount || 0);
+
+  return {
+    id: docId,
+    orderNumber: data.orderNumber || data.orderId || docId,
+    customer: {
+      name,
+      phone,
+      address,
+      city,
+      pincode,
+      email
+    },
+    products: productsList,
+    total,
+    status,
+    paymentMethod: data.paymentMethod || "COD",
+    paymentStatus: data.paymentStatus || "Pending",
+    paymentId: data.paymentId || null,
+    createdAt: data.createdAt
+  };
+};
+
 export default function AdminOrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<any[]>([]);
@@ -31,13 +98,9 @@ export default function AdminOrdersPage() {
       const ordersRef = collection(db, "orders");
       const q = query(ordersRef, orderBy("createdAt", "desc"));
       const snapshot = await getDocs(q);
-      const ordersList: any[] = [];
-      snapshot.forEach((docItem) => {
-        ordersList.push({
-          id: docItem.id,
-          ...docItem.data(),
-        });
-      });
+      const ordersList = snapshot.docs.map((docItem) =>
+        normalizeOrder(docItem.id, docItem.data())
+      );
       setOrders(ordersList);
     } catch (err) {
       console.error("Error fetching orders:", err);
@@ -64,10 +127,13 @@ export default function AdminOrdersPage() {
     try {
       setUpdatingId(orderId);
       const docRef = doc(db, "orders", orderId);
-      await updateDoc(docRef, { status: newStatus });
+      await updateDoc(docRef, {
+        status: newStatus.toLowerCase(),
+        orderStatus: newStatus.charAt(0).toUpperCase() + newStatus.slice(1).toLowerCase(),
+      });
       setOrders((prev) =>
         prev.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
+          order.id === orderId ? { ...order, status: newStatus.toLowerCase() } : order
         )
       );
       toast.success(`Order status updated to ${newStatus}`);

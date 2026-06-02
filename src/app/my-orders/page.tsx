@@ -6,6 +6,26 @@ import { db } from "@/firebase/config";
 import Link from "next/link";
 import Image from "next/image";
 
+const normalizeOrder = (docId: string, data: any) => {
+  let phone = "";
+  if (data.customer) {
+    phone = data.customer.phone || "";
+  } else if (data.userDetails) {
+    phone = data.userDetails.phone || "";
+  }
+  return {
+    id: docId,
+    orderNumber: data.orderNumber || data.orderId || docId,
+    customer: {
+      phone,
+    },
+    total: Number(data.total || data.totalAmount || 0),
+    status: (data.status || data.orderStatus || "pending").toLowerCase(),
+    paymentMethod: data.paymentMethod || "COD",
+    createdAt: data.createdAt,
+  };
+};
+
 export default function MyOrdersPage() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,13 +60,9 @@ export default function MyOrdersPage() {
       const q = query(ordersRef, orderBy("createdAt", "desc"));
       const snapshot = await getDocs(q);
 
-      const allOrders: any[] = [];
-      snapshot.forEach((docItem) => {
-        allOrders.push({
-          id: docItem.id,
-          ...docItem.data(),
-        });
-      });
+      const allOrders = snapshot.docs.map((docItem) =>
+        normalizeOrder(docItem.id, docItem.data())
+      );
 
       // Filter by normalized suffix matching
       const matchedOrders = allOrders.filter((order) => {

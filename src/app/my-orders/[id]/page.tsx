@@ -7,6 +7,73 @@ import { db } from "@/firebase/config";
 import Link from "next/link";
 import Image from "next/image";
 
+const normalizeOrder = (docId: string, data: any) => {
+  let name = "";
+  let phone = "";
+  let address = "";
+  let city = "";
+  let pincode = "";
+  let email = "";
+
+  if (data.customer) {
+    name = data.customer.name || `${data.customer.firstName || ""} ${data.customer.lastName || ""}`.trim();
+    phone = data.customer.phone || "";
+    address = data.customer.address || `${data.customer.addressLine1 || ""}${data.customer.addressLine2 ? ", " + data.customer.addressLine2 : ""}`.trim();
+    city = data.customer.city || "";
+    pincode = data.customer.pincode || "";
+    email = data.customer.email || "";
+  } else if (data.userDetails) {
+    name = `${data.userDetails.firstName || ""} ${data.userDetails.lastName || ""}`.trim();
+    phone = data.userDetails.phone || "";
+    address = `${data.userDetails.address1 || ""}${data.userDetails.address2 ? ", " + data.userDetails.address2 : ""}`.trim();
+    city = data.userDetails.city || "";
+    pincode = data.userDetails.pincode || "";
+    email = data.userDetails.email || "";
+  }
+
+  let productsList = [];
+  if (Array.isArray(data.products)) {
+    productsList = data.products.map((p: any) => ({
+      name: p.name || "",
+      imageUrl: p.imageUrl || p.image || "",
+      price: Number(p.price) || 0,
+      quantity: Number(p.quantity) || 1,
+      selectedSize: p.selectedSize || ""
+    }));
+  } else if (Array.isArray(data.items)) {
+    productsList = data.items.map((p: any) => ({
+      name: p.name || "",
+      imageUrl: p.image || p.imageUrl || "",
+      price: Number(p.price) || 0,
+      quantity: Number(p.quantity) || 1,
+      selectedSize: p.selectedSize || ""
+    }));
+  }
+
+  const status = (data.status || data.orderStatus || "pending").toLowerCase();
+  const total = Number(data.total || data.totalAmount || 0);
+
+  return {
+    id: docId,
+    orderNumber: data.orderNumber || data.orderId || docId,
+    customer: {
+      name,
+      phone,
+      address,
+      city,
+      pincode,
+      email
+    },
+    products: productsList,
+    total,
+    status,
+    paymentMethod: data.paymentMethod || "COD",
+    paymentStatus: data.paymentStatus || "Pending",
+    paymentId: data.paymentId || null,
+    createdAt: data.createdAt
+  };
+};
+
 export default function OrderDetailsPage() {
   const { id } = useParams();
   const [order, setOrder] = useState<any | null>(null);
@@ -45,10 +112,7 @@ export default function OrderDetailsPage() {
         }
 
         if (orderData) {
-          setOrder({
-            id: orderDocId,
-            ...orderData,
-          });
+          setOrder(normalizeOrder(orderDocId, orderData));
         } else {
           setError("No order found with the provided identifier.");
         }
