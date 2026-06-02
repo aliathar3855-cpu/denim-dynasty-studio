@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminGuard from "@/components/AdminGuard";
@@ -18,11 +18,19 @@ export default function NewProductPage() {
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadPreviews, setUploadPreviews] = useState<string[]>([]);
   const [sizeType, setSizeType] = useState<"LETTER" | "NUMERIC">("LETTER");
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Clean up preview object URLs to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      uploadPreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [uploadPreviews]);
 
   const handleSizeChange = (size: string) => {
     setSelectedSizes((prev) =>
@@ -35,31 +43,30 @@ export default function NewProductPage() {
     setSelectedSizes([]); // Reset selected sizes when size type changes
   };
 
-  // Image upload handler
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Image selection handler (stages files locally and generates preview URLs)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const fileList = Array.from(files);
-    
+    console.log("Selected file(s):", fileList); // Console log: Selected files
+
+    // Stage files in state
+    setSelectedFiles((prev) => [...prev, ...fileList]);
+
     // Generate object URLs for immediate preview
     const localPreviews = fileList.map((file) => URL.createObjectURL(file));
-    setUploadPreviews(localPreviews);
-    setUploading(true);
+    setUploadPreviews((prev) => [...prev, ...localPreviews]);
 
-    try {
-      const urls = await uploadImages(fileList);
-      setImages((prev) => [...prev, ...urls]);
-      toast.success(`${urls.length} image(s) uploaded successfully!`);
-    } catch (err: any) {
-      console.error("Upload error:", err);
-      toast.error(err.message || "Failed to upload images.");
-    } finally {
-      // Clean up object URLs
-      localPreviews.forEach((url) => URL.revokeObjectURL(url));
-      setUploadPreviews([]);
-      setUploading(false);
-    }
+    // Reset input value so selecting the same file again triggers onChange
+    e.target.value = "";
+  };
+
+  const removeStagedImage = (indexToRemove: number) => {
+    // Revoke object URL
+    URL.revokeObjectURL(uploadPreviews[indexToRemove]);
+    setUploadPreviews((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+    setSelectedFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const removeImage = (indexToRemove: number) => {
@@ -81,8 +88,8 @@ export default function NewProductPage() {
       toast.error("Please select a product category.");
       return;
     }
-    if (images.length === 0) {
-      toast.error("Please upload at least one product image.");
+    if (images.length === 0 && selectedFiles.length === 0) {
+      toast.error("Please select or upload at least one product image.");
       return;
     }
     if (selectedSizes.length === 0) {
@@ -90,22 +97,51 @@ export default function NewProductPage() {
       return;
     }
 
+    let uploadedUrls: string[] = [];
+
     try {
       setLoading(true);
+
+      // Perform Cloudinary upload if there are staged local files
+      if (selectedFiles.length > 0) {
+        setUploading(true);
+        console.log("Upload start: uploading staged files to Cloudinary..."); // Console log: Upload start
+        const uploadToastId = toast.loading("Uploading images to Cloudinary...");
+
+        try {
+          uploadedUrls = await uploadImages(selectedFiles);
+          console.log("Cloudinary response secure URLs:", uploadedUrls); // Console log: Cloudinary response
+          toast.success("Images uploaded successfully to Cloudinary!", { id: uploadToastId });
+        } catch (uploadErr: any) {
+          console.error("Cloudinary upload failure:", uploadErr);
+          toast.error(uploadErr.message || "Failed to upload images. Please try again.", { id: uploadToastId });
+          setUploading(false);
+          setLoading(false);
+          return;
+        }
+        setUploading(false);
+      }
+
+      const finalImages = [...images, ...uploadedUrls];
 
       const productPayload = {
         name: name.trim(),
         description: description.trim(),
         price: Number(price),
         category: category,
-        images,
+        images: finalImages,
         sizeType,
         sizes: selectedSizes,
       };
 
+      console.log("Firestore save payload:", productPayload); // Console log: Firestore save
       await addProduct(productPayload);
 
       toast.success("Product Added Successfully");
+      
+      // Revoke preview URLs
+      uploadPreviews.forEach((url) => URL.revokeObjectURL(url));
+
       router.push("/admin/products");
     } catch (error: any) {
       console.error("Error adding product:", error);
@@ -255,20 +291,25 @@ export default function NewProductPage() {
                     </div>
                   ))}
 
-                  {/* Local staged files being uploaded */}
+                  {/* Local staged files ready for upload */}
                   {uploadPreviews.map((url, idx) => (
-                    <div key={`staged-${idx}`} className="relative aspect-square rounded-xl overflow-hidden border border-neutral-200 bg-neutral-50 flex items-center justify-center">
+                    <div key={`staged-${idx}`} className="relative group aspect-square rounded-xl overflow-hidden border border-neutral-200 bg-sky-50/10 shadow-sm">
                       <img
                         src={url}
-                        alt="Uploading preview"
-                        className="w-full h-full object-cover opacity-40"
+                        alt={`Staged image preview ${idx + 1}`}
+                        className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#38BDF8] mb-1"></div>
-                        <span className="text-[8px] text-black font-extrabold uppercase bg-white/80 px-1 rounded tracking-wide">
-                          Uploading...
-                        </span>
-                      </div>
+                      {/* Badge indicating it is local/staged */}
+                      <span className="absolute bottom-1.5 left-1.5 bg-amber-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                        Staged
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeStagedImage(idx)}
+                        className="absolute top-1.5 right-1.5 bg-black/75 hover:bg-red-600 text-white rounded-full p-1 text-xs transition cursor-pointer flex items-center justify-center w-5 h-5 font-bold"
+                      >
+                        ✕
+                      </button>
                     </div>
                   ))}
                 </div>
