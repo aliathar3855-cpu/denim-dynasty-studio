@@ -37,6 +37,7 @@ export default function AdminPage() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      localStorage.removeItem("admin");
       toast.success("Logged out successfully");
       router.push("/admin/login");
     } catch (err) {

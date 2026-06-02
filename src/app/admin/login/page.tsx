@@ -12,13 +12,30 @@ export default function AdminLogin() {
   const router = useRouter();
 
   const handleLogin = async () => {
+    const inputEmail = email.trim();
+    const inputPassword = password.trim();
+
+    if (!inputEmail || !inputPassword) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      // 1. Try standard Firebase authentication
+      await signInWithEmailAndPassword(auth, inputEmail, inputPassword);
+      localStorage.setItem("admin", "true"); // Sync local session
       toast.success("Login Successful");
       router.push("/admin/orders");
-
-    } catch (err) {
-      toast.error("Invalid credentials");
+    } catch (err: any) {
+      // 2. Fallback to hardcoded static admin credentials if Firebase authentication fails
+      if (inputEmail === "admin@denimdynasty.com" && inputPassword === "admin123") {
+        localStorage.setItem("admin", "true");
+        toast.success("Login Successful (Bypass)");
+        router.push("/admin/orders");
+      } else {
+        console.error("Authentication failed:", err);
+        toast.error("Invalid credentials");
+      }
     }
   };
 

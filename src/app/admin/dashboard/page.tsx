@@ -89,6 +89,7 @@ export default function DashboardPage() {
   const logout = async () => {
     try {
       await signOut(auth);
+      localStorage.removeItem("admin");
       router.push("/admin/login");
     } catch (error) {
       console.error("Logout failed:", error);

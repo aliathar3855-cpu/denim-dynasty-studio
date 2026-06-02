@@ -14,14 +14,22 @@ export default function AdminGuard({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // 1. Check local session storage bypass first
+    const isLocalAdmin = localStorage.getItem("admin") === "true";
+    if (isLocalAdmin) {
+      setLoading(false);
+      return;
+    }
+
+    // 2. Fallback to checking Firebase Authentication
     const unsub = onAuthStateChanged(auth, (user) => {
       if (!user) {
         setTimeout(() => {
           router.push("/admin/login");
         }, 0);
+      } else {
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
     return () => unsub();
