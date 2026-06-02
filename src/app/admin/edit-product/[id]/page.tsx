@@ -6,6 +6,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import AdminGuard from "@/components/AdminGuard";
 import { toast } from "react-hot-toast";
+import { formatSize } from "@/lib/products";
 
 export default function EditProductPage() {
   const params = useParams();
@@ -27,7 +28,7 @@ export default function EditProductPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const letterSizesList = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
-  const numericSizesList = ["28", "30", "32", "34", "36", "38", "40", "42", "44"];
+  const numericSizesList = ["16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40"];
 
   const handleSizeToggle = (size: string) => {
     setSelectedSizes((prev) =>
@@ -265,7 +266,7 @@ export default function EditProductPage() {
                           onChange={() => handleSizeToggle(size)}
                           className="hidden"
                         />
-                        {size}
+                        {formatSize(size)}
                       </label>
                     );
                   })}

@@ -6,6 +6,7 @@ import { auth } from "@/firebase/config";
 import { signOut } from "firebase/auth";
 import AdminGuard from "@/components/AdminGuard";
 import { toast } from "react-hot-toast";
+import { formatSize } from "@/lib/products";
 
 export default function DashboardPage() {
   const [name, setName] = useState("");
@@ -19,7 +20,7 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const letterSizesList = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
-  const numericSizesList = ["28", "30", "32", "34", "36", "38", "40", "42", "44"];
+  const numericSizesList = ["16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40"];
 
   const handleSizeToggle = (size: string) => {
     setSelectedSizes((prev) =>
@@ -218,7 +219,7 @@ export default function DashboardPage() {
                         onChange={() => handleSizeToggle(size)}
                         className="hidden"
                       />
-                      {size}
+                      {formatSize(size)}
                     </label>
                   );
                 })}

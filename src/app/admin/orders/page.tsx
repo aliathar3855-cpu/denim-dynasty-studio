@@ -15,6 +15,7 @@ import {
 import { signOut } from "firebase/auth";
 import AdminGuard from "@/components/AdminGuard";
 import { toast } from "react-hot-toast";
+import { formatSize } from "@/lib/products";
 
 const normalizeOrder = (docId: string, data: any) => {
   let name = "";
@@ -457,7 +458,7 @@ export default function AdminOrdersPage() {
                             </p>
                             {item.selectedSize && (
                               <p className="text-xs text-[#999999] mt-0.5 font-bold">
-                                Size: {item.selectedSize}
+                                Size: {formatSize(item.selectedSize)}
                               </p>
                             )}
                           </div>

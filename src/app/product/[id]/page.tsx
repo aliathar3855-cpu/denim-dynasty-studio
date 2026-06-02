@@ -7,6 +7,7 @@ import { db } from "@/firebase/config";
 import { useCart } from "@/context/CartContext";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
+import { formatSize } from "@/lib/products";
 import Image from "next/image";
 
 export default function ProductPage() {
@@ -245,7 +246,7 @@ export default function ProductPage() {
                           : "bg-white border-neutral-200 text-[#666666] hover:text-[#38BDF8] hover:border-[#38BDF8]/40"
                       }`}
                     >
-                      {size}
+                      {formatSize(size)}
                     </button>
                   );
                 })}

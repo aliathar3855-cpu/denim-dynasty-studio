@@ -5,7 +5,7 @@ import { db } from "@/firebase/config";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
-import { getProductById } from "@/lib/products";
+import { getProductById, formatSize } from "@/lib/products";
 import { createOrder } from "@/lib/orders";
 import { toast } from "react-hot-toast";
 import { brandConfig } from "@/config/brand";
@@ -608,7 +608,7 @@ export default function CheckoutPage() {
                       <span className="text-[11px] text-neutral-500">Qty: {item.quantity}</span>
                       {item.selectedSize && (
                         <span className="bg-neutral-200 text-neutral-800 text-[9px] font-bold px-1.5 py-0.5 rounded ml-2">
-                          Size: {item.selectedSize}
+                          Size: {formatSize(item.selectedSize)}
                         </span>
                       )}
                     </div>

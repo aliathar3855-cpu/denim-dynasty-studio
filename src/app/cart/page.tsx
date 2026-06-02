@@ -4,6 +4,7 @@ import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { formatSize } from "@/lib/products";
 
 export default function CartPage() {
   const {
@@ -59,7 +60,7 @@ export default function CartPage() {
 
                 {item.selectedSize && (
                   <p className="text-xs text-[#666666] mt-1 font-semibold">
-                    Size: <span className="text-[#111111] font-bold">{item.selectedSize}</span>
+                    Size: <span className="text-[#111111] font-bold">{formatSize(item.selectedSize)}</span>
                   </p>
                 )}
 

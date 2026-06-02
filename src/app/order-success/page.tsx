@@ -6,6 +6,7 @@ import { doc, getDoc, collection, query, where, getDocs } from "firebase/firesto
 import { db } from "@/firebase/config";
 import Link from "next/link";
 import { brandConfig } from "@/config/brand";
+import { formatSize } from "@/lib/products";
 
 function OrderSuccessPageContent() {
   const router = useRouter();
@@ -172,7 +173,7 @@ function OrderSuccessPageContent() {
                       {name} <span className="font-extrabold text-[#111111]">x{qty}</span>
                       {item.selectedSize && (
                         <span className="text-[9px] text-neutral-400 font-bold ml-1.5 uppercase">
-                          ({item.selectedSize})
+                          ({formatSize(item.selectedSize)})
                         </span>
                       )}
                     </span>

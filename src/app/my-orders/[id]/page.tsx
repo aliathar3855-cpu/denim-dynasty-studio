@@ -6,6 +6,7 @@ import { doc, getDoc, collection, query, where, getDocs } from "firebase/firesto
 import { db } from "@/firebase/config";
 import Link from "next/link";
 import Image from "next/image";
+import { formatSize } from "@/lib/products";
 
 const normalizeOrder = (docId: string, data: any) => {
   let name = "";
@@ -325,7 +326,7 @@ export default function OrderDetailsPage() {
                     </p>
                     {item.selectedSize && (
                       <p className="text-xs text-[#999999] mt-0.5 font-bold">
-                        Size: {item.selectedSize}
+                        Size: {formatSize(item.selectedSize)}
                       </p>
                     )}
                   </div>

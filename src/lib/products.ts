@@ -13,6 +13,27 @@ import {
   Timestamp,
 } from "firebase/firestore";
 
+export const KIDS_SIZE_CHART: Record<string, string> = {
+  "16": "1-2 Years",
+  "18": "2-3 Years",
+  "20": "3-4 Years",
+  "22": "4-5 Years",
+  "24": "5-6 Years",
+  "26": "6-7 Years",
+  "28": "7-8 Years",
+  "30": "8-9 Years",
+  "32": "9-10 Years",
+  "34": "10-11 Years",
+  "36": "11-12 Years",
+  "38": "12-13 Years",
+  "40": "13-14 Years",
+};
+
+export const formatSize = (size: string | null | undefined): string => {
+  if (!size) return "";
+  return KIDS_SIZE_CHART[size] ? `${size} (${KIDS_SIZE_CHART[size]})` : size;
+};
+
 export interface Product {
   id?: string;
   name: string;

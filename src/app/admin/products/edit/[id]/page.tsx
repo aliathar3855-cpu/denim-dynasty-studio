@@ -4,12 +4,12 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminGuard from "@/components/AdminGuard";
-import { getProductById, updateProduct } from "@/lib/products";
+import { getProductById, updateProduct, formatSize } from "@/lib/products";
 import { uploadImages } from "@/lib/upload";
 import { toast } from "react-hot-toast";
 
 const LETTER_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
-const NUMERIC_SIZES = ["28", "30", "32", "34", "36", "38", "40", "42", "44"];
+const NUMERIC_SIZES = ["16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40"];
 
 export default function EditProductPage() {
   const params = useParams();
@@ -368,7 +368,7 @@ export default function EditProductPage() {
                   className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition cursor-pointer font-bold text-sm"
                 >
                   <option value="LETTER">LETTER (XS, S, M, L...)</option>
-                  <option value="NUMERIC">NUMERIC (28, 30, 32...)</option>
+                  <option value="NUMERIC">NUMERIC (KIDS 16 - 40)</option>
                 </select>
               </div>
 
@@ -391,7 +391,7 @@ export default function EditProductPage() {
                             : "bg-white border-neutral-200 text-neutral-500 hover:border-neutral-300"
                         }`}
                       >
-                        {size}
+                        {formatSize(size)}
                       </button>
                     );
                   })}
