@@ -1,31 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-white text-[#111111] p-6 md:p-12 font-sans">
       
-      {/* Top Navbar */}
-      <nav className="flex items-center justify-between max-w-4xl mx-auto mb-16 border-b border-neutral-200 pb-5">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <Image
-            src="/logo-icon.png"
-            alt="Denim Dynasty Studio"
-            width={40}
-            height={40}
-            priority
-            className="w-8 h-8 md:w-9 md:h-9 object-contain"
-          />
-          <span className="text-sm sm:text-base md:text-lg font-black tracking-wider text-black">
-            DENIM DYNASTY STUDIO
-          </span>
-        </Link>
-        <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
-          ➔ Back to Shop
-        </Link>
-      </nav>
+
 
       {/* Main Content */}
       <article className="max-w-3xl mx-auto space-y-12">

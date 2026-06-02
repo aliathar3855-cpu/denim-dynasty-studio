@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import AdminGuard from "@/components/AdminGuard";
+import { toast } from "react-hot-toast";
 
 export default function AdminOrdersPage() {
   const router = useRouter();
@@ -68,6 +69,7 @@ export default function AdminOrdersPage() {
           order.id === orderId ? { ...order, status: newStatus } : order
         )
       );
+      toast.success(`Order status updated to ${newStatus}`);
 
       // Send email notifications for shipped and delivered updates
       if (newStatus === "shipped" || newStatus === "delivered") {
@@ -83,7 +85,7 @@ export default function AdminOrdersPage() {
       }
     } catch (err) {
       console.error("Failed to update status:", err);
-      alert("Failed to update order status.");
+      toast.error("Failed to update order status.");
     } finally {
       setUpdatingId(null);
     }
@@ -97,12 +99,13 @@ export default function AdminOrdersPage() {
       const docRef = doc(db, "orders", orderId);
       await deleteDoc(docRef);
       setOrders((prev) => prev.filter((order) => order.id !== orderId));
+      toast.success("Order deleted successfully");
       if (expandedOrderId === orderId) {
         setExpandedOrderId(null);
       }
     } catch (err) {
       console.error("Failed to delete order:", err);
-      alert("Failed to delete order.");
+      toast.error("Failed to delete order.");
     } finally {
       setUpdatingId(null);
     }

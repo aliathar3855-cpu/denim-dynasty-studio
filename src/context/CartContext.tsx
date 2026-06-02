@@ -6,153 +6,136 @@ import {
   useEffect,
   useState,
 } from "react";
+import { toast } from "react-hot-toast";
 
-const CartContext = createContext<any>(null);
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  imageUrl?: string; // For backward compatibility with existing components
+  selectedSize: string;
+  quantity: number;
+}
+
+interface CartContextType {
+  cart: CartItem[];
+  addToCart: (product: any) => void;
+  removeFromCart: (id: string, selectedSize?: string) => void;
+  increaseQuantity: (id: string, selectedSize?: string) => void;
+  decreaseQuantity: (id: string, selectedSize?: string) => void;
+  clearCart: () => void;
+  showToast: (message: string, type?: "success" | "error" | "info") => void;
+}
+
+const CartContext = createContext<CartContextType | null>(null);
 
 export const CartProvider = ({
   children,
 }: {
   children: React.ReactNode;
- }) => {
+}) => {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const [cart, setCart] = useState<any[]>([]);
-
-  // Toast notifications state
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [toastType, setToastType] = useState<"success" | "error" | "info">("success");
-
-  // Load cart from localStorage
+  // Load cart from localStorage once on mount
   useEffect(() => {
-
-    const storedCart = localStorage.getItem("cart");
-
-    if (storedCart) {
-
-      setCart(JSON.parse(storedCart));
-
-    }
-
+    const stored = localStorage.getItem("cart");
+    if (stored) setCart(JSON.parse(stored));
+    setIsLoaded(true);
   }, []);
 
-  // Save cart to localStorage
+  // Save cart to localStorage whenever it changes, but only after it's loaded
   useEffect(() => {
-
-    localStorage.setItem(
-      "cart",
-      JSON.stringify(cart)
-    );
-
-  }, [cart]);
+    if (isLoaded) {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+  }, [cart, isLoaded]);
 
   const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
-    setToastMessage(message);
-    setToastType(type);
-  };
-
-  // Auto-hide toast after 3 seconds
-  useEffect(() => {
-    if (toastMessage) {
-      const timer = setTimeout(() => {
-        setToastMessage(null);
-      }, 3000);
-      return () => clearTimeout(timer);
+    if (type === "success") {
+      toast.success(message);
+    } else if (type === "error") {
+      toast.error(message);
+    } else {
+      toast(message);
     }
-  }, [toastMessage]);
+  };
 
   // Add to cart
   const addToCart = (product: any) => {
+    const id = product.id;
+    const name = product.name;
+    const price = Number(product.price);
+    const image = product.image || product.imageUrl || "";
+    const selectedSize = product.selectedSize || "";
 
-    const existingProduct = cart.find(
-      (item) => item.id === product.id && item.selectedSize === product.selectedSize
-    );
+    setCart((prevCart) => {
+      const existing = prevCart.find(
+        (p) => p.id === id && p.selectedSize === selectedSize
+      );
 
-    if (existingProduct) {
+      if (existing) {
+        return prevCart.map((item) =>
+          item.id === id && item.selectedSize === selectedSize
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      } else {
+        return [
+          ...prevCart,
+          {
+            id,
+            name,
+            price,
+            image,
+            imageUrl: image, // Sync imageUrl for backward compatibility
+            selectedSize,
+            quantity: 1,
+          },
+        ];
+      }
+    });
 
-      const updatedCart = cart.map((item) => {
-
-        if (item.id === product.id && item.selectedSize === product.selectedSize) {
-
-          return {
-            ...item,
-            quantity: item.quantity + 1,
-          };
-
-        }
-
-        return item;
-
-      });
-
-      setCart(updatedCart);
-
-    } else {
-
-      setCart([
-        ...cart,
-        {
-          ...product,
-          quantity: 1,
-        },
-      ]);
-
-    }
-
-    showToast("Product added to cart", "success");
+    toast.success("Product added to cart");
   };
 
   // Remove item
-  const removeFromCart = (id: string, selectedSize?: string) => {
-
-    const updatedCart = cart.filter(
-      (item) => !(item.id === id && item.selectedSize === selectedSize)
+  const removeFromCart = (id: string, selectedSize: string = "") => {
+    setCart((prevCart) =>
+      prevCart.filter(
+        (item) => !(item.id === id && item.selectedSize === selectedSize)
+      )
     );
-
-    setCart(updatedCart);
-
   };
 
   // Increase quantity
-  const increaseQuantity = (id: string, selectedSize?: string) => {
-
-    const updatedCart = cart.map((item) => {
-
-      if (item.id === id && item.selectedSize === selectedSize) {
-
-        return {
-          ...item,
-          quantity: item.quantity + 1,
-        };
-
-      }
-
-      return item;
-
-    });
-
-    setCart(updatedCart);
-
+  const increaseQuantity = (id: string, selectedSize: string = "") => {
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === id && item.selectedSize === selectedSize
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
   };
 
   // Decrease quantity
-  const decreaseQuantity = (id: string, selectedSize?: string) => {
+  const decreaseQuantity = (id: string, selectedSize: string = "") => {
+    setCart((prevCart) =>
+      prevCart
+        .map((item) =>
+          item.id === id && item.selectedSize === selectedSize
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
 
-    const updatedCart = cart.map((item) => {
-
-      if (item.id === id && item.selectedSize === selectedSize) {
-
-        return {
-          ...item,
-          quantity: item.quantity - 1,
-        };
-
-      }
-
-      return item;
-
-    }).filter((item) => item.quantity > 0);
-
-    setCart(updatedCart);
-
+  // Clear cart
+  const clearCart = () => {
+    setCart([]);
   };
 
   return (
@@ -163,30 +146,19 @@ export const CartProvider = ({
         removeFromCart,
         increaseQuantity,
         decreaseQuantity,
+        clearCart,
         showToast,
       }}
     >
       {children}
-
-      {/* Global Luxury Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-10 right-10 bg-[#111111] text-white px-6 py-4 rounded-xl font-bold shadow-2xl z-[9999] transition-all duration-300 flex items-center gap-3 border border-neutral-800 text-sm animate-fadeIn">
-          {toastType === "success" && (
-            <span className="w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-black">
-              ✓
-            </span>
-          )}
-          {toastType === "error" && (
-            <span className="w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-black">
-              !
-            </span>
-          )}
-          <span className="tracking-wide text-white">{toastMessage}</span>
-        </div>
-      )}
     </CartContext.Provider>
   );
-
 };
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
+};

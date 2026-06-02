@@ -1,31 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { brandConfig } from "@/config/brand";
 
 export default function RefundPolicyPage() {
   return (
     <main className="min-h-screen bg-white text-[#111111] p-6 md:p-12 font-sans">
       
-      {/* Top Navbar */}
-      <nav className="flex items-center justify-between max-w-4xl mx-auto mb-16 border-b border-neutral-200 pb-5">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <Image
-            src="/logo-icon.png"
-            alt="Denim Dynasty Studio"
-            width={40}
-            height={40}
-            priority
-            className="w-8 h-8 md:w-9 md:h-9 object-contain"
-          />
-          <span className="text-sm sm:text-base md:text-lg font-black tracking-wider text-black">
-            DENIM DYNASTY STUDIO
-          </span>
-        </Link>
-        <Link href="/" className="text-sm text-neutral-500 hover:text-black transition">
-          ➔ Back to Shop
-        </Link>
-      </nav>
+
 
       <article className="max-w-3xl mx-auto space-y-10">
         <header className="text-center space-y-3">
@@ -38,7 +20,7 @@ export default function RefundPolicyPage() {
 
         <section className="space-y-6 text-[#666666] leading-relaxed">
           <p>
-            We want you to be completely satisfied with your premium apparel purchase from Denim Dynasty Studio. If something is not right, we are here to support you with our returns and refund policy.
+            We want you to be completely satisfied with your premium apparel purchase from {brandConfig.brandName}. If something is not right, we are here to support you with our returns and refund policy.
           </p>
 
           <div className="space-y-4">

@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import AdminGuard from "@/components/AdminGuard";
+import { toast } from "react-hot-toast";
 
 export default function EditProductPage() {
   const params = useParams();
@@ -52,7 +53,7 @@ export default function EditProductPage() {
           setSizeType(data.sizeType || "");
           setSelectedSizes(data.sizes || []);
         } else {
-          alert("Product not found");
+          toast.error("Product not found");
           router.push("/admin");
         }
       } catch (err) {
@@ -78,12 +79,12 @@ export default function EditProductPage() {
     e.preventDefault();
 
     if (!id) {
-      alert("Product ID is missing");
+      toast.error("Product ID is missing");
       return;
     }
 
     if (!name || !price || !category) {
-      alert("Please fill all required fields");
+      toast.error("Please fill all required fields");
       return;
     }
 
@@ -110,14 +111,14 @@ export default function EditProductPage() {
       const data = await res.json();
 
       if (data.success) {
-        alert("Product Updated Successfully ✅");
+        toast.success("Product Updated Successfully ✅");
         router.push("/admin");
       } else {
-        alert(data.error || "Update failed");
+        toast.error(data.error || "Update failed");
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong");
+      toast.error("Something went wrong");
     } finally {
       setSubmitting(false);
     }

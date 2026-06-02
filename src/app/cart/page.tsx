@@ -24,25 +24,7 @@ export default function CartPage() {
   return (
     <main className="min-h-screen bg-white text-[#111111] p-6 md:p-12 font-sans max-w-4xl mx-auto">
       
-      {/* Top Navbar */}
-      <nav className="flex items-center justify-between mb-10 border-b border-neutral-200 pb-5">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <Image
-            src="/logo-icon.png"
-            alt="Denim Dynasty Studio"
-            width={40}
-            height={40}
-            priority
-            className="w-8 h-8 md:w-9 md:h-9 object-contain"
-          />
-          <span className="text-sm sm:text-base md:text-lg font-black tracking-wider text-black">
-            DENIM DYNASTY STUDIO
-          </span>
-        </Link>
-        <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
-          ➔ Back to Shop
-        </Link>
-      </nav>
+
 
       <h1 className="text-4xl font-black mb-10 tracking-tight text-[#111111]">
         Shopping Cart
@@ -61,7 +43,7 @@ export default function CartPage() {
         <div className="grid gap-8">
           {cart.map((item: any) => (
             <div
-              key={`${item.id}-${item.selectedSize || ""}`}
+              key={`${item.id}-${item.selectedSize}`}
               className="bg-white border border-neutral-200 shadow-sm rounded-2xl p-6 flex flex-col md:flex-row gap-6 items-center"
             >
               <img

@@ -153,31 +153,7 @@ export default function OrderDetailsPage() {
   return (
     <main className="min-h-screen bg-white text-[#111111] p-6 md:p-12 font-sans max-w-5xl mx-auto">
       
-      {/* Top Navbar */}
-      <nav className="flex items-center justify-between mb-12 border-b border-neutral-200 pb-5">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <Image
-            src="/logo-icon.png"
-            alt="Denim Dynasty Studio"
-            width={40}
-            height={40}
-            priority
-            className="w-8 h-8 md:w-9 md:h-9 object-contain"
-          />
-          <span className="text-sm sm:text-base md:text-lg font-black tracking-wider text-black">
-            DENIM DYNASTY STUDIO
-          </span>
-        </Link>
-        <div className="flex gap-4 items-center">
-          <Link href="/my-orders" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
-            My Orders
-          </Link>
-          <span className="text-neutral-300">|</span>
-          <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
-            Shop
-          </Link>
-        </div>
-      </nav>
+
 
       {/* Header Info */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 border-b border-neutral-100 pb-6">

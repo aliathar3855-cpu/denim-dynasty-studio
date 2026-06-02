@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/config";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -13,11 +14,11 @@ export default function AdminLogin() {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-
+      toast.success("Login Successful");
       router.push("/admin/orders");
 
     } catch (err) {
-      alert("Invalid credentials");
+      toast.error("Invalid credentials");
     }
   };
 

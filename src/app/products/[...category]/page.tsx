@@ -107,36 +107,7 @@ export default function CategoryProducts() {
   return (
     <main className="min-h-screen bg-white text-[#111111] p-6 md:p-12 font-sans max-w-6xl mx-auto">
       
-      {/* Top Navbar */}
-      <nav className="flex items-center justify-between mb-10 border-b border-neutral-200 pb-5">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <Image
-            src="/logo-icon.png"
-            alt="Denim Dynasty Studio"
-            width={40}
-            height={40}
-            priority
-            className="w-8 h-8 md:w-9 md:h-9 object-contain"
-          />
-          <span className="text-sm sm:text-base md:text-lg font-black tracking-wider text-black">
-            DENIM DYNASTY STUDIO
-          </span>
-        </Link>
-        <div className="flex gap-6 items-center">
-          <Link href="/" className="text-sm text-neutral-500 hover:text-[#38BDF8] transition">
-            ➔ Back to Shop
-          </Link>
-          <Link
-            href="/cart"
-            className="bg-[#111111] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-neutral-800 transition whitespace-nowrap flex items-center gap-2 text-sm"
-          >
-            <span>Cart</span>
-            <span className="bg-[#38BDF8] text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
-              {cart.reduce((sum: number, item: any) => sum + item.quantity, 0)}
-            </span>
-          </Link>
-        </div>
-      </nav>
+
 
       <h1 className="text-4xl font-black mb-10 capitalize tracking-tight text-[#111111]">
         {displayCategory} Collection

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 import { sendEmail } from "@/lib/email";
+import { brandConfig } from "@/config/brand";
 
 export async function POST(req: Request) {
   try {
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
     const trackingUrl = `${req.headers.get("origin") || "http://localhost:3000"}/my-orders/${orderNumber}`;
 
     if (action === "placed") {
-      subject = `Denim Dynasty Studio: Order Received! (${orderNumber})`;
+      subject = `${brandConfig.brandName}: Order Received! (${orderNumber})`;
       
       const itemsHtml = (order.products || [])
         .map(
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
       html = `
         <div style="font-family: Arial, sans-serif; background-color: #f6f6f6; padding: 20px; color: #333;">
           <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-            <h2 style="text-align: center; color: #000; margin-bottom: 30px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 15px;">DENIM DYNASTY STUDIO</h2>
+            <h2 style="text-align: center; color: #000; margin-bottom: 30px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 15px;">${brandConfig.brandName.toUpperCase()}</h2>
             <p>Hi <strong>${c.name}</strong>,</p>
             <p>Thank you for shopping with us! We have received your order and are currently processing it.</p>
             
@@ -94,18 +95,18 @@ export async function POST(req: Request) {
             </div>
             
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-            <p style="font-size: 11px; color: #999; text-align: center;">© 2026 Denim Dynasty Studio. All rights reserved.</p>
+            <p style="font-size: 11px; color: #999; text-align: center;">© 2026 ${brandConfig.brandName}. All rights reserved.</p>
           </div>
         </div>
       `;
     } else if (action === "shipped") {
-      subject = `Denim Dynasty Studio: Order Shipped! (${orderNumber})`;
+      subject = `${brandConfig.brandName}: Order Shipped! (${orderNumber})`;
       html = `
         <div style="font-family: Arial, sans-serif; background-color: #f6f6f6; padding: 20px; color: #333;">
           <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-            <h2 style="text-align: center; color: #000; margin-bottom: 30px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 15px;">DENIM DYNASTY STUDIO</h2>
+            <h2 style="text-align: center; color: #000; margin-bottom: 30px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 15px;">${brandConfig.brandName.toUpperCase()}</h2>
             <p>Hi <strong>${c.name}</strong>,</p>
-            <p>Exciting news! Your Denim Dynasty Studio order <strong>${orderNumber}</strong> has been shipped and is on its way to you.</p>
+            <p>Exciting news! Your ${brandConfig.brandName} order <strong>${orderNumber}</strong> has been shipped and is on its way to you.</p>
             
             <p>You can follow the progress of your shipment in real-time by clicking the link below:</p>
 
@@ -119,27 +120,27 @@ export async function POST(req: Request) {
             </div>
             
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-            <p style="font-size: 11px; color: #999; text-align: center;">© 2026 Denim Dynasty Studio. All rights reserved.</p>
+            <p style="font-size: 11px; color: #999; text-align: center;">© 2026 ${brandConfig.brandName}. All rights reserved.</p>
           </div>
         </div>
       `;
     } else if (action === "delivered") {
-      subject = `Denim Dynasty Studio: Order Delivered! (${orderNumber})`;
+      subject = `${brandConfig.brandName}: Order Delivered! (${orderNumber})`;
       html = `
         <div style="font-family: Arial, sans-serif; background-color: #f6f6f6; padding: 20px; color: #333;">
           <div style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-            <h2 style="text-align: center; color: #000; margin-bottom: 30px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 15px;">DENIM DYNASTY STUDIO</h2>
+            <h2 style="text-align: center; color: #000; margin-bottom: 30px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 15px;">${brandConfig.brandName.toUpperCase()}</h2>
             <p>Hi <strong>${c.name}</strong>,</p>
             <p>Your order <strong>${orderNumber}</strong> has been successfully delivered! We hope you love your new streetwear items.</p>
             
-            <p>Thank you for choosing Denim Dynasty Studio. We would love to hear your feedback on your purchase!</p>
+            <p>Thank you for choosing ${brandConfig.brandName}. We would love to hear your feedback on your purchase!</p>
 
             <div style="text-align: center; margin: 40px 0;">
               <a href="${trackingUrl}" style="background-color: #000000; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 14px;">View Receipt details</a>
             </div>
             
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-            <p style="font-size: 11px; color: #999; text-align: center;">© 2026 Denim Dynasty Studio. All rights reserved.</p>
+            <p style="font-size: 11px; color: #999; text-align: center;">© 2026 ${brandConfig.brandName}. All rights reserved.</p>
           </div>
         </div>
       `;

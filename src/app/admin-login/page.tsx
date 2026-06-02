@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -15,9 +16,10 @@ export default function AdminLoginPage() {
       password === "admin123"
     ) {
       localStorage.setItem("admin", "true");
+      toast.success("Login Successful");
       router.push("/admin");
     } else {
-      alert("Invalid credentials");
+      toast.error("Invalid credentials");
     }
   };
 

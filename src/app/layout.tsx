@@ -4,6 +4,9 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import Script from "next/script";
 import GlobalFooter from "@/components/GlobalFooter";
+import Navbar from "@/components/Navbar";
+import { Toaster } from "react-hot-toast";
+import { brandConfig } from "@/config/brand";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Denim Dynasty Studio",
+  title: brandConfig.brandName,
   description: "Modern fashion ecommerce store",
 };
 
@@ -36,6 +39,8 @@ export default function RootLayout({
         />
 
         <CartProvider>
+          <Toaster position="top-center" reverseOrder={false} />
+          <Navbar />
           {children}
           <GlobalFooter />
         </CartProvider>

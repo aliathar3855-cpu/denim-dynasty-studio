@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { auth } from "@/firebase/config";
 import { signOut } from "firebase/auth";
 import AdminGuard from "@/components/AdminGuard";
+import { toast } from "react-hot-toast";
 
 export default function DashboardPage() {
   const [name, setName] = useState("");
@@ -30,12 +31,12 @@ export default function DashboardPage() {
     e.preventDefault();
 
     if (!image) {
-      alert("Please select image");
+      toast.error("Please select image");
       return;
     }
 
     if (!name || !price || !category) {
-      alert("Fill all required fields");
+      toast.error("Fill all required fields");
       return;
     }
 
@@ -60,7 +61,7 @@ export default function DashboardPage() {
       const data = await res.json();
 
       if (data.success) {
-        alert("Product Added Successfully");
+        toast.success("Product Added Successfully");
 
         // RESET ALL FIELDS
         setName("");
@@ -74,12 +75,12 @@ export default function DashboardPage() {
         // refresh products if needed
         window.location.reload();
       } else {
-        alert("Upload failed");
+        toast.error("Upload failed");
       }
 
     } catch (error) {
       console.error(error);
-      alert("Something went wrong");
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }

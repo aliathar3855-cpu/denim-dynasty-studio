@@ -6,6 +6,7 @@ import Image from "next/image";
 import { db } from "../firebase/config";
 import { collection, getDocs } from "firebase/firestore";
 import { useCart } from "@/context/CartContext";
+import { brandConfig } from "@/config/brand";
 
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
@@ -30,13 +31,10 @@ export default function Home() {
         const querySnapshot = await getDocs(
           collection(db, "products")
         );
-        const productList: any[] = [];
-        querySnapshot.forEach((doc) => {
-          productList.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
+        const productList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         setProducts(productList);
       } catch (error) {
         console.error(error);
@@ -70,41 +68,7 @@ export default function Home() {
   return (
     <main className="bg-[#ffffff] text-[#111111] min-h-screen">
 
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-neutral-200 bg-white sticky top-0 z-50 backdrop-blur-md bg-white/95">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <Image
-            src="/logo-icon.png"
-            alt="Denim Dynasty Studio"
-            width={40}
-            height={40}
-            priority
-            className="w-8 h-8 md:w-9 md:h-9 object-contain"
-          />
-          <span className="text-sm sm:text-base md:text-lg font-black tracking-wider text-black">
-            DENIM DYNASTY STUDIO
-          </span>
-        </Link>
 
-        <div className="flex flex-wrap gap-4 md:gap-6 text-sm items-center justify-end">
-          <Link href="/" className="text-[#38BDF8] font-bold transition">Home</Link>
-          <Link href="/#products" className="text-[#666666] hover:text-[#38BDF8] transition">Shop</Link>
-          <Link href="/about" className="text-[#666666] hover:text-[#38BDF8] transition">About</Link>
-          <Link href="/contact" className="text-[#666666] hover:text-[#38BDF8] transition">Contact</Link>
-          <Link href="/my-orders" className="text-[#666666] hover:text-[#38BDF8] transition">
-            My Orders
-          </Link>
-          <Link
-            href="/cart"
-            className="bg-[#111111] text-white px-5 py-2.5 rounded-full font-semibold hover:bg-neutral-800 transition whitespace-nowrap flex items-center gap-2"
-          >
-            <span>Cart</span>
-            <span className="bg-[#38BDF8] text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
-              {cart.reduce((sum: number, item: any) => sum + item.quantity, 0)}
-            </span>
-          </Link>
-        </div>
-      </nav>
 
       {/* Hero */}
       <section className="h-[60vh] flex flex-col items-center justify-center text-center px-6 bg-gradient-to-b from-white to-[#E0F2FE]">
@@ -112,7 +76,7 @@ export default function Home() {
           Welcome to
         </span>
         <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tight text-[#111111] uppercase">
-          Denim Dynasty Studio
+          {brandConfig.brandName}
         </h2>
         <p className="text-[#666666] text-base md:text-lg max-w-2xl">
           Premium boys fashion & curated streetwear collection for modern trendsetters.
