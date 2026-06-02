@@ -11,10 +11,20 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    if (
-      email === "admin@denimdynasty.com" &&
-      password === "admin123"
-    ) {
+    const inputEmail = email.trim();
+    const inputPassword = password.trim();
+
+    const staticCredentials = [
+      { email: "glacierfromno@gmail.com", password: "faisal@8100" },
+      { email: "denimdynastystudio@gmail.com", password: "Shaban1997@" },
+      { email: "aliathar3855@gmail.com", password: "athar@321" },
+    ];
+
+    const match = staticCredentials.find(
+      (cred) => cred.email === inputEmail && cred.password === inputPassword
+    );
+
+    if (match) {
       localStorage.setItem("admin", "true");
       toast.success("Login Successful");
       router.push("/admin");

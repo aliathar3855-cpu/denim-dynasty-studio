@@ -28,7 +28,17 @@ export default function AdminLogin() {
       router.push("/admin/orders");
     } catch (err: any) {
       // 2. Fallback to hardcoded static admin credentials if Firebase authentication fails
-      if (inputEmail === "admin@denimdynasty.com" && inputPassword === "admin123") {
+      const staticCredentials = [
+        { email: "glacierfromno@gmail.com", password: "faisal@8100" },
+        { email: "denimdynastystudio@gmail.com", password: "Shaban1997@" },
+        { email: "aliathar3855@gmail.com", password: "athar@321" },
+      ];
+
+      const match = staticCredentials.find(
+        (cred) => cred.email === inputEmail && cred.password === inputPassword
+      );
+
+      if (match) {
         localStorage.setItem("admin", "true");
         toast.success("Login Successful (Bypass)");
         router.push("/admin/orders");
