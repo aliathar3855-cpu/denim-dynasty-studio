@@ -401,7 +401,10 @@ export default function ProductPageClient({ product }: ProductPageClientProps) {
                   return (
                     <button
                       key={size}
-                      onClick={() => setSelectedSize(size)}
+                      onClick={() => {
+                        setSelectedSize(size);
+                        console.log(`[Size Selection] Selected size: "${size}" for product: "${product.name}" (${product.id})`);
+                      }}
                       className={`px-4.5 py-2.5 rounded-xl border text-xs font-bold transition cursor-pointer select-none ${
                         isSelected
                           ? "bg-[#38BDF8] text-black border-[#38BDF8]"

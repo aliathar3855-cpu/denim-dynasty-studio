@@ -96,7 +96,14 @@ export const createOrder = async (orderData: OrderData, paymentId?: string): Pro
     status: "pending", // converted orderStatus to lowercase
   };
 
-  const docRef = doc(db, "orders", orderId);
-  await setDoc(docRef, payload);
-  return orderId;
+  console.log(`[Firestore Order Save] Writing order document to database. ID: "${orderId}", Payload:`, payload);
+  try {
+    const docRef = doc(db, "orders", orderId);
+    await setDoc(docRef, payload);
+    console.log(`[Firestore Order Save] Order successfully written to Firestore.`);
+    return orderId;
+  } catch (err: any) {
+    console.error(`[Firestore Order Save] Error writing order to Firestore:`, err);
+    throw err;
+  }
 };

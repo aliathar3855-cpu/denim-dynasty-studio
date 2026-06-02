@@ -21,7 +21,7 @@ interface EnrichedCartItem {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { clearCart } = useCart();
+  const { cart, clearCart } = useCart();
 
   // Enriched cart item state resolved from Firestore products catalog
   const [cartItems, setCartItems] = useState<EnrichedCartItem[]>([]);
@@ -59,13 +59,13 @@ export default function CheckoutPage() {
     };
   }, []);
 
-  // 2. Fetch full product details from Firestore using raw cart productId mapping
+  // 2. Fetch full product details from Firestore using active cart context mapping
   useEffect(() => {
     const resolveCart = async () => {
+      console.log(`[Cart Retrieval] Resolving cart items from state:`, cart);
       setLoadingCart(true);
       try {
-        const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
-        if (storedCart.length === 0) {
+        if (cart.length === 0) {
           setCartItems([]);
           setTotal(0);
           setLoadingCart(false);
@@ -73,10 +73,11 @@ export default function CheckoutPage() {
         }
 
         // Verify if any items are missing selected sizes
-        const sizeMissing = storedCart.some(
+        const sizeMissing = cart.some(
           (item: any) => !item.selectedSize || item.selectedSize.trim() === ""
         );
         if (sizeMissing) {
+          console.warn(`[Checkout Resolution] Size validation warning: size is missing for one or more items.`);
           toast.error("One or more items in your cart do not have a size selected. Please resolve before placing an order.", {
             duration: 6000,
           });
@@ -84,8 +85,8 @@ export default function CheckoutPage() {
 
         // Enrich items list
         const resolved = await Promise.all(
-          storedCart.map(async (item: any) => {
-            const productId = item.id || item.productId;
+          cart.map(async (item: any) => {
+            const productId = item.productId || item.id;
             const product = await getProductById(productId);
             if (product) {
               return {
@@ -102,6 +103,7 @@ export default function CheckoutPage() {
         );
 
         const enriched = resolved.filter((item): item is EnrichedCartItem => item !== null);
+        console.log(`[Checkout Resolution] Cart successfully enriched:`, enriched);
 
         setCartItems(enriched);
         const totalPrice = enriched.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -115,7 +117,7 @@ export default function CheckoutPage() {
     };
 
     resolveCart();
-  }, []);
+  }, [cart]);
 
   // 3. Pincode Auto-Fill
   useEffect(() => {
@@ -173,9 +175,11 @@ export default function CheckoutPage() {
 
   // Form Valdiations
   const validateForm = () => {
+    console.log(`[Checkout Validation] Starting form validation. Cart items:`, cartItems);
     const newErrors: Record<string, string> = {};
 
     if (cartItems.length === 0) {
+      console.warn(`[Checkout Validation] Blocked: Cart items list is empty.`);
       toast.error("Your cart is empty. Checkout is blocked.");
       return false;
     }
@@ -184,6 +188,7 @@ export default function CheckoutPage() {
       (item) => !item.selectedSize || item.selectedSize.trim() === ""
     );
     if (sizeMissing) {
+      console.warn(`[Checkout Validation] Blocked: selectedSize is missing for one or more items:`, cartItems);
       toast.error("Selected size is missing for one or more items. Select a size before checkout.");
       return false;
     }
@@ -219,10 +224,14 @@ export default function CheckoutPage() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
+      console.warn(`[Checkout Validation] Blocked: Validation errors found:`, newErrors);
       toast.error("Please fill in all required fields correctly.");
       return false;
     }
 
+    console.log(`[Checkout Validation] Validation passed successfully:`, {
+      firstName, lastName, phone, email, pincode, city, state, paymentMethod
+    });
     return true;
   };
 
@@ -354,9 +363,10 @@ export default function CheckoutPage() {
 
             toast.success("✓ Payment Successful | Order Confirmed");
             router.push(`/order-success?orderNumber=${createdId}`);
-          } catch (err) {
+          } catch (err: any) {
             console.error("Order save failure after online payment:", err);
-            toast.error("Payment was successful, but we failed to record your order. Please contact our support team.");
+            const errMsg = err?.message || String(err);
+            toast.error(`Payment was successful, but we failed to record your order: ${errMsg}`, { duration: 10000 });
           }
         },
         theme: {
@@ -369,9 +379,10 @@ export default function CheckoutPage() {
         toast.error(`Payment failed: ${response.error.description}`);
       });
       razor.open();
-    } catch (err) {
-      console.error("Payment initiation error:", err);
-      toast.error("Something went wrong while placing order.");
+    } catch (err: any) {
+      console.error("Payment initiation / COD placement error:", err);
+      const errMsg = err?.message || String(err);
+      toast.error(`Something went wrong while placing order: ${errMsg}`, { duration: 8000 });
     } finally {
       setSubmitting(false);
     }
