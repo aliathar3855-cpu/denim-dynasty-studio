@@ -81,7 +81,7 @@ export default function Footer() {
       {/* Footer Bottom */}
       <div className="max-w-6xl mx-auto border-t border-neutral-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-neutral-500 gap-4">
         <div>
-          © {new Date().getFullYear()} Denim Dynasty Studio. All rights reserved.
+          © Denim Dynasty Studio. All Rights Reserved.
         </div>
         <div className="flex gap-6 font-semibold flex-wrap justify-center md:justify-end">
           <a href="https://wa.me/917003951437" target="_blank" rel="noopener noreferrer" className="text-[#38BDF8] hover:opacity-80 transition flex items-center gap-1">

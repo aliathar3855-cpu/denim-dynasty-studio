@@ -72,29 +72,18 @@ export default function Home() {
 
       {/* Navbar */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-neutral-200 bg-white sticky top-0 z-50 backdrop-blur-md bg-white/95">
-        <Link href="/" className="flex items-center shrink-0">
-          {/* Full Logo - Desktop and Tablet */}
-          <div className="hidden sm:block">
-            <Image
-              src="/logo-full.png"
-              alt="Denim Dynasty Studio"
-              width={200}
-              height={50}
-              priority
-              className="w-auto h-9 md:h-11 object-contain"
-            />
-          </div>
-          {/* Icon Logo - Mobile */}
-          <div className="block sm:hidden">
-            <Image
-              src="/logo-icon.png"
-              alt="Denim Dynasty Studio"
-              width={50}
-              height={50}
-              priority
-              className="w-10 h-10 object-contain"
-            />
-          </div>
+        <Link href="/" className="flex items-center gap-2.5 shrink-0">
+          <Image
+            src="/logo-icon.png"
+            alt="Denim Dynasty Studio"
+            width={40}
+            height={40}
+            priority
+            className="w-8 h-8 md:w-9 md:h-9 object-contain"
+          />
+          <span className="text-sm sm:text-base md:text-lg font-black tracking-wider text-black">
+            DENIM DYNASTY STUDIO
+          </span>
         </Link>
 
         <div className="flex flex-wrap gap-4 md:gap-6 text-sm items-center justify-end">
@@ -119,11 +108,14 @@ export default function Home() {
 
       {/* Hero */}
       <section className="h-[60vh] flex flex-col items-center justify-center text-center px-6 bg-gradient-to-b from-white to-[#E0F2FE]">
-        <h2 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight text-[#111111]">
-          Boys Fashion Store
+        <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-[#38BDF8] mb-3">
+          Welcome to
+        </span>
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tight text-[#111111] uppercase">
+          Denim Dynasty Studio
         </h2>
-        <p className="text-[#666666] text-lg max-w-2xl">
-          Trendy fashion collection for modern streetwear lovers.
+        <p className="text-[#666666] text-base md:text-lg max-w-2xl">
+          Premium boys fashion & curated streetwear collection for modern trendsetters.
         </p>
         <button 
           onClick={() => {
