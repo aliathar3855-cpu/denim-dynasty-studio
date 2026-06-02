@@ -253,12 +253,12 @@ export default function CheckoutPage() {
             phone: phone.replace(/[^0-9]/g, ""),
             email: email.trim(),
             address1: addressLine1.trim(),
-            address2: addressLine2.trim() || undefined,
+            address2: addressLine2.trim() || "",
             pincode: pincode.replace(/[^0-9]/g, ""),
             city: city.trim(),
             state: state.trim(),
-            landmark: landmark.trim() || undefined,
-            notes: notes.trim() || undefined,
+            landmark: landmark.trim() || "",
+            notes: notes.trim() || "",
           },
           items: cartItems,
           totalAmount: total,
@@ -266,6 +266,8 @@ export default function CheckoutPage() {
           paymentStatus: "Pending" as const,
           orderStatus: "Pending" as const,
         };
+
+        console.log("ORDER PAYLOAD", orderData);
 
         const createdId = await createOrder(orderData);
 
@@ -330,12 +332,12 @@ export default function CheckoutPage() {
                 phone: phone.replace(/[^0-9]/g, ""),
                 email: email.trim(),
                 address1: addressLine1.trim(),
-                address2: addressLine2.trim() || undefined,
+                address2: addressLine2.trim() || "",
                 pincode: pincode.replace(/[^0-9]/g, ""),
                 city: city.trim(),
                 state: state.trim(),
-                landmark: landmark.trim() || undefined,
-                notes: notes.trim() || undefined,
+                landmark: landmark.trim() || "",
+                notes: notes.trim() || "",
               },
               items: cartItems,
               totalAmount: total,
@@ -343,6 +345,8 @@ export default function CheckoutPage() {
               paymentStatus: "Paid" as const,
               orderStatus: "Pending" as const,
             };
+
+            console.log("ORDER PAYLOAD", orderData);
 
             const createdId = await createOrder(orderData, response.razorpay_payment_id);
 

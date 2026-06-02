@@ -35,6 +35,34 @@ export interface OrderData {
 }
 
 /**
+ * Recursively sanitizes a payload object by replacing all undefined values with empty strings ("").
+ * It preserves special Firestore types like FieldValue (serverTimestamp) and Timestamp.
+ */
+export const sanitizePayload = (obj: any): any => {
+  if (obj === undefined) {
+    return "";
+  }
+  if (obj === null) {
+    return null;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizePayload(item));
+  }
+  if (typeof obj === "object") {
+    // Check if it is a plain object or a special Firestore type
+    const proto = Object.getPrototypeOf(obj);
+    if (proto === null || proto === Object.prototype) {
+      const result: Record<string, any> = {};
+      for (const key of Object.keys(obj)) {
+        result[key] = sanitizePayload(obj[key]);
+      }
+      return result;
+    }
+  }
+  return obj;
+};
+
+/**
  * Saves a new order to the "orders" collection in Firestore.
  * Supports both the new structured schema and the legacy schema for total backward compatibility.
  * 
@@ -43,6 +71,7 @@ export interface OrderData {
  * @returns The unique order ID
  */
 export const createOrder = async (orderData: OrderData, paymentId?: string): Promise<string> => {
+  console.log("ORDER PAYLOAD", orderData);
   const { orderId, userDetails, items, totalAmount, paymentMethod, paymentStatus, orderStatus } = orderData;
 
   const fullName = `${userDetails.firstName} ${userDetails.lastName}`.trim();
@@ -96,10 +125,11 @@ export const createOrder = async (orderData: OrderData, paymentId?: string): Pro
     status: "pending", // converted orderStatus to lowercase
   };
 
-  console.log(`[Firestore Order Save] Writing order document to database. ID: "${orderId}", Payload:`, payload);
+  const sanitizedPayload = sanitizePayload(payload);
+  console.log(`[Firestore Order Save] Writing order document to database. ID: "${orderId}", Payload:`, sanitizedPayload);
   try {
     const docRef = doc(db, "orders", orderId);
-    await setDoc(docRef, payload);
+    await setDoc(docRef, sanitizedPayload);
     console.log(`[Firestore Order Save] Order successfully written to Firestore.`);
     return orderId;
   } catch (err: any) {
@@ -107,3 +137,4 @@ export const createOrder = async (orderData: OrderData, paymentId?: string): Pro
     throw err;
   }
 };
+
