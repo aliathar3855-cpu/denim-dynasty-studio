@@ -31,10 +31,22 @@ export default function Home() {
         const querySnapshot = await getDocs(
           collection(db, "products")
         );
-        const productList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const productList = querySnapshot.docs.map((docItem) => {
+          const data = docItem.data();
+          const images = Array.isArray(data.images) ? data.images : (data.imageUrl ? [data.imageUrl] : []);
+          return {
+            id: docItem.id,
+            ...data,
+            imageUrl: data.imageUrl || images[0] || "/placeholder-product.png",
+            images,
+            price: Number(data.price) || 0,
+            originalPrice: data.originalPrice !== undefined && data.originalPrice !== null ? Number(data.originalPrice) : undefined,
+            salePrice: data.salePrice !== undefined && data.salePrice !== null ? Number(data.salePrice) : undefined,
+            stockStatus: data.stockStatus || "IN_STOCK",
+            isBestSeller: !!data.isBestSeller,
+            createdAt: data.createdAt,
+          } as any;
+        });
         setProducts(productList);
       } catch (error) {
         console.error(error);
@@ -64,6 +76,111 @@ export default function Home() {
       }
       return 0;
     });
+
+  // Derived collections
+  const newArrivals = [...products]
+    .sort((a, b) => {
+      const aTime = a.createdAt?.seconds || 0;
+      const bTime = b.createdAt?.seconds || 0;
+      return bTime - aTime;
+    })
+    .slice(0, 4);
+
+  const bestSellers = products.filter((p) => p.isBestSeller).length > 0
+    ? products.filter((p) => p.isBestSeller).slice(0, 4)
+    : products.slice(0, 4);
+
+  const renderProductCard = (p: any) => {
+    const showDiscount = p.originalPrice && p.originalPrice > p.price;
+    const discountPercent = showDiscount ? Math.round(((p.originalPrice! - p.price) / p.originalPrice!) * 100) : 0;
+    const isOutOfStock = p.stockStatus === "OUT_OF_STOCK";
+
+    return (
+      <div
+        key={p.id}
+        className="bg-white border border-neutral-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-305 flex flex-col h-full group relative"
+      >
+        {/* Badges Overlay */}
+        <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+          {showDiscount && (
+            <span className="bg-[#38BDF8] text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+              {discountPercent}% OFF
+            </span>
+          )}
+          {isOutOfStock && (
+            <span className="bg-red-650 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+              Sold Out
+            </span>
+          )}
+          {p.stockStatus === "LOW_STOCK" && (
+            <span className="bg-amber-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+              Low Stock
+            </span>
+          )}
+          {p.isBestSeller && (
+            <span className="bg-black text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+              Best Seller
+            </span>
+          )}
+        </div>
+
+        <Link href={`/product/${p.id}`} className="block cursor-pointer overflow-hidden relative aspect-square">
+          <img
+            src={p.imageUrl}
+            alt={p.name}
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+          />
+        </Link>
+
+        <div className="p-5 flex flex-col flex-1 justify-between">
+          <div>
+            <Link href={`/product/${p.id}`} className="block cursor-pointer hover:text-[#38BDF8] transition-colors">
+              <h4 className="text-base font-bold text-[#111111] line-clamp-1 uppercase">
+                {p.name}
+              </h4>
+            </Link>
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-sm font-bold text-[#111111]">
+                ₹{p.price}
+              </span>
+              {showDiscount && (
+                <span className="text-xs text-neutral-400 line-through font-semibold">
+                  ₹{p.originalPrice}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex gap-2.5 mt-5">
+            <button
+              onClick={() => {
+                if (isOutOfStock) return;
+                addToCart({
+                  id: p.id,
+                  name: p.name,
+                  price: p.price,
+                  image: p.imageUrl,
+                  imageUrl: p.imageUrl,
+                  quantity: 1,
+                  selectedSize: p.sizes?.[0] || null,
+                });
+              }}
+              disabled={isOutOfStock}
+              className="flex-1 bg-[#38BDF8] disabled:bg-neutral-250 disabled:text-neutral-450 text-black py-2.5 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition text-xs tracking-wider uppercase cursor-pointer shadow-sm select-none"
+            >
+              {isOutOfStock ? "Sold Out" : "Add To Cart"}
+            </button>
+            <Link
+              href={`/product/${p.id}`}
+              className="flex-1 bg-[#f8f8f8] text-[#111111] border border-neutral-250 py-2.5 rounded-xl font-bold text-center hover:bg-neutral-100 transition text-xs tracking-wider uppercase"
+            >
+              Details
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <main className="bg-[#ffffff] text-[#111111] min-h-screen">
@@ -96,7 +213,7 @@ export default function Home() {
 
       {/* Categories */}
       <section className="px-8 py-16 max-w-6xl mx-auto">
-        <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111]">
+        <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
           Shop By Category
         </h3>
 
@@ -133,13 +250,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* New Arrivals Section */}
+      {newArrivals.length > 0 && (
+        <section className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
+          <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
+            New Arrivals
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {newArrivals.map((p) => renderProductCard(p))}
+          </div>
+        </section>
+      )}
+
+      {/* Best Sellers Section */}
+      {bestSellers.length > 0 && (
+        <section className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
+          <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
+            Best Sellers
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {bestSellers.map((p) => renderProductCard(p))}
+          </div>
+        </section>
+      )}
+
       {/* Products */}
       <section
         id="products"
-        className="bg-[#E0F2FE] py-24 w-full"
+        className="bg-[#E0F2FE] py-24 w-full border-t border-neutral-200"
       >
         <div className="max-w-6xl mx-auto px-8">
-          <h3 className="text-3xl font-bold mb-10 text-center text-[#111111]">
+          <h3 className="text-3xl font-black mb-10 text-center text-[#111111] uppercase tracking-tight">
             Featured Products
           </h3>
 
@@ -163,7 +304,7 @@ export default function Home() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-xl text-sm text-[#666666] focus:border-neutral-500 outline-none transition cursor-pointer"
+                className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-xl text-sm text-[#666666] focus:border-neutral-500 outline-none transition cursor-pointer font-bold"
               >
                 <option value="default">Sort: Recommended</option>
                 <option value="low-to-high">Price: Low to High</option>
@@ -174,7 +315,7 @@ export default function Home() {
 
           {/* Category Tabs */}
           <div className="border-t border-neutral-200 pt-6">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#666666] mb-3 px-1">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#666666] mb-3 px-1">
               Filter Categories
             </p>
             <div className="flex gap-2.5 overflow-x-auto pb-3 md:pb-0 md:flex-wrap no-scrollbar">
@@ -200,54 +341,13 @@ export default function Home() {
 
         {filteredProducts.length === 0 ? (
           <div className="text-center py-20 bg-[#f8f8f8] border border-neutral-200 rounded-3xl">
-            <p className="text-[#666666] text-lg">
+            <p className="text-[#666666] text-lg font-bold">
               No premium streetwear products found matching your search filters.
             </p>
           </div>
         ) : (
           <div className="grid md:grid-cols-3 gap-8">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white border border-neutral-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full group"
-              >
-                <Link href={`/product/${product.id}`} className="block cursor-pointer overflow-hidden">
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="w-full h-[350px] object-cover hover:scale-[1.02] transition-transform duration-300"
-                  />
-                </Link>
-
-                <div className="p-6 flex flex-col flex-1 justify-between">
-                  <div>
-                    <Link href={`/product/${product.id}`} className="block cursor-pointer hover:text-[#38BDF8] transition-colors">
-                      <h4 className="text-xl font-bold text-[#111111] line-clamp-1">
-                        {product.name}
-                      </h4>
-                    </Link>
-                    <p className="text-[#666666] mt-2 font-semibold">
-                      ₹{product.price}
-                    </p>
-                  </div>
-
-                  <div className="flex gap-3 mt-6">
-                    <button
-                      onClick={() => addToCart(product)}
-                      className="flex-1 bg-[#38BDF8] text-black py-3 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition text-sm cursor-pointer shadow-sm"
-                    >
-                      Add To Cart
-                    </button>
-                    <Link
-                      href={`/product/${product.id}`}
-                      className="flex-1 bg-[#f8f8f8] text-[#111111] border border-neutral-250 py-3 rounded-xl font-bold text-center hover:bg-neutral-100 transition text-sm"
-                    >
-                      View Details
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
+            {filteredProducts.map((product) => renderProductCard(product))}
           </div>
         )}
         </div>

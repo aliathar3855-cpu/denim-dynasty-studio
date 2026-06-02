@@ -18,7 +18,10 @@ export default function EditProductPage() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState(""); // Acts as Sale Price/Regular Price
+  const [originalPrice, setOriginalPrice] = useState(""); // MRP (Optional)
+  const [stockStatus, setStockStatus] = useState<"IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK">("IN_STOCK");
+  const [isBestSeller, setIsBestSeller] = useState(false);
   const [category, setCategory] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -45,6 +48,9 @@ export default function EditProductPage() {
           setName(prod.name || "");
           setDescription(prod.description || "");
           setPrice(prod.price?.toString() || "");
+          setOriginalPrice(prod.originalPrice?.toString() || "");
+          setStockStatus(prod.stockStatus || "IN_STOCK");
+          setIsBestSeller(!!prod.isBestSeller);
           setCategory(prod.category || "");
           setImages(prod.images || []);
           setSizeType(prod.sizeType || "LETTER");
@@ -162,11 +168,15 @@ export default function EditProductPage() {
       const updatePayload = {
         name: name.trim(),
         description: description.trim(),
-        price: Number(price),
+        price: Number(price), // Active selling price (salePrice)
         category: category,
         images: finalImages,
         sizeType,
         sizes: selectedSizes,
+        stockStatus,
+        originalPrice: originalPrice ? Number(originalPrice) : null,
+        salePrice: Number(price),
+        isBestSeller,
       };
 
       console.log("Firestore update payload:", updatePayload); // Console log: Firestore save
@@ -246,19 +256,66 @@ export default function EditProductPage() {
                 />
               </div>
 
-              {/* Price */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
-                  Price (INR)
-                </label>
-                <input
-                  type="number"
-                  placeholder="e.g. 1499"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition font-medium text-sm"
-                  required
-                />
+              {/* Pricing Section (Regular vs Sale Price) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+                    Sale Price / Active Price (INR) *
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 1499"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition font-medium text-sm"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+                    Original Price / MRP (INR, Optional)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 1999"
+                    value={originalPrice}
+                    onChange={(e) => setOriginalPrice(e.target.value)}
+                    className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition font-medium text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Inventory Status & Highlight */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+                    Stock Status
+                  </label>
+                  <select
+                    value={stockStatus}
+                    onChange={(e) => setStockStatus(e.target.value as any)}
+                    className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition cursor-pointer font-bold text-sm"
+                  >
+                    <option value="IN_STOCK">In Stock</option>
+                    <option value="LOW_STOCK">Low Stock</option>
+                    <option value="OUT_OF_STOCK">Out of Stock</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center">
+                  <label className="flex items-center gap-3 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={isBestSeller}
+                      onChange={(e) => setIsBestSeller(e.target.checked)}
+                      className="w-5 h-5 rounded border-neutral-300 text-[#38BDF8] focus:ring-[#38BDF8] cursor-pointer"
+                    />
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#666666]">
+                      Mark as Best Seller
+                    </span>
+                  </label>
+                </div>
               </div>
 
               {/* Category dropdown */}

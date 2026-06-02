@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/firebase/config";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+
+const ADMIN_WHITELIST = [
+  "glacierfromno@gmail.com",
+  "denimdynastystudio@gmail.com",
+  "aliathar3855@gmail.com",
+];
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -12,7 +18,7 @@ export default function AdminLogin() {
   const router = useRouter();
 
   const handleLogin = async () => {
-    const inputEmail = email.trim();
+    const inputEmail = email.trim().toLowerCase();
     const inputPassword = password.trim();
 
     if (!inputEmail || !inputPassword) {
@@ -20,14 +26,20 @@ export default function AdminLogin() {
       return;
     }
 
+    if (!ADMIN_WHITELIST.includes(inputEmail)) {
+      toast.error("Unauthorized email address.");
+      return;
+    }
+
     try {
       // 1. Try standard Firebase authentication
-      await signInWithEmailAndPassword(auth, inputEmail, inputPassword);
-      localStorage.setItem("admin", "true"); // Sync local session
-      toast.success("Login Successful");
-      router.push("/admin/orders");
+      const userCredential = await signInWithEmailAndPassword(auth, inputEmail, inputPassword);
+      if (userCredential.user) {
+        toast.success("Login Successful");
+        router.push("/admin/orders");
+      }
     } catch (err: any) {
-      // 2. Fallback to hardcoded static admin credentials if Firebase authentication fails
+      // 2. Self-healing/fallback check: if whitelisted bypass matches, register/sign up the user
       const staticCredentials = [
         { email: "glacierfromno@gmail.com", password: "faisal@8100" },
         { email: "denimdynastystudio@gmail.com", password: "Shaban1997@" },
@@ -39,9 +51,14 @@ export default function AdminLogin() {
       );
 
       if (match) {
-        localStorage.setItem("admin", "true");
-        toast.success("Login Successful (Bypass)");
-        router.push("/admin/orders");
+        try {
+          await createUserWithEmailAndPassword(auth, inputEmail, inputPassword);
+          toast.success("Login Successful (Account Activated)");
+          router.push("/admin/orders");
+        } catch (createErr: any) {
+          console.error("Auto-registration failed:", createErr);
+          toast.error("Authentication failed. Please verify password.");
+        }
       } else {
         console.error("Authentication failed:", err);
         toast.error("Invalid credentials");

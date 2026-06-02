@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/firebase/config";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+
+const ADMIN_WHITELIST = [
+  "glacierfromno@gmail.com",
+  "denimdynastystudio@gmail.com",
+  "aliathar3855@gmail.com",
+];
 
 export default function AdminGuard({
   children,
@@ -14,19 +21,17 @@ export default function AdminGuard({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Check local session storage bypass first
-    const isLocalAdmin = localStorage.getItem("admin") === "true";
-    if (isLocalAdmin) {
-      setLoading(false);
-      return;
-    }
-
-    // 2. Fallback to checking Firebase Authentication
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        setTimeout(() => {
-          router.push("/admin/login");
-        }, 0);
+        router.push("/admin/login");
+      } else if (!user.email || !ADMIN_WHITELIST.includes(user.email.toLowerCase())) {
+        try {
+          await signOut(auth);
+        } catch (err) {
+          console.error("SignOut error:", err);
+        }
+        toast.error("Unauthorized access: email not whitelisted.");
+        router.push("/admin/login");
       } else {
         setLoading(false);
       }

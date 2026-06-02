@@ -45,6 +45,10 @@ export interface Product {
   sizeType: "LETTER" | "NUMERIC";
   sizes: string[];
   createdAt?: Timestamp;
+  stockStatus?: "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK";
+  originalPrice?: number | null;
+  salePrice?: number | null;
+  isBestSeller?: boolean;
 }
 
 /**
@@ -70,6 +74,10 @@ const normalizeProduct = (docId: string, data: any): Product => {
     sizeType: data.sizeType || "LETTER",
     sizes: data.sizes || [],
     createdAt: data.createdAt,
+    stockStatus: data.stockStatus || "IN_STOCK",
+    originalPrice: data.originalPrice !== undefined && data.originalPrice !== null ? Number(data.originalPrice) : undefined,
+    salePrice: data.salePrice !== undefined && data.salePrice !== null ? Number(data.salePrice) : undefined,
+    isBestSeller: !!data.isBestSeller,
   };
 };
 
@@ -155,6 +163,10 @@ export const addProduct = async (
     sizeType: productData.sizeType,
     sizes: productData.sizes,
     createdAt: serverTimestamp(),
+    stockStatus: productData.stockStatus || "IN_STOCK",
+    originalPrice: productData.originalPrice !== undefined && productData.originalPrice !== null ? Number(productData.originalPrice) : null,
+    salePrice: productData.salePrice !== undefined && productData.salePrice !== null ? Number(productData.salePrice) : null,
+    isBestSeller: !!productData.isBestSeller,
   });
 
   return docRef.id;
@@ -185,6 +197,18 @@ export const updateProduct = async (
   if (productData.images) {
     updatePayload.images = productData.images;
     updatePayload.imageUrl = productData.images[0] || "";
+  }
+  if (productData.stockStatus) {
+    updatePayload.stockStatus = productData.stockStatus;
+  }
+  if (productData.originalPrice !== undefined) {
+    updatePayload.originalPrice = productData.originalPrice !== null ? Number(productData.originalPrice) : null;
+  }
+  if (productData.salePrice !== undefined) {
+    updatePayload.salePrice = productData.salePrice !== null ? Number(productData.salePrice) : null;
+  }
+  if (productData.isBestSeller !== undefined) {
+    updatePayload.isBestSeller = !!productData.isBestSeller;
   }
 
   await updateDoc(docRef, updatePayload);
