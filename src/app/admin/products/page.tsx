@@ -117,7 +117,7 @@ export default function ProductListPage() {
                         <td className="p-5 text-black">₹{product.price}</td>
                         <td className="p-5">
                           <div className="flex flex-wrap gap-1">
-                            {product.sizes.map((s) => (
+                            {(product.sizes || []).map((s) => (
                               <span
                                 key={s}
                                 className="bg-[#E0F2FE] text-black text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#38BDF8]/20"
@@ -182,7 +182,7 @@ export default function ProductListPage() {
                     <div>
                       <p className="text-[10px] uppercase font-bold text-[#666666] tracking-wider mb-2">Sizes Available</p>
                       <div className="flex flex-wrap gap-1">
-                        {product.sizes.map((s) => (
+                        {(product.sizes || []).map((s) => (
                           <span
                             key={s}
                             className="bg-[#E0F2FE] text-black text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#38BDF8]/20"
