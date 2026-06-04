@@ -223,6 +223,12 @@ export async function POST(req: Request) {
         razorpayOrderId: razorpayOrderId || "",
         razorpaySignature: razorpaySignature || "",
         createdAt: serverTimestamp(),
+        statusHistory: [
+          {
+            status: "Pending",
+            timestamp: new Date(),
+          }
+        ],
 
         // Legacy Schema Compatibility
         orderNumber: orderId,

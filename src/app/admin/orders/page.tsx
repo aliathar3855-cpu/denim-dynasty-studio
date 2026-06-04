@@ -11,6 +11,7 @@ import {
   doc,
   query,
   orderBy,
+  arrayUnion,
 } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import AdminGuard from "@/components/AdminGuard";
@@ -80,7 +81,8 @@ const normalizeOrder = (docId: string, data: any) => {
     paymentMethod: data.paymentMethod || "COD",
     paymentStatus: data.paymentStatus || "Pending",
     paymentId: data.paymentId || null,
-    createdAt: data.createdAt
+    createdAt: data.createdAt,
+    statusHistory: Array.isArray(data.statusHistory) ? data.statusHistory : [],
   };
 };
 
@@ -128,14 +130,23 @@ export default function AdminOrdersPage() {
     try {
       setUpdatingId(orderId);
       const docRef = doc(db, "orders", orderId);
+      const formattedStatus = newStatus.charAt(0).toUpperCase() + newStatus.slice(1).toLowerCase();
       await updateDoc(docRef, {
         status: newStatus.toLowerCase(),
-        orderStatus: newStatus.charAt(0).toUpperCase() + newStatus.slice(1).toLowerCase(),
+        orderStatus: formattedStatus,
+        statusHistory: arrayUnion({
+          status: formattedStatus,
+          timestamp: new Date(),
+        })
       });
       setOrders((prev) =>
-        prev.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus.toLowerCase() } : order
-        )
+        prev.map((order) => {
+          if (order.id === orderId) {
+            const updatedHistory = [...(order.statusHistory || []), { status: formattedStatus, timestamp: new Date() }];
+            return { ...order, status: newStatus.toLowerCase(), statusHistory: updatedHistory };
+          }
+          return order;
+        })
       );
       toast.success(`Order status updated to ${newStatus}`);
 
@@ -342,16 +353,22 @@ export default function AdminOrdersPage() {
                               order.status === "delivered"
                                 ? "bg-green-50 text-green-750 border-green-200"
                                 : order.status === "shipped"
-                                ? "bg-blue-50 text-blue-750 border-blue-200"
-                                : order.status === "processing"
-                                ? "bg-purple-50 text-purple-750 border-purple-200"
-                                : "bg-amber-50 text-amber-750 border-amber-200"
+                                ? "bg-blue-50 text-blue-755 border-blue-200"
+                                : order.status === "packed"
+                                ? "bg-cyan-50 text-cyan-755 border-cyan-200"
+                                : order.status === "confirmed"
+                                ? "bg-indigo-50 text-indigo-755 border-indigo-200"
+                                : order.status === "cancelled"
+                                ? "bg-red-50 text-red-755 border-red-200"
+                                : "bg-amber-50 text-amber-755 border-amber-200"
                             }`}
                           >
                             <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="packed">Packed</option>
                             <option value="shipped">Shipped</option>
                             <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
                           </select>
                         </td>
 

@@ -71,7 +71,8 @@ const normalizeOrder = (docId: string, data: any) => {
     paymentMethod: data.paymentMethod || "COD",
     paymentStatus: data.paymentStatus || "Pending",
     paymentId: data.paymentId || null,
-    createdAt: data.createdAt
+    createdAt: data.createdAt,
+    statusHistory: Array.isArray(data.statusHistory) ? data.statusHistory : [],
   };
 };
 
@@ -148,7 +149,13 @@ export default function OrderDetailsPage() {
   };
 
   const getStepStatus = (stepKey: string, currentStatus: string) => {
-    const statusOrder = ["pending", "processing", "shipped", "delivered"];
+    if (currentStatus === "cancelled") {
+      // If cancelled, check if the step was completed before cancellation (exists in history)
+      const historyItem = order?.statusHistory?.find((h: any) => h.status?.toLowerCase() === stepKey.toLowerCase());
+      return historyItem ? "completed" : "pending";
+    }
+
+    const statusOrder = ["pending", "confirmed", "packed", "shipped", "delivered"];
     const currentIdx = statusOrder.indexOf((currentStatus || "pending").toLowerCase());
     const stepIdx = statusOrder.indexOf(stepKey.toLowerCase());
 
@@ -161,10 +168,31 @@ export default function OrderDetailsPage() {
     return "pending";
   };
 
+  const formatStepDate = (timestamp: any) => {
+    if (!timestamp) return "";
+    let date: Date;
+    if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else if (timestamp.toDate) {
+      date = timestamp.toDate();
+    } else {
+      date = new Date(timestamp);
+    }
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const getPaymentStatus = (paymentMethod: string, status: string, paymentId?: string) => {
     const s = (status || "pending").toLowerCase();
     const pm = (paymentMethod || "").toLowerCase();
     
+    if (s === "cancelled") {
+      return { text: "Order Cancelled", class: "text-red-700 bg-red-50 border-red-200" };
+    }
     if (s === "paid" || paymentId) {
       return { text: "Paid Online", class: "text-green-700 bg-green-50 border-green-200" };
     }
@@ -179,7 +207,8 @@ export default function OrderDetailsPage() {
 
   const steps = [
     { key: "pending", label: "Order Placed", desc: "Your order has been recorded." },
-    { key: "processing", label: "Processing", desc: "We are preparing your streetwear items." },
+    { key: "confirmed", label: "Confirmed", desc: "Your order has been confirmed." },
+    { key: "packed", label: "Packed", desc: "Your package has been packed." },
     { key: "shipped", label: "Shipped", desc: "Your package is on its way." },
     { key: "delivered", label: "Delivered", desc: "Your package has been successfully delivered." },
   ];
@@ -242,9 +271,22 @@ export default function OrderDetailsPage() {
         <div className="bg-white border border-neutral-200 rounded-3xl p-6 md:p-8 shadow-sm">
           <h2 className="text-lg font-bold text-[#111111] mb-8">Shipping Progress</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative">
+          {order.status === "cancelled" && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-3 rounded-2xl mb-8 flex items-center gap-3">
+              <span className="text-xl font-bold">✕</span>
+              <div>
+                <h4 className="font-bold text-sm">Order Cancelled</h4>
+                <p className="text-xs text-red-600 font-medium">This order has been cancelled and will not be processed further.</p>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-4 relative">
             {steps.map((step, idx) => {
               const status = getStepStatus(step.key, order.status || "pending");
+              const historyItem = order.statusHistory?.find(
+                (h: any) => h.status?.toLowerCase() === step.key.toLowerCase()
+              );
               return (
                 <div key={step.key} className="flex md:flex-col items-center md:text-center gap-4 md:gap-0 relative z-10">
                   <div
@@ -252,18 +294,23 @@ export default function OrderDetailsPage() {
                       status === "completed"
                         ? "bg-green-50 border-green-600 text-green-700"
                         : status === "active"
-                        ? "bg-sky-50 border-[#38BDF8] text-sky-605 animate-pulse font-extrabold"
+                        ? "bg-sky-50 border-[#38BDF8] text-sky-600 animate-pulse font-extrabold"
                         : "bg-white border-neutral-300 text-neutral-400"
                     }`}
                   >
-                    {status === "completed" ? "✓" : idx + 1}
+                    {status === "completed" ? "✓" : "○"}
                   </div>
-
+ 
                   <div className="md:mt-4 text-left md:text-center">
-                    <h3 className="font-semibold text-sm text-[#111111]">{step.label}</h3>
-                    <p className="text-[#666666] text-xs mt-0.5 leading-relaxed md:px-3">
+                    <h3 className="font-bold text-sm text-[#111111]">{step.label}</h3>
+                    <p className="text-[#666666] text-xs mt-0.5 leading-relaxed md:px-2">
                       {step.desc}
                     </p>
+                    {historyItem?.timestamp && (
+                      <p className="text-[10px] text-green-600 font-bold tracking-wider mt-1.5 uppercase">
+                        ✓ {formatStepDate(historyItem.timestamp)}
+                      </p>
+                    )}
                   </div>
                 </div>
               );
