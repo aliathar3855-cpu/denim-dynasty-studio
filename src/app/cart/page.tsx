@@ -119,7 +119,7 @@ export default function CartPage() {
             <span>
               {subtotal >= FREE_SHIPPING_THRESHOLD
                 ? "🎉 Congratulations! You unlocked FREE Delivery"
-                : `Add ₹${FREE_SHIPPING_THRESHOLD - subtotal} more to get FREE Delivery 🚚`}
+                : `Add ₹${FREE_SHIPPING_THRESHOLD - subtotal} more to unlock FREE Delivery 🚚`}
             </span>
             {subtotal < FREE_SHIPPING_THRESHOLD ? (
               <span className="text-[10px] uppercase font-black tracking-wider bg-amber-200 text-amber-950 px-2 py-0.5 rounded-md hidden sm:inline-block">

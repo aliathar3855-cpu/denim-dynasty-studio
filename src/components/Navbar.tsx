@@ -5,11 +5,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { brandConfig } from "@/config/brand";
 
 export default function Navbar() {
   const pathname = usePathname() || "";
   const { cart } = useCart();
+  const { wishlist } = useWishlist();
   const [isOpen, setIsOpen] = useState(false);
 
   const totalItems = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
@@ -79,6 +81,21 @@ export default function Navbar() {
           })}
 
           <Link
+            href="/wishlist"
+            className="relative bg-white hover:bg-neutral-50 text-[#111111] border border-neutral-200 px-4.5 py-2.5 rounded-full font-semibold transition flex items-center gap-2 select-none"
+          >
+            <span className="relative flex items-center text-base">
+              ❤️
+              {wishlist.length > 0 && (
+                <span className="absolute -top-2.5 -right-2.5 bg-red-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-sm animate-pulse">
+                  {wishlist.length}
+                </span>
+              )}
+            </span>
+            <span className="text-sm">Wishlist</span>
+          </Link>
+
+          <Link
             href="/cart"
             className="relative bg-[#111111] hover:bg-neutral-800 text-white px-5 py-2.5 rounded-full font-semibold transition flex items-center gap-2 select-none"
           >
@@ -96,6 +113,21 @@ export default function Navbar() {
 
         {/* Mobile controls (Cart Icon + Hamburger Menu) */}
         <div className="flex md:hidden items-center gap-4">
+          <Link
+            href="/wishlist"
+            onClick={handleMobileLinkClick}
+            className="relative bg-white hover:bg-neutral-50 text-[#111111] border border-neutral-200 p-2.5 rounded-full font-semibold transition flex items-center justify-center select-none"
+          >
+            <span className="relative flex items-center text-base">
+              ❤️
+              {wishlist.length > 0 && (
+                <span className="absolute -top-2.5 -right-2.5 bg-red-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-sm animate-pulse">
+                  {wishlist.length}
+                </span>
+              )}
+            </span>
+          </Link>
+
           <Link
             href="/cart"
             onClick={handleMobileLinkClick}

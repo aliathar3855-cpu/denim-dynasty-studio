@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import Script from "next/script";
 import GlobalFooter from "@/components/GlobalFooter";
 import Navbar from "@/components/Navbar";
@@ -39,10 +40,12 @@ export default function RootLayout({
         />
 
         <CartProvider>
-          <Toaster position="top-center" reverseOrder={false} />
-          <Navbar />
-          {children}
-          <GlobalFooter />
+          <WishlistProvider>
+            <Toaster position="top-center" reverseOrder={false} />
+            <Navbar />
+            {children}
+            <GlobalFooter />
+          </WishlistProvider>
         </CartProvider>
 
       </body>

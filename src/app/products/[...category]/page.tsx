@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 import {
   collection,
@@ -18,6 +19,7 @@ export default function CategoryProducts() {
 
   const { category } = useParams();
   const { cart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,9 +126,22 @@ export default function CategoryProducts() {
           {products.map((product) => (
             <div
               key={product.id}
-              className="bg-white border border-neutral-200/80 rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full group"
+              className="bg-white border border-neutral-200/80 rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full group relative"
             >
-              <Link href={`/product/${product.id}`} className="block cursor-pointer overflow-hidden">
+              {/* Wishlist Heart Toggle */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleWishlist(product.id);
+                }}
+                className="absolute top-3 right-3 z-20 bg-white/90 hover:bg-white text-neutral-800 p-2 rounded-full shadow-sm hover:shadow transition cursor-pointer select-none active:scale-95"
+                title={isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+              >
+                <span className="text-sm block leading-none">{isInWishlist(product.id) ? "❤️" : "🤍"}</span>
+              </button>
+
+              <Link href={`/product/${product.id}`} className="block cursor-pointer overflow-hidden relative">
                 <img
                   src={product.imageUrl}
                   alt={product.name}

@@ -6,11 +6,14 @@ import Image from "next/image";
 import { db } from "../firebase/config";
 import { collection, getDocs } from "firebase/firestore";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { brandConfig } from "@/config/brand";
+import HeroSlider from "@/components/HeroSlider";
 
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const { addToCart, cart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -100,6 +103,19 @@ export default function Home() {
         key={p.id}
         className="bg-white border border-neutral-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-305 flex flex-col h-full group relative"
       >
+        {/* Wishlist Heart Toggle */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleWishlist(p.id);
+          }}
+          className="absolute top-3 right-3 z-20 bg-white/90 hover:bg-white text-neutral-800 p-2 rounded-full shadow-sm hover:shadow transition cursor-pointer select-none active:scale-95"
+          title={isInWishlist(p.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+        >
+          <span className="text-sm block leading-none">{isInWishlist(p.id) ? "❤️" : "🤍"}</span>
+        </button>
+
         {/* Badges Overlay */}
         <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
           {showDiscount && (
@@ -169,27 +185,8 @@ export default function Home() {
 
 
 
-      {/* Hero */}
-      <section className="h-[60vh] flex flex-col items-center justify-center text-center px-6 bg-gradient-to-b from-white to-[#E0F2FE]">
-        <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-[#38BDF8] mb-3">
-          Welcome to
-        </span>
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tight text-[#111111] uppercase">
-          {brandConfig.brandName}
-        </h2>
-        <p className="text-[#666666] text-base md:text-lg max-w-2xl">
-          Premium boys fashion & curated streetwear collection for modern trendsetters.
-        </p>
-        <button 
-          onClick={() => {
-            const el = document.getElementById("products");
-            el?.scrollIntoView({ behavior: "smooth" });
-          }}
-          className="mt-8 bg-[#38BDF8] text-black px-8 py-3 rounded-full font-bold hover:bg-[#0ea5e9] hover:text-white transition cursor-pointer shadow-md"
-        >
-          Shop Now
-        </button>
-      </section>
+      {/* Hero Slider */}
+      <HeroSlider />
 
 
 
@@ -234,7 +231,7 @@ export default function Home() {
 
       {/* New Arrivals Section */}
       {newArrivals.length > 0 && (
-        <section className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
+        <section id="new-arrivals" className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
           <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
             New Arrivals
           </h3>
@@ -246,7 +243,7 @@ export default function Home() {
 
       {/* Best Sellers Section */}
       {bestSellers.length > 0 && (
-        <section className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
+        <section id="best-sellers" className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
           <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
             Best Sellers
           </h3>

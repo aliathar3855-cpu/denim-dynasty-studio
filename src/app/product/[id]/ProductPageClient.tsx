@@ -11,6 +11,7 @@ import Image from "next/image";
 import HoverMagnifier from "@/components/HoverMagnifier";
 import ProductImageLightbox from "@/components/ProductImageLightbox";
 import { getOptimizedImageUrl } from "@/lib/cloudinaryHelper";
+import { useWishlist } from "@/context/WishlistContext";
 
 interface ProductPageClientProps {
   product: {
@@ -32,6 +33,7 @@ interface ProductPageClientProps {
 
 export default function ProductPageClient({ product }: ProductPageClientProps) {
   const { addToCart, showToast } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const [selectedSize, setSelectedSize] = useState("");
 
   // Gallery State
@@ -426,8 +428,8 @@ export default function ProductPageClient({ product }: ProductPageClientProps) {
             </div>
           )}
 
-          {/* Cart Add Button */}
-          <div className="mt-8">
+          {/* Cart Add & Wishlist Buttons */}
+          <div className="mt-8 flex gap-4">
             <button
               onClick={() => {
                 if (product.sizes && product.sizes.length > 0 && !selectedSize) {
@@ -446,9 +448,20 @@ export default function ProductPageClient({ product }: ProductPageClientProps) {
                 });
               }}
               disabled={product.stockStatus === "OUT_OF_STOCK"}
-              className="w-full bg-[#111111] hover:bg-neutral-800 disabled:bg-neutral-250 disabled:text-neutral-450 text-white py-4.5 rounded-xl font-bold transition shadow-md cursor-pointer text-sm uppercase tracking-wider select-none"
+              className="flex-1 bg-[#111111] hover:bg-neutral-800 disabled:bg-neutral-250 disabled:text-neutral-450 text-white py-4.5 rounded-xl font-bold transition shadow-md cursor-pointer text-sm uppercase tracking-wider select-none text-center"
             >
               {product.stockStatus === "OUT_OF_STOCK" ? "Out Of Stock" : "Add To Cart"}
+            </button>
+            <button
+              onClick={() => toggleWishlist(product.id)}
+              className={`p-4.5 rounded-xl border transition cursor-pointer select-none flex items-center justify-center min-w-[56px] text-xl shadow-sm ${
+                isInWishlist(product.id)
+                  ? "bg-red-50 border-red-200 text-red-500 hover:bg-red-100"
+                  : "bg-white border-neutral-200 text-neutral-400 hover:text-red-550 hover:bg-neutral-50"
+              }`}
+              title={isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+            >
+              {isInWishlist(product.id) ? "❤️" : "🤍"}
             </button>
           </div>
 
