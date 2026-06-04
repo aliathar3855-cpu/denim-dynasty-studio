@@ -29,7 +29,9 @@ export default function EditProductPage() {
   const [price, setPrice] = useState(""); // Acts as Sale Price/Regular Price
   const [originalPrice, setOriginalPrice] = useState(""); // MRP (Optional)
   const [stockStatus, setStockStatus] = useState<"IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK">("IN_STOCK");
-  const [isBestSeller, setIsBestSeller] = useState(false);
+  const [featured, setFeatured] = useState(false);
+  const [trending, setTrending] = useState(false);
+  const [bestSeller, setBestSeller] = useState(false);
   const [category, setCategory] = useState("");
   const [season, setSeason] = useState("All Season");
   const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>([]);
@@ -68,7 +70,9 @@ export default function EditProductPage() {
           setPrice(prod.price?.toString() || "");
           setOriginalPrice(prod.originalPrice?.toString() || "");
           setStockStatus(prod.stockStatus || "IN_STOCK");
-          setIsBestSeller(!!prod.isBestSeller);
+          setFeatured(!!prod.featured);
+          setTrending(!!prod.trending);
+          setBestSeller(prod.bestSeller !== undefined ? !!prod.bestSeller : !!prod.isBestSeller);
           setCategory(prod.category || "");
           
           // Map existing product images to ImageItem objects
@@ -248,7 +252,10 @@ export default function EditProductPage() {
         stockStatus,
         originalPrice: originalPrice ? Number(originalPrice) : null,
         salePrice: Number(price),
-        isBestSeller,
+        featured,
+        trending,
+        bestSeller,
+        isBestSeller: bestSeller,
         season,
         ageGroups: selectedAgeGroups,
       };
@@ -382,19 +389,50 @@ export default function EditProductPage() {
                   </select>
                 </div>
 
-                <div className="flex items-center">
-                  <label className="flex items-center gap-3 cursor-pointer select-none">
+              {/* Product Toggles */}
+              <div className="flex flex-col gap-3.5 border border-neutral-200 p-4.5 rounded-2xl bg-neutral-50/50">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#666666] block mb-1">
+                  Product Badges
+                </span>
+                
+                <div className="flex flex-wrap gap-6">
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
                     <input
                       type="checkbox"
-                      checked={isBestSeller}
-                      onChange={(e) => setIsBestSeller(e.target.checked)}
+                      checked={featured}
+                      onChange={(e) => setFeatured(e.target.checked)}
                       className="w-5 h-5 rounded border-neutral-300 text-[#38BDF8] focus:ring-[#38BDF8] cursor-pointer"
                     />
                     <span className="text-xs font-bold uppercase tracking-wider text-[#666666]">
-                      Mark as Best Seller
+                      ⭐ Featured Product
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={trending}
+                      onChange={(e) => setTrending(e.target.checked)}
+                      className="w-5 h-5 rounded border-neutral-300 text-[#38BDF8] focus:ring-[#38BDF8] cursor-pointer"
+                    />
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#666666]">
+                      🔥 Trending Product
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={bestSeller}
+                      onChange={(e) => setBestSeller(e.target.checked)}
+                      className="w-5 h-5 rounded border-neutral-300 text-[#38BDF8] focus:ring-[#38BDF8] cursor-pointer"
+                    />
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#666666]">
+                      🏆 Best Seller
                     </span>
                   </label>
                 </div>
+              </div>
               </div>
 
               {/* Category dropdown */}

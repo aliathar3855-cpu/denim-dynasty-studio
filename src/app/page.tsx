@@ -81,7 +81,10 @@ export default function Home() {
             originalPrice: data.originalPrice !== undefined && data.originalPrice !== null ? Number(data.originalPrice) : undefined,
             salePrice: data.salePrice !== undefined && data.salePrice !== null ? Number(data.salePrice) : undefined,
             stockStatus: data.stockStatus || "IN_STOCK",
-            isBestSeller: !!data.isBestSeller,
+            isBestSeller: data.bestSeller !== undefined ? !!data.bestSeller : !!data.isBestSeller,
+            bestSeller: data.bestSeller !== undefined ? !!data.bestSeller : !!data.isBestSeller,
+            featured: !!data.featured,
+            trending: !!data.trending,
             createdAt: data.createdAt,
             season: data.season || "All Season",
           } as any;
@@ -125,9 +128,9 @@ export default function Home() {
     })
     .slice(0, 4);
 
-  const bestSellers = products.filter((p) => p.isBestSeller).length > 0
-    ? products.filter((p) => p.isBestSeller).slice(0, 4)
-    : products.slice(0, 4);
+  const featuredProducts = products.filter((p) => p.featured).slice(0, 4);
+  const trendingProducts = products.filter((p) => p.trending).slice(0, 4);
+  const bestSellers = products.filter((p) => p.bestSeller || p.isBestSeller).slice(0, 4);
 
   const currentSeasonKey = getCurrentSeason();
   const seasonConfig = SEASON_CONFIG[currentSeasonKey];
@@ -160,25 +163,40 @@ export default function Home() {
         </button>
 
         {/* Badges Overlay */}
-        <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+        <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
+          {newArrivals.some((na) => na.id === p.id) && (
+            <span className="bg-green-600 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+              NEW
+            </span>
+          )}
+          {p.featured && (
+            <span className="bg-yellow-500 text-black text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+              FEATURED
+            </span>
+          )}
+          {p.trending && (
+            <span className="bg-orange-500 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+              TRENDING
+            </span>
+          )}
+          {(p.bestSeller || p.isBestSeller) && (
+            <span className="bg-black text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+              BEST SELLER
+            </span>
+          )}
           {showDiscount && (
-            <span className="bg-[#38BDF8] text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+            <span className="bg-[#38BDF8] text-black text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
               {discountPercent}% OFF
             </span>
           )}
           {isOutOfStock && (
-            <span className="bg-red-650 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+            <span className="bg-red-600 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
               Sold Out
             </span>
           )}
           {p.stockStatus === "LOW_STOCK" && (
-            <span className="bg-amber-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+            <span className="bg-amber-500 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
               Low Stock
-            </span>
-          )}
-          {p.isBestSeller && (
-            <span className="bg-black text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
-              Best Seller
             </span>
           )}
         </div>
@@ -377,6 +395,43 @@ export default function Home() {
       )}
 
       {/* New Arrivals Section */}
+      {/* Featured Products Section */}
+      {featuredProducts.length > 0 && (
+        <section id="featured-products" className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
+          <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
+            ⭐ Featured Products
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {featuredProducts.map((p) => renderProductCard(p))}
+          </div>
+        </section>
+      )}
+
+      {/* Trending Products Section */}
+      {trendingProducts.length > 0 && (
+        <section id="trending-products" className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
+          <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
+            🔥 Trending Products
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {trendingProducts.map((p) => renderProductCard(p))}
+          </div>
+        </section>
+      )}
+
+      {/* Best Sellers Section */}
+      {bestSellers.length > 0 && (
+        <section id="best-sellers" className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
+          <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
+            🏆 Best Sellers
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {bestSellers.map((p) => renderProductCard(p))}
+          </div>
+        </section>
+      )}
+
+      {/* New Arrivals Section */}
       {newArrivals.length > 0 && (
         <section id="new-arrivals" className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
           <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
@@ -388,18 +443,6 @@ export default function Home() {
         </section>
       )}
 
-      {/* Best Sellers Section */}
-      {bestSellers.length > 0 && (
-        <section id="best-sellers" className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
-          <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
-            Best Sellers
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {bestSellers.map((p) => renderProductCard(p))}
-          </div>
-        </section>
-      )}
-
       {/* Products */}
       <section
         id="products"
@@ -407,7 +450,7 @@ export default function Home() {
       >
         <div className="max-w-6xl mx-auto px-8">
           <h3 className="text-3xl font-black mb-10 text-center text-[#111111] uppercase tracking-tight">
-            Featured Products
+            Browse Collection
           </h3>
 
           {/* Search, Filter, Sort Controls */}

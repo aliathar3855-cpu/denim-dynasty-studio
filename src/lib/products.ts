@@ -49,6 +49,9 @@ export interface Product {
   originalPrice?: number | null;
   salePrice?: number | null;
   isBestSeller?: boolean;
+  bestSeller?: boolean;
+  featured?: boolean;
+  trending?: boolean;
   season?: string;
   ageGroups?: string[];
 }
@@ -79,7 +82,10 @@ const normalizeProduct = (docId: string, data: any): Product => {
     stockStatus: data.stockStatus || "IN_STOCK",
     originalPrice: data.originalPrice !== undefined && data.originalPrice !== null ? Number(data.originalPrice) : undefined,
     salePrice: data.salePrice !== undefined && data.salePrice !== null ? Number(data.salePrice) : undefined,
-    isBestSeller: !!data.isBestSeller,
+    isBestSeller: data.bestSeller !== undefined ? !!data.bestSeller : !!data.isBestSeller,
+    bestSeller: data.bestSeller !== undefined ? !!data.bestSeller : !!data.isBestSeller,
+    featured: !!data.featured,
+    trending: !!data.trending,
     season: data.season || "All Season",
     ageGroups: Array.isArray(data.ageGroups) ? data.ageGroups : [],
   };
@@ -175,7 +181,10 @@ export const addProduct = async (
     stockStatus: productData.stockStatus || "IN_STOCK",
     originalPrice: productData.originalPrice !== undefined && productData.originalPrice !== null ? Number(productData.originalPrice) : null,
     salePrice: productData.salePrice !== undefined && productData.salePrice !== null ? Number(productData.salePrice) : null,
-    isBestSeller: !!productData.isBestSeller,
+    isBestSeller: productData.bestSeller !== undefined ? !!productData.bestSeller : !!productData.isBestSeller,
+    bestSeller: productData.bestSeller !== undefined ? !!productData.bestSeller : !!productData.isBestSeller,
+    featured: !!productData.featured,
+    trending: !!productData.trending,
     season: productData.season || "All Season",
     ageGroups: productData.ageGroups || [],
   });
@@ -220,6 +229,17 @@ export const updateProduct = async (
   }
   if (productData.isBestSeller !== undefined) {
     updatePayload.isBestSeller = !!productData.isBestSeller;
+    updatePayload.bestSeller = !!productData.isBestSeller;
+  }
+  if (productData.bestSeller !== undefined) {
+    updatePayload.bestSeller = !!productData.bestSeller;
+    updatePayload.isBestSeller = !!productData.bestSeller;
+  }
+  if (productData.featured !== undefined) {
+    updatePayload.featured = !!productData.featured;
+  }
+  if (productData.trending !== undefined) {
+    updatePayload.trending = !!productData.trending;
   }
   if (productData.season !== undefined) {
     updatePayload.season = productData.season;

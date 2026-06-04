@@ -526,11 +526,34 @@ export default function ProductPageClient({ product }: ProductPageClientProps) {
                       alt={p.name}
                       className="w-full h-full object-cover group-hover:scale-103 transition duration-300"
                     />
-                    {hasDiscount && (
-                      <span className="absolute top-2.5 left-2.5 bg-[#38BDF8] text-black text-[8px] font-black px-2 py-0.5 rounded shadow">
-                        {discount}% OFF
-                      </span>
-                    )}
+                    {/* Badges Overlay */}
+                    <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
+                      {p.createdAt?.seconds && (Date.now() - p.createdAt.seconds * 1000 < 14 * 24 * 60 * 60 * 1000) && (
+                        <span className="bg-green-600 text-white text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm select-none">
+                          NEW
+                        </span>
+                      )}
+                      {p.featured && (
+                        <span className="bg-yellow-500 text-black text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm select-none">
+                          FEATURED
+                        </span>
+                      )}
+                      {p.trending && (
+                        <span className="bg-orange-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm select-none">
+                          TRENDING
+                        </span>
+                      )}
+                      {(p.bestSeller || p.isBestSeller) && (
+                        <span className="bg-black text-white text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm select-none">
+                          BEST SELLER
+                        </span>
+                      )}
+                      {hasDiscount && (
+                        <span className="bg-[#38BDF8] text-black text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm select-none">
+                          {discount}% OFF
+                        </span>
+                      )}
+                    </div>
                   </Link>
                   <div className="p-4 flex flex-col justify-between flex-1">
                     <div>
@@ -568,11 +591,34 @@ export default function ProductPageClient({ product }: ProductPageClientProps) {
                       alt={p.name}
                       className="w-full h-full object-cover group-hover:scale-103 transition duration-305"
                     />
-                    {hasDiscount && (
-                      <span className="absolute top-2.5 left-2.5 bg-[#38BDF8] text-black text-[8px] font-black px-2 py-0.5 rounded shadow">
-                        {discount}% OFF
-                      </span>
-                    )}
+                    {/* Badges Overlay */}
+                    <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1 items-start">
+                      {p.createdAt?.seconds && (Date.now() - p.createdAt.seconds * 1000 < 14 * 24 * 60 * 60 * 1000) && (
+                        <span className="bg-green-600 text-white text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm select-none">
+                          NEW
+                        </span>
+                      )}
+                      {p.featured && (
+                        <span className="bg-yellow-500 text-black text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm select-none">
+                          FEATURED
+                        </span>
+                      )}
+                      {p.trending && (
+                        <span className="bg-orange-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm select-none">
+                          TRENDING
+                        </span>
+                      )}
+                      {(p.bestSeller || p.isBestSeller) && (
+                        <span className="bg-black text-white text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm select-none">
+                          BEST SELLER
+                        </span>
+                      )}
+                      {hasDiscount && (
+                        <span className="bg-[#38BDF8] text-black text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shadow-sm select-none">
+                          {discount}% OFF
+                        </span>
+                      )}
+                    </div>
                   </Link>
                   <div className="p-4 flex flex-col justify-between flex-1">
                     <div>

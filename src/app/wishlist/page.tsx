@@ -107,15 +107,40 @@ export default function WishlistPage() {
                   </Link>
 
                   {/* Badges Overlay */}
-                  <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+                  <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
+                    {product.createdAt?.seconds && (Date.now() - product.createdAt.seconds * 1000 < 14 * 24 * 60 * 60 * 1000) && (
+                      <span className="bg-green-600 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                        NEW
+                      </span>
+                    )}
+                    {product.featured && (
+                      <span className="bg-yellow-500 text-black text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                        FEATURED
+                      </span>
+                    )}
+                    {product.trending && (
+                      <span className="bg-orange-500 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                        TRENDING
+                      </span>
+                    )}
+                    {(product.bestSeller || product.isBestSeller) && (
+                      <span className="bg-black text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                        BEST SELLER
+                      </span>
+                    )}
                     {showDiscount && (
-                      <span className="bg-[#38BDF8] text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                      <span className="bg-[#38BDF8] text-black text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
                         {discountPercent}% OFF
                       </span>
                     )}
                     {product.stockStatus === "OUT_OF_STOCK" && (
-                      <span className="bg-red-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                      <span className="bg-red-600 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
                         Sold Out
+                      </span>
+                    )}
+                    {product.stockStatus === "LOW_STOCK" && (
+                      <span className="bg-amber-500 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                        Low Stock
                       </span>
                     )}
                   </div>

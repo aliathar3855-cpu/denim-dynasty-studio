@@ -80,6 +80,10 @@ function ProductsFilterContent() {
             images,
             price: Number(item.price) || 0,
             originalPrice: item.originalPrice !== undefined && item.originalPrice !== null ? Number(item.originalPrice) : undefined,
+            featured: !!item.featured,
+            trending: !!item.trending,
+            bestSeller: item.bestSeller !== undefined ? !!item.bestSeller : !!item.isBestSeller,
+            isBestSeller: item.bestSeller !== undefined ? !!item.bestSeller : !!item.isBestSeller,
             season: item.season || "All Season",
             ageGroups: Array.isArray(item.ageGroups) ? item.ageGroups : [],
           };
@@ -151,6 +155,16 @@ function ProductsFilterContent() {
 
     return true;
   });
+
+  const newestIds = products
+    .slice()
+    .sort((a: any, b: any) => {
+      const dateA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : new Date(a.createdAt).getTime();
+      const dateB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : new Date(b.createdAt).getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 4)
+    .map((p) => p.id);
 
   if (loading) {
     return (
@@ -312,15 +326,40 @@ function ProductsFilterContent() {
                       </Link>
 
                       {/* Badges */}
-                      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+                      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 items-start">
+                        {newestIds.includes(product.id) && (
+                          <span className="bg-green-600 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                            NEW
+                          </span>
+                        )}
+                        {product.featured && (
+                          <span className="bg-yellow-500 text-black text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                            FEATURED
+                          </span>
+                        )}
+                        {product.trending && (
+                          <span className="bg-orange-500 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                            TRENDING
+                          </span>
+                        )}
+                        {(product.bestSeller || product.isBestSeller) && (
+                          <span className="bg-black text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
+                            BEST SELLER
+                          </span>
+                        )}
                         {showDiscount && (
-                          <span className="bg-[#38BDF8] text-black text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow shadow-sm">
+                          <span className="bg-[#38BDF8] text-black text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm select-none">
                             {discountPercent}% OFF
                           </span>
                         )}
                         {product.stockStatus === "OUT_OF_STOCK" && (
-                          <span className="bg-red-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow shadow-sm">
+                          <span className="bg-red-600 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow shadow-sm">
                             Sold Out
+                          </span>
+                        )}
+                        {product.stockStatus === "LOW_STOCK" && (
+                          <span className="bg-amber-500 text-white text-[8px] sm:text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow shadow-sm">
+                            Low Stock
                           </span>
                         )}
                       </div>
