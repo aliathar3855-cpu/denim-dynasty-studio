@@ -173,30 +173,36 @@ export default function AdminPage() {
         {/* Quick Actions Panel */}
         <div className="bg-[#f8f8f8] border border-neutral-200 p-8 rounded-3xl shadow-sm">
           <h3 className="text-xl font-bold mb-6 text-black tracking-tight uppercase">Quick Actions</h3>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <Link
               href="/admin/products/new"
-              className="flex-1 bg-[#38BDF8] text-black font-bold text-center py-4 rounded-xl hover:bg-[#0ea5e9] hover:text-white transition shadow-sm text-sm"
+              className="bg-[#38BDF8] text-black font-bold text-center py-4 rounded-xl hover:bg-[#0ea5e9] hover:text-white transition shadow-sm text-sm flex items-center justify-center"
             >
               Add New Product
             </Link>
             <Link
               href="/admin/products"
-              className="flex-1 bg-[#111111] text-white font-bold text-center py-4 rounded-xl hover:bg-neutral-800 transition text-sm"
+              className="bg-[#111111] text-white font-bold text-center py-4 rounded-xl hover:bg-neutral-800 transition text-sm flex items-center justify-center"
             >
               View Products
             </Link>
             <Link
               href="/admin/orders"
-              className="flex-1 bg-white border border-neutral-300 text-black font-bold text-center py-4 rounded-xl hover:bg-neutral-50 transition text-sm"
+              className="bg-white border border-neutral-300 text-black font-bold text-center py-4 rounded-xl hover:bg-neutral-50 transition text-sm flex items-center justify-center"
             >
               Manage Orders
             </Link>
             <Link
               href="/admin/coupons"
-              className="flex-1 bg-white border border-neutral-300 text-black font-bold text-center py-4 rounded-xl hover:bg-neutral-50 transition text-sm"
+              className="bg-white border border-neutral-300 text-black font-bold text-center py-4 rounded-xl hover:bg-neutral-50 transition text-sm flex items-center justify-center"
             >
               Manage Coupons
+            </Link>
+            <Link
+              href="/admin/homepage"
+              className="bg-white border border-neutral-300 text-black font-bold text-center py-4 rounded-xl hover:bg-neutral-50 transition text-sm flex items-center justify-center"
+            >
+              Manage Homepage
             </Link>
           </div>
         </div>

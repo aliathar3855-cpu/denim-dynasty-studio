@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { db } from "../firebase/config";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { brandConfig } from "@/config/brand";
@@ -53,6 +53,12 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("default");
+  const [settings, setSettings] = useState<any>({
+    featuredSectionEnabled: true,
+    trendingSectionEnabled: true,
+    seasonalSectionEnabled: true,
+    saleBanner: { enabled: false }
+  });
 
   const categories = [
     "Cord Set",
@@ -64,6 +70,17 @@ export default function Home() {
   ];
 
   useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settingsRef = doc(db, "homepageSettings", "settings");
+        const settingsSnap = await getDoc(settingsRef);
+        if (settingsSnap.exists()) {
+          setSettings(settingsSnap.data());
+        }
+      } catch (err) {
+        console.error("Failed to load homepage settings:", err);
+      }
+    };
     const fetchProducts = async () => {
       try {
         const querySnapshot = await getDocs(
@@ -94,6 +111,7 @@ export default function Home() {
         console.error(error);
       }
     };
+    fetchSettings();
     fetchProducts();
   }, []);
 
@@ -323,7 +341,7 @@ export default function Home() {
       </section>
 
       {/* Seasonal Collection Section */}
-      {seasonalProducts.length > 0 && (
+      {settings.seasonalSectionEnabled !== false && seasonalProducts.length > 0 && (
         <section className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100 flex flex-col gap-10">
           
           {/* Seasonal Banner */}
@@ -396,7 +414,7 @@ export default function Home() {
 
       {/* New Arrivals Section */}
       {/* Featured Products Section */}
-      {featuredProducts.length > 0 && (
+      {settings.featuredSectionEnabled !== false && featuredProducts.length > 0 && (
         <section id="featured-products" className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
           <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
             ⭐ Featured Products
@@ -408,7 +426,7 @@ export default function Home() {
       )}
 
       {/* Trending Products Section */}
-      {trendingProducts.length > 0 && (
+      {settings.trendingSectionEnabled !== false && trendingProducts.length > 0 && (
         <section id="trending-products" className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
           <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
             🔥 Trending Products
@@ -439,6 +457,44 @@ export default function Home() {
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {newArrivals.map((p) => renderProductCard(p))}
+          </div>
+        </section>
+      )}
+
+      {/* Sale Banner Section */}
+      {settings.saleBanner?.enabled && (
+        <section className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100">
+          <div className="relative h-[280px] sm:h-[350px] rounded-[32px] overflow-hidden shadow-lg flex items-center">
+            {/* Background image */}
+            <div className="absolute inset-0 z-0">
+              <img
+                src={settings.saleBanner.imageUrl || settings.saleBanner.image || "/banner-winter.png"}
+                alt={settings.saleBanner.title || "Sale Banner"}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent" />
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 p-8 sm:p-12 text-white max-w-md space-y-4">
+              <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#38BDF8]">
+                Limited Time Offer
+              </span>
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight leading-tight">
+                {settings.saleBanner.title || settings.saleBanner.heading}
+              </h2>
+              <p className="text-xs sm:text-sm text-neutral-300 font-medium leading-relaxed">
+                {settings.saleBanner.subtitle || settings.saleBanner.subheading}
+              </p>
+              <div className="pt-2">
+                <Link
+                  href={settings.saleBanner.buttonLink || settings.saleBanner.action || "/products/all"}
+                  className="inline-block bg-[#38BDF8] text-black px-6 py-3 rounded-xl font-extrabold text-xs uppercase tracking-wider hover:bg-[#0ea5e9] hover:text-white transition duration-305 shadow-md active:scale-95"
+                >
+                  {settings.saleBanner.buttonText || settings.saleBanner.ctaText || "Shop Now"}
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
       )}

@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { db } from "@/firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 
 interface Slide {
   id: number;
@@ -50,17 +52,35 @@ const SLIDES: Slide[] = [
 
 export default function HeroSlider() {
   const router = useRouter();
+  const [slides, setSlides] = useState<Slide[]>(SLIDES);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const docRef = doc(db, "homepageSettings", "settings");
+        const snap = await getDoc(docRef);
+        if (snap.exists() && Array.isArray(snap.data().heroBanners) && snap.data().heroBanners.length > 0) {
+          setSlides(snap.data().heroBanners);
+        }
+      } catch (err) {
+        console.error("Failed to load hero banners from Firestore:", err);
+      }
+    };
+    fetchBanners();
   }, []);
 
+  const nextSlide = useCallback(() => {
+    if (slides.length === 0) return;
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
+
   const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
-  }, []);
+    if (slides.length === 0) return;
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
 
   const selectSlide = (index: number) => {
     setCurrentSlide(index);
@@ -68,7 +88,7 @@ export default function HeroSlider() {
 
   // Autoplay Logic
   useEffect(() => {
-    if (!isHovered) {
+    if (!isHovered && slides.length > 0) {
       timerRef.current = setInterval(() => {
         nextSlide();
       }, 5000);
@@ -78,7 +98,7 @@ export default function HeroSlider() {
         clearInterval(timerRef.current);
       }
     };
-  }, [isHovered, nextSlide]);
+  }, [isHovered, nextSlide, slides.length]);
 
   const handleCtaClick = (action: string) => {
     if (action.startsWith("#")) {
@@ -100,7 +120,7 @@ export default function HeroSlider() {
     >
       {/* Slides Container */}
       <div className="absolute inset-0 w-full h-full">
-        {SLIDES.map((slide, index) => {
+        {slides.map((slide, index) => {
           const isActive = index === currentSlide;
           return (
             <div
@@ -211,7 +231,7 @@ export default function HeroSlider() {
 
       {/* Dots Indicator */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5">
-        {SLIDES.map((_, index) => {
+        {slides.map((_, index) => {
           const isActive = index === currentSlide;
           return (
             <button
