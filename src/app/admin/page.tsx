@@ -204,6 +204,12 @@ export default function AdminPage() {
             >
               Manage Homepage
             </Link>
+            <Link
+              href="/admin/announcements"
+              className="bg-white border border-neutral-300 text-black font-bold text-center py-4 rounded-xl hover:bg-neutral-50 transition text-sm flex items-center justify-center"
+            >
+              Manage Announcements
+            </Link>
           </div>
         </div>
       </main>

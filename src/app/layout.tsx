@@ -6,6 +6,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import Script from "next/script";
 import GlobalFooter from "@/components/GlobalFooter";
 import Navbar from "@/components/Navbar";
+import AnnouncementBar from "@/components/AnnouncementBar";
 import { Toaster } from "react-hot-toast";
 import { brandConfig } from "@/config/brand";
 
@@ -42,7 +43,10 @@ export default function RootLayout({
         <CartProvider>
           <WishlistProvider>
             <Toaster position="top-center" reverseOrder={false} />
-            <Navbar />
+            <header className="sticky top-0 z-50 w-full flex flex-col">
+              <AnnouncementBar />
+              <Navbar />
+            </header>
             {children}
             <GlobalFooter />
           </WishlistProvider>

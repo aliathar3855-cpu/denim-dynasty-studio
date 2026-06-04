@@ -47,7 +47,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="border-b border-neutral-200 bg-white sticky top-0 z-50 backdrop-blur-md bg-white/95 w-full">
+    <nav className="border-b border-neutral-200 bg-white backdrop-blur-md bg-white/95 w-full">
       <div className="flex items-center justify-between px-6 py-4 md:px-8 md:py-5 max-w-7xl mx-auto">
         <Link href="/" className="flex items-center gap-2.5 shrink-0" onClick={handleMobileLinkClick}>
           <Image
