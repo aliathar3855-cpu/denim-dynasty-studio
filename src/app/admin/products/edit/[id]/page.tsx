@@ -11,6 +11,13 @@ import { toast } from "react-hot-toast";
 const LETTER_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 const NUMERIC_SIZES = ["16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40"];
 
+interface ImageItem {
+  id: string;
+  type: "uploaded" | "staged";
+  url: string;
+  file?: File;
+}
+
 export default function EditProductPage() {
   const params = useParams();
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
@@ -23,21 +30,29 @@ export default function EditProductPage() {
   const [stockStatus, setStockStatus] = useState<"IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK">("IN_STOCK");
   const [isBestSeller, setIsBestSeller] = useState(false);
   const [category, setCategory] = useState("");
-  const [images, setImages] = useState<string[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  
+  // Unified images and upload state
+  const [items, setItems] = useState<ImageItem[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [uploadPreviews, setUploadPreviews] = useState<string[]>([]);
   const [sizeType, setSizeType] = useState<"LETTER" | "NUMERIC">("LETTER");
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // Clean up object URLs on component unmount
+  // Keep a ref of items for unmount cleanup
+  const itemsRef = React.useRef<ImageItem[]>([]);
+  itemsRef.current = items;
+
+  // Clean up preview object URLs to avoid memory leaks on component unmount
   useEffect(() => {
     return () => {
-      uploadPreviews.forEach((url) => URL.revokeObjectURL(url));
+      itemsRef.current.forEach((item) => {
+        if (item.type === "staged") {
+          URL.revokeObjectURL(item.url);
+        }
+      });
     };
-  }, [uploadPreviews]);
+  }, []);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -52,7 +67,15 @@ export default function EditProductPage() {
           setStockStatus(prod.stockStatus || "IN_STOCK");
           setIsBestSeller(!!prod.isBestSeller);
           setCategory(prod.category || "");
-          setImages(prod.images || []);
+          
+          // Map existing product images to ImageItem objects
+          const initialItems: ImageItem[] = (prod.images || []).map((url, idx) => ({
+            id: `loaded-${idx}-${Date.now()}`,
+            type: "uploaded" as const,
+            url,
+          }));
+          setItems(initialItems);
+
           setSizeType(prod.sizeType || "LETTER");
           setSelectedSizes(prod.sizes || []);
         } else {
@@ -86,28 +109,47 @@ export default function EditProductPage() {
     if (!files || files.length === 0) return;
 
     const fileList = Array.from(files);
-    console.log("Selected edit file(s):", fileList); // Console log: Selected files
+    console.log("Selected edit file(s):", fileList);
 
-    // Stage files in state
-    setSelectedFiles((prev) => [...prev, ...fileList]);
+    // Validation: Maximum 10 images
+    if (items.length + fileList.length > 10) {
+      toast.error("You can upload a maximum of 10 product images.");
+      return;
+    }
 
-    // Generate object URLs for immediate preview
-    const localPreviews = fileList.map((file) => URL.createObjectURL(file));
-    setUploadPreviews((prev) => [...prev, ...localPreviews]);
+    const newItems: ImageItem[] = fileList.map((file) => {
+      const id = `staged-${Math.random().toString(36).substring(2, 9)}-${Date.now()}`;
+      const url = URL.createObjectURL(file);
+      return { id, type: "staged", url, file };
+    });
+
+    setItems((prev) => [...prev, ...newItems]);
 
     // Reset input value so selecting the same file again triggers onChange
     e.target.value = "";
   };
 
-  const removeStagedImage = (indexToRemove: number) => {
-    // Revoke object URL
-    URL.revokeObjectURL(uploadPreviews[indexToRemove]);
-    setUploadPreviews((prev) => prev.filter((_, idx) => idx !== indexToRemove));
-    setSelectedFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  const removeImageItem = (idToRemove: string) => {
+    setItems((prev) => {
+      const item = prev.find((x) => x.id === idToRemove);
+      if (item && item.type === "staged") {
+        URL.revokeObjectURL(item.url);
+      }
+      return prev.filter((x) => x.id !== idToRemove);
+    });
   };
 
-  const removeImage = (indexToRemove: number) => {
-    setImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  const moveImageItem = (index: number, direction: "left" | "right") => {
+    const targetIndex = direction === "left" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+
+    setItems((prev) => {
+      const newItems = [...prev];
+      const temp = newItems[index];
+      newItems[index] = newItems[targetIndex];
+      newItems[targetIndex] = temp;
+      return newItems;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -129,29 +171,38 @@ export default function EditProductPage() {
       toast.error("Please select a product category.");
       return;
     }
-    if (images.length === 0 && selectedFiles.length === 0) {
-      toast.error("Please select or upload at least one product image.");
+    
+    // Validation: Minimum 1 image, Maximum 10 images
+    if (items.length === 0) {
+      toast.error("Please upload at least one product image");
       return;
     }
+    if (items.length > 10) {
+      toast.error("You can upload a maximum of 10 product images.");
+      return;
+    }
+    
     if (selectedSizes.length === 0) {
       toast.error("Please select at least one size.");
       return;
     }
 
     let uploadedUrls: string[] = [];
+    const stagedItems = items.filter((x) => x.type === "staged");
 
     try {
       setSubmitting(true);
 
       // Perform Cloudinary upload if there are staged local files
-      if (selectedFiles.length > 0) {
+      if (stagedItems.length > 0) {
         setUploading(true);
-        console.log("Upload start: uploading staged files to Cloudinary..."); // Console log: Upload start
-        const uploadToastId = toast.loading("Uploading new images to Cloudinary...");
+        console.log("Upload start: uploading staged files to Cloudinary...");
+        const uploadToastId = toast.loading(`Uploading ${stagedItems.length} new image(s) to Cloudinary...`);
 
         try {
-          uploadedUrls = await uploadImages(selectedFiles);
-          console.log("Cloudinary response secure URLs:", uploadedUrls); // Console log: Cloudinary response
+          const filesToUpload = stagedItems.map((x) => x.file!);
+          uploadedUrls = await uploadImages(filesToUpload);
+          console.log("Cloudinary response secure URLs:", uploadedUrls);
           toast.success("Images uploaded successfully to Cloudinary!", { id: uploadToastId });
         } catch (uploadErr: any) {
           console.error("Cloudinary upload failure:", uploadErr);
@@ -163,7 +214,17 @@ export default function EditProductPage() {
         setUploading(false);
       }
 
-      const finalImages = [...images, ...uploadedUrls];
+      // Reconstruct order of all images replacing staged with their uploaded URLs
+      let uploadIndex = 0;
+      const finalImages = items.map((item) => {
+        if (item.type === "uploaded") {
+          return item.url;
+        } else {
+          const url = uploadedUrls[uploadIndex];
+          uploadIndex++;
+          return url;
+        }
+      });
 
       const updatePayload = {
         name: name.trim(),
@@ -185,7 +246,11 @@ export default function EditProductPage() {
       toast.success("Product updated successfully");
 
       // Revoke preview URLs
-      uploadPreviews.forEach((url) => URL.revokeObjectURL(url));
+      items.forEach((item) => {
+        if (item.type === "staged") {
+          URL.revokeObjectURL(item.url);
+        }
+      });
 
       router.refresh();
       router.push("/admin/products");
@@ -352,7 +417,7 @@ export default function EditProductPage() {
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <span className="text-2xl mb-2">📷</span>
                       <p className="mb-1 text-xs text-[#666666] font-bold">
-                        Click to upload more images
+                        Click to upload more images (1 to 10 images)
                       </p>
                       <p className="text-[10px] text-neutral-400 font-semibold">
                         PNG, JPG, JPEG (Select multiple)
@@ -370,45 +435,67 @@ export default function EditProductPage() {
                 </div>
 
                 {/* Images Grid */}
-                {(images.length > 0 || uploadPreviews.length > 0) && (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-4">
-                    {/* Existing uploaded images */}
-                    {images.map((url, idx) => (
-                      <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-neutral-200 bg-white shadow-sm">
+                {items.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
+                    {items.map((item, idx) => (
+                      <div
+                        key={item.id}
+                        className={`relative group aspect-square rounded-2xl overflow-hidden border bg-neutral-50 shadow-sm transition flex flex-col justify-between ${
+                          item.type === "staged" ? "border-amber-250 ring-2 ring-amber-500/10" : "border-neutral-200"
+                        }`}
+                      >
                         <img
-                          src={url}
-                          alt={`Product image ${idx + 1}`}
+                          src={item.url}
+                          alt={`Preview ${idx + 1}`}
                           className="w-full h-full object-cover"
                         />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(idx)}
-                          className="absolute top-1.5 right-1.5 bg-black/75 hover:bg-red-600 text-white rounded-full p-1 text-xs transition cursor-pointer flex items-center justify-center w-5 h-5 font-bold"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-
-                    {/* Local staged files ready for upload */}
-                    {uploadPreviews.map((url, idx) => (
-                      <div key={`staged-${idx}`} className="relative group aspect-square rounded-xl overflow-hidden border border-neutral-200 bg-sky-50/10 shadow-sm">
-                        <img
-                          src={url}
-                          alt={`Staged image preview ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        {/* Badge indicating it is local/staged */}
-                        <span className="absolute bottom-1.5 left-1.5 bg-amber-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm">
-                          Staged
+                        
+                        {/* Badge in top-left showing rank / number */}
+                        <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[9px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">
+                          {idx + 1}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => removeStagedImage(idx)}
-                          className="absolute top-1.5 right-1.5 bg-black/75 hover:bg-red-600 text-white rounded-full p-1 text-xs transition cursor-pointer flex items-center justify-center w-5 h-5 font-bold"
-                        >
-                          ✕
-                        </button>
+
+                        {/* Staged local file badge */}
+                        {item.type === "staged" && (
+                          <span className="absolute bottom-2 left-2 bg-amber-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                            Staged
+                          </span>
+                        )}
+
+                        {/* Hover action overlay or bottom action bar */}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between gap-1">
+                          <div className="flex gap-1">
+                            {/* Move Left */}
+                            <button
+                              type="button"
+                              onClick={() => moveImageItem(idx, "left")}
+                              disabled={idx === 0}
+                              className="bg-white/90 hover:bg-white text-black p-1 rounded-lg text-xs transition disabled:opacity-40 disabled:hover:bg-white/90 cursor-pointer flex items-center justify-center w-6 h-6"
+                              title="Move Left"
+                            >
+                              ←
+                            </button>
+                            {/* Move Right */}
+                            <button
+                              type="button"
+                              onClick={() => moveImageItem(idx, "right")}
+                              disabled={idx === items.length - 1}
+                              className="bg-white/90 hover:bg-white text-black p-1 rounded-lg text-xs transition disabled:opacity-40 disabled:hover:bg-white/90 cursor-pointer flex items-center justify-center w-6 h-6"
+                              title="Move Right"
+                            >
+                              →
+                            </button>
+                          </div>
+                          {/* Remove */}
+                          <button
+                            type="button"
+                            onClick={() => removeImageItem(item.id)}
+                            className="bg-red-500/90 hover:bg-red-650 text-white p-1 rounded-lg text-xs transition cursor-pointer flex items-center justify-center w-6 h-6 font-bold"
+                            title="Remove Image"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
