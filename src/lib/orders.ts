@@ -30,6 +30,9 @@ export interface OrderData {
   items: OrderItem[];
   subtotal: number;
   deliveryCharge: number;
+  couponCode?: string;
+  couponType?: string;
+  couponDiscount?: number;
   totalAmount: number;
   paymentMethod: "COD" | "RAZORPAY";
   paymentStatus: "Pending" | "Paid";
@@ -73,71 +76,25 @@ export const sanitizePayload = (obj: any): any => {
  * @returns The unique order ID
  */
 export const createOrder = async (orderData: OrderData, paymentId?: string): Promise<string> => {
-  console.log("ORDER PAYLOAD", orderData);
-  const { orderId, userDetails, items, subtotal, deliveryCharge, totalAmount, paymentMethod, paymentStatus, orderStatus } = orderData;
+  console.log("ORDER PAYLOAD (sent to server-side validate/save):", orderData);
 
-  const fullName = `${userDetails.firstName} ${userDetails.lastName}`.trim();
-  const fullAddress = `${userDetails.address1}${
-    userDetails.address2 ? ", " + userDetails.address2 : ""
-  }${userDetails.landmark ? " (Landmark: " + userDetails.landmark + ")" : ""}`.trim();
-
-  // Legacy products format mapping
-  const legacyProducts = items.map((item) => ({
-    id: item.productId,
-    productId: item.productId,
-    name: item.name,
-    price: item.price,
-    imageUrl: item.image,
-    selectedSize: item.selectedSize,
-    quantity: item.quantity,
-  }));
-
-  const payload = {
-    // New Schema
-    orderId,
-    userDetails,
-    items,
-    subtotal,
-    deliveryCharge,
-    totalAmount,
-    paymentMethod,
-    paymentStatus,
-    orderStatus,
-    createdAt: serverTimestamp(),
-
-    // Legacy Schema (maintains compatibility with existing admin/email systems)
-    orderNumber: orderId,
-    customer: {
-      firstName: userDetails.firstName,
-      lastName: userDetails.lastName,
-      name: fullName,
-      email: userDetails.email,
-      phone: userDetails.phone,
-      addressLine1: userDetails.address1,
-      addressLine2: userDetails.address2 || "",
-      landmark: userDetails.landmark || "",
-      address: fullAddress,
-      pincode: userDetails.pincode,
-      city: userDetails.city,
-      state: userDetails.state,
-      country: "India",
-      notes: userDetails.notes || "",
-    },
-    products: legacyProducts,
-    total: totalAmount,
-    paymentId: paymentId || null,
-    status: "pending", // converted orderStatus to lowercase
-  };
-
-  const sanitizedPayload = sanitizePayload(payload);
-  console.log(`[Firestore Order Save] Writing order document to database. ID: "${orderId}", Payload:`, sanitizedPayload);
   try {
-    const docRef = doc(db, "orders", orderId);
-    await setDoc(docRef, sanitizedPayload);
-    console.log(`[Firestore Order Save] Order successfully written to Firestore.`);
-    return orderId;
+    const response = await fetch("/api/place-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderData, paymentId }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to validate and save order on the server.");
+    }
+
+    console.log(`[Firestore Order Save] Order successfully created on server. ID: "${result.orderId}"`);
+    return result.orderId;
   } catch (err: any) {
-    console.error(`[Firestore Order Save] Error writing order to Firestore:`, err);
+    console.error(`[Firestore Order Save] Error routing order to server API:`, err);
     throw err;
   }
 };

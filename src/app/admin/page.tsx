@@ -14,6 +14,7 @@ export default function AdminPage() {
   const router = useRouter();
   const [productCount, setProductCount] = useState<number | null>(null);
   const [orderCount, setOrderCount] = useState<number | null>(null);
+  const [couponCount, setCouponCount] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -26,6 +27,13 @@ export default function AdminPage() {
           setOrderCount(orderSnapshot.size);
         } catch {
           setOrderCount(0); // fallback if orders collection doesn't exist yet
+        }
+
+        try {
+          const couponSnapshot = await getDocs(collection(db, "coupons"));
+          setCouponCount(couponSnapshot.size);
+        } catch {
+          setCouponCount(0); // fallback if coupons collection doesn't exist yet
         }
       } catch (err) {
         console.error("Failed to fetch stats:", err);
@@ -66,7 +74,7 @@ export default function AdminPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {/* Products Count */}
           <div className="bg-[#f8f8f8] border border-neutral-200 p-8 rounded-3xl flex flex-col justify-between h-[180px] shadow-sm">
             <div>
@@ -98,6 +106,22 @@ export default function AdminPage() {
               View Sales & Shipments ➔
             </Link>
           </div>
+
+          {/* Coupons Count */}
+          <div className="bg-[#f8f8f8] border border-neutral-200 p-8 rounded-3xl flex flex-col justify-between h-[180px] shadow-sm">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#666666] mb-1">Total Coupons</p>
+              <h2 className="text-5xl font-black text-black">
+                {couponCount !== null ? couponCount : "—"}
+              </h2>
+            </div>
+            <Link
+              href="/admin/coupons"
+              className="text-sm font-bold text-[#38BDF8] hover:text-[#0ea5e9] transition flex items-center gap-1 mt-4"
+            >
+              Manage Campaigns ➔
+            </Link>
+          </div>
         </div>
 
         {/* Quick Actions Panel */}
@@ -121,6 +145,12 @@ export default function AdminPage() {
               className="flex-1 bg-white border border-neutral-300 text-black font-bold text-center py-4 rounded-xl hover:bg-neutral-50 transition text-sm"
             >
               Manage Orders
+            </Link>
+            <Link
+              href="/admin/coupons"
+              className="flex-1 bg-white border border-neutral-300 text-black font-bold text-center py-4 rounded-xl hover:bg-neutral-50 transition text-sm"
+            >
+              Manage Coupons
             </Link>
           </div>
         </div>
