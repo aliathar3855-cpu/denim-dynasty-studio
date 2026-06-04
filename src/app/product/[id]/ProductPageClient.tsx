@@ -28,6 +28,7 @@ interface ProductPageClientProps {
     originalPrice?: number;
     salePrice?: number;
     isBestSeller?: boolean;
+    ageGroups?: string[];
   };
 }
 
@@ -387,6 +388,25 @@ export default function ProductPageClient({ product }: ProductPageClientProps) {
           <p className="text-neutral-600 mt-6 text-sm sm:text-base leading-relaxed font-medium">
             {product.description}
           </p>
+
+          {/* Suitable For Age Groups */}
+          {product.ageGroups && product.ageGroups.length > 0 && (
+            <div className="mt-6">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#666666] block mb-2">
+                Suitable For
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {product.ageGroups.map((age) => (
+                  <span
+                    key={age}
+                    className="inline-flex items-center gap-1 bg-neutral-50 border border-neutral-200 text-neutral-800 text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs"
+                  >
+                    👶 {age}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Size Selectors Section */}
           {product.sizes && product.sizes.length > 0 && (

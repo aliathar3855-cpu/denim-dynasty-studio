@@ -272,6 +272,38 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Shop By Age */}
+      <section className="px-8 py-16 max-w-6xl mx-auto border-t border-neutral-100">
+        <h3 className="text-3xl font-black mb-10 text-center tracking-tight text-[#111111] uppercase">
+          Shop By Age
+        </h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-4">
+          {[
+            { age: "1-2 Years", desc: "Toddlers", emoji: "👶", bg: "bg-sky-50 border-sky-100 text-sky-850 hover:bg-sky-100/50" },
+            { age: "2-4 Years", desc: "Preschool", emoji: "🧸", bg: "bg-amber-50 border-amber-100 text-amber-900 hover:bg-amber-100/50" },
+            { age: "4-6 Years", desc: "Kinder", emoji: "🎨", bg: "bg-emerald-50 border-emerald-100 text-emerald-950 hover:bg-emerald-100/50" },
+            { age: "6-8 Years", desc: "Active", emoji: "🏃‍♂️", bg: "bg-purple-50 border-purple-100 text-purple-900 hover:bg-purple-100/50" },
+            { age: "8-10 Years", desc: "Explorer", emoji: "🛹", bg: "bg-rose-50 border-rose-100 text-rose-900 hover:bg-rose-100/50" },
+            { age: "10-12 Years", desc: "Tweens", emoji: "🎮", bg: "bg-blue-50 border-blue-100 text-blue-900 hover:bg-blue-100/50" },
+            { age: "12-14 Years", desc: "Teens", emoji: "🎧", bg: "bg-neutral-50 border-neutral-200 text-neutral-800 hover:bg-neutral-100/50" },
+          ].map((item) => (
+            <Link
+              key={item.age}
+              href={`/products/all?ageGroup=${encodeURIComponent(item.age)}`}
+              className={`p-5 rounded-3xl border flex flex-col items-center text-center justify-center transition-all duration-300 shadow-sm hover:shadow hover:scale-102 cursor-pointer ${item.bg}`}
+            >
+              <span className="text-3xl mb-3 block leading-none">{item.emoji}</span>
+              <h4 className="text-sm font-black tracking-tight whitespace-nowrap leading-none mb-1">
+                {item.age}
+              </h4>
+              <span className="text-[10px] uppercase font-bold tracking-wider opacity-60">
+                {item.desc}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Seasonal Collection Section */}
       {seasonalProducts.length > 0 && (
         <section className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100 flex flex-col gap-10">

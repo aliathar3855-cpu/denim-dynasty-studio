@@ -50,6 +50,7 @@ export interface Product {
   salePrice?: number | null;
   isBestSeller?: boolean;
   season?: string;
+  ageGroups?: string[];
 }
 
 /**
@@ -80,6 +81,7 @@ const normalizeProduct = (docId: string, data: any): Product => {
     salePrice: data.salePrice !== undefined && data.salePrice !== null ? Number(data.salePrice) : undefined,
     isBestSeller: !!data.isBestSeller,
     season: data.season || "All Season",
+    ageGroups: Array.isArray(data.ageGroups) ? data.ageGroups : [],
   };
 };
 
@@ -175,6 +177,7 @@ export const addProduct = async (
     salePrice: productData.salePrice !== undefined && productData.salePrice !== null ? Number(productData.salePrice) : null,
     isBestSeller: !!productData.isBestSeller,
     season: productData.season || "All Season",
+    ageGroups: productData.ageGroups || [],
   });
 
   return docRef.id;
@@ -220,6 +223,9 @@ export const updateProduct = async (
   }
   if (productData.season !== undefined) {
     updatePayload.season = productData.season;
+  }
+  if (productData.ageGroups !== undefined) {
+    updatePayload.ageGroups = productData.ageGroups;
   }
 
   await updateDoc(docRef, updatePayload);

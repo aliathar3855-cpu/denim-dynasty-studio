@@ -10,6 +10,7 @@ import { toast } from "react-hot-toast";
 
 const LETTER_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 const NUMERIC_SIZES = ["16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40"];
+const AGE_GROUPS = ["1-2 Years", "2-4 Years", "4-6 Years", "6-8 Years", "8-10 Years", "10-12 Years", "12-14 Years"];
 
 interface ImageItem {
   id: string;
@@ -28,6 +29,7 @@ export default function NewProductPage() {
   const [isBestSeller, setIsBestSeller] = useState(false);
   const [category, setCategory] = useState("");
   const [season, setSeason] = useState("All Season");
+  const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>([]);
   
   // Unified images and upload state
   const [items, setItems] = useState<ImageItem[]>([]);
@@ -54,6 +56,12 @@ export default function NewProductPage() {
   const handleSizeChange = (size: string) => {
     setSelectedSizes((prev) =>
       prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
+    );
+  };
+
+  const handleAgeGroupChange = (age: string) => {
+    setSelectedAgeGroups((prev) =>
+      prev.includes(age) ? prev.filter((a) => a !== age) : [...prev, age]
     );
   };
 
@@ -193,6 +201,7 @@ export default function NewProductPage() {
         salePrice: Number(price),
         isBestSeller,
         season,
+        ageGroups: selectedAgeGroups,
       };
 
       console.log("Firestore save payload:", productPayload); // Console log: Firestore save
@@ -371,6 +380,31 @@ export default function NewProductPage() {
                 <option value="Festive">Festive</option>
                 <option value="Winter">Winter</option>
               </select>
+            </div>
+
+            {/* Age Groups checkboxes */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-3">
+                Suitable Age Groups (Select multiple if needed)
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-white p-5 border border-neutral-300 rounded-xl">
+                {AGE_GROUPS.map((age) => {
+                  const isChecked = selectedAgeGroups.includes(age);
+                  return (
+                    <label key={age} className="flex items-center gap-2.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => handleAgeGroupChange(age)}
+                        className="w-4.5 h-4.5 rounded border-neutral-300 text-[#38BDF8] focus:ring-[#38BDF8] cursor-pointer"
+                      />
+                      <span className="text-xs font-bold text-[#111111]">
+                        {age}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Product Images Upload */}
