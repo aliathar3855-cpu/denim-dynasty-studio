@@ -239,6 +239,10 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     if (!validateForm()) return;
 
+    const subtotal = total;
+    const deliveryCharge = subtotal >= 999 ? 0 : 99;
+    const finalTotal = subtotal + deliveryCharge;
+
     setSubmitting(true);
     const orderId = generateOrderId();
 
@@ -261,7 +265,9 @@ export default function CheckoutPage() {
             notes: notes.trim() || "",
           },
           items: cartItems,
-          totalAmount: total,
+          subtotal,
+          deliveryCharge,
+          totalAmount: finalTotal,
           paymentMethod: "COD" as const,
           paymentStatus: "Pending" as const,
           orderStatus: "Pending" as const,
@@ -295,7 +301,7 @@ export default function CheckoutPage() {
       const res = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: total }),
+        body: JSON.stringify({ amount: finalTotal }),
       });
 
       if (!res.ok) {
@@ -340,7 +346,9 @@ export default function CheckoutPage() {
                 notes: notes.trim() || "",
               },
               items: cartItems,
-              totalAmount: total,
+              subtotal,
+              deliveryCharge,
+              totalAmount: finalTotal,
               paymentMethod: "RAZORPAY" as const,
               paymentStatus: "Paid" as const,
               orderStatus: "Pending" as const,
@@ -628,9 +636,23 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          <div className="border-t border-neutral-200 pt-4 mt-4 text-xl font-black text-[#111111] flex justify-between">
-            <span>Total:</span>
-            <span>₹{total}</span>
+          {/* Totals Breakdown */}
+          {cartItems.length > 0 && (
+            <div className="border-t border-neutral-200 pt-4 mt-4 space-y-2 text-sm font-semibold text-neutral-600">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>₹{total}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Delivery Charge</span>
+                <span>{total >= 999 ? <span className="text-[#38BDF8] font-bold">FREE</span> : `₹99`}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="border-t border-neutral-200 pt-4 mt-2 text-xl font-black text-[#111111] flex justify-between">
+            <span>Final Total:</span>
+            <span>₹{total + (total >= 999 ? 0 : 99)}</span>
           </div>
 
           <button

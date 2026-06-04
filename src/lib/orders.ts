@@ -28,6 +28,8 @@ export interface OrderData {
   orderId: string;
   userDetails: UserDetails;
   items: OrderItem[];
+  subtotal: number;
+  deliveryCharge: number;
   totalAmount: number;
   paymentMethod: "COD" | "RAZORPAY";
   paymentStatus: "Pending" | "Paid";
@@ -72,7 +74,7 @@ export const sanitizePayload = (obj: any): any => {
  */
 export const createOrder = async (orderData: OrderData, paymentId?: string): Promise<string> => {
   console.log("ORDER PAYLOAD", orderData);
-  const { orderId, userDetails, items, totalAmount, paymentMethod, paymentStatus, orderStatus } = orderData;
+  const { orderId, userDetails, items, subtotal, deliveryCharge, totalAmount, paymentMethod, paymentStatus, orderStatus } = orderData;
 
   const fullName = `${userDetails.firstName} ${userDetails.lastName}`.trim();
   const fullAddress = `${userDetails.address1}${
@@ -95,6 +97,8 @@ export const createOrder = async (orderData: OrderData, paymentId?: string): Pro
     orderId,
     userDetails,
     items,
+    subtotal,
+    deliveryCharge,
     totalAmount,
     paymentMethod,
     paymentStatus,

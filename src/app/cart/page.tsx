@@ -18,11 +18,15 @@ export default function CartPage() {
 
   const router = useRouter();
 
-  const totalPrice = cart.reduce(
+  const subtotal = cart.reduce(
     (total: number, item: any) =>
       total + item.price * item.quantity,
     0
   );
+  const FREE_SHIPPING_THRESHOLD = 999;
+  const DELIVERY_FEE = 99;
+  const deliveryCharge = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : DELIVERY_FEE;
+  const grandTotal = subtotal + deliveryCharge;
 
   return (
     <main className="min-h-screen bg-white text-[#111111] p-6 md:p-12 font-sans max-w-4xl mx-auto">
@@ -106,12 +110,47 @@ export default function CartPage() {
             </div>
           ))}
 
-          <div className="bg-[#f8f8f8] border border-neutral-200 rounded-2xl p-8 mt-6">
-            <h2 className="text-3xl font-black text-[#111111]">
-              Grand Total: ₹{totalPrice}
+          {/* Dynamic Free Shipping Progress Alert */}
+          <div className={`p-4 rounded-2xl border text-sm font-bold tracking-tight mb-2 flex items-center justify-between transition-all ${
+            subtotal >= FREE_SHIPPING_THRESHOLD
+              ? "bg-[#38BDF8]/10 border-[#38BDF8] text-black"
+              : "bg-amber-50 border-amber-200 text-amber-900"
+          }`}>
+            <span>
+              {subtotal >= FREE_SHIPPING_THRESHOLD
+                ? "🎉 Congratulations! You unlocked FREE Delivery"
+                : `Add ₹${FREE_SHIPPING_THRESHOLD - subtotal} more to get FREE Delivery 🚚`}
+            </span>
+            {subtotal < FREE_SHIPPING_THRESHOLD ? (
+              <span className="text-[10px] uppercase font-black tracking-wider bg-amber-200 text-amber-950 px-2 py-0.5 rounded-md hidden sm:inline-block">
+                Progress
+              </span>
+            ) : (
+              <span className="text-[10px] uppercase font-black tracking-wider bg-[#38BDF8] text-black px-2 py-0.5 rounded-md hidden sm:inline-block">
+                Unlocked
+              </span>
+            )}
+          </div>
+
+          <div className="bg-[#f8f8f8] border border-neutral-200 rounded-2xl p-8 space-y-4">
+            {/* Totals Breakdown */}
+            <div className="space-y-2 pb-4 border-b border-neutral-200">
+              <div className="flex justify-between text-neutral-600 font-semibold text-sm">
+                <span>Subtotal</span>
+                <span>₹{subtotal}</span>
+              </div>
+              <div className="flex justify-between text-neutral-600 font-semibold text-sm">
+                <span>Delivery Charge</span>
+                <span>{deliveryCharge === 0 ? <span className="text-[#38BDF8] font-black">FREE</span> : `₹${deliveryCharge}`}</span>
+              </div>
+            </div>
+
+            <h2 className="text-3xl font-black text-[#111111] flex justify-between">
+              <span>Grand Total:</span>
+              <span>₹{grandTotal}</span>
             </h2>
 
-            <div className="flex flex-wrap gap-4 mt-6">
+            <div className="flex flex-wrap gap-4 pt-4">
               <button
                 onClick={() => router.push("/checkout")}
                 className="bg-[#38BDF8] text-black px-8 py-4 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition cursor-pointer shadow-md select-none"
