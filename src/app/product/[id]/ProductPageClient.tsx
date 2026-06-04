@@ -8,6 +8,9 @@ import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { formatSize, KIDS_SIZE_CHART } from "@/lib/products";
 import Image from "next/image";
+import HoverMagnifier from "@/components/HoverMagnifier";
+import ProductImageLightbox from "@/components/ProductImageLightbox";
+import { getOptimizedImageUrl } from "@/lib/cloudinaryHelper";
 
 interface ProductPageClientProps {
   product: {
@@ -43,6 +46,9 @@ export default function ProductPageClient({ product }: ProductPageClientProps) {
 
   // Size Guide Modal State
   const [showSizeGuide, setShowSizeGuide] = useState(false);
+
+  // Lightbox Modal State
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   // Related & Recently Viewed States
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
@@ -255,10 +261,10 @@ export default function ProductPageClient({ product }: ProductPageClientProps) {
               </>
             )}
 
-            <img
+            <HoverMagnifier
               src={productImages[activeImageIndex]}
               alt={`${product.name} - image ${activeImageIndex + 1}`}
-              className="w-full h-full object-cover"
+              onClick={() => setIsLightboxOpen(true)}
             />
 
             {/* Out of Stock banner overlay on main preview */}
@@ -290,9 +296,10 @@ export default function ProductPageClient({ product }: ProductPageClientProps) {
                   }`}
                 >
                   <img
-                    src={img}
+                    src={getOptimizedImageUrl(img, 155)}
                     alt={`${product.name} thumbnail ${idx + 1}`}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </button>
               ))}
@@ -775,6 +782,15 @@ export default function ProductPageClient({ product }: ProductPageClientProps) {
           </div>
         </div>
       )}
+
+      {/* Product Image Zoom Fullscreen Lightbox Modal */}
+      <ProductImageLightbox
+        images={productImages}
+        initialIndex={activeImageIndex}
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        productName={product.name}
+      />
 
     </main>
   );
