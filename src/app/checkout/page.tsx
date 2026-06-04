@@ -351,6 +351,7 @@ export default function CheckoutPage() {
       }
 
       // 2. Online Razorpay Checkout Flow
+      console.log(`[Razorpay Flow] Initiating order creation on server for subtotal: ${subtotal}, delivery: ${deliveryCharge}, discount: ${discount}, finalTotal: ${finalTotal}`);
       const res = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -358,13 +359,19 @@ export default function CheckoutPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to contact Razorpay server");
+        const errorData = await res.json().catch(() => ({}));
+        const serverError = errorData?.error || "Failed to contact Razorpay server";
+        throw new Error(serverError);
       }
 
       const razorpayOrder = await res.json();
+      console.log("[Razorpay Flow] Razorpay order created successfully on server:", razorpayOrder);
+
+      const activeKeyId = razorpayOrder.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SuvDwRB1EtmEvK";
+      console.log(`[Razorpay Flow] Using key_id: "${activeKeyId}"`);
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SuvDwRB1EtmEvK",
+        key: activeKeyId,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
         name: brandConfig.brandName,
@@ -381,7 +388,16 @@ export default function CheckoutPage() {
           netbanking: true,
           wallet: true,
         },
+        modal: {
+          ondismiss: function () {
+            console.log(`[Razorpay Flow] Payment modal dismissed/cancelled by user for order ${orderId}`);
+            setSubmitting(false);
+          }
+        },
         handler: async function (response: any) {
+          console.log("[Razorpay Flow] Payment success callback triggered by Razorpay. Response:", response);
+          console.log(`[Razorpay Flow] payment_id: "${response.razorpay_payment_id}", order_id: "${response.razorpay_order_id}", signature: "${response.razorpay_signature}"`);
+
           try {
             const orderData = {
               orderId,
@@ -405,14 +421,18 @@ export default function CheckoutPage() {
               couponType: appliedCoupon ? appliedCoupon.type : "",
               couponDiscount: discount,
               totalAmount: finalTotal,
-              paymentMethod: "RAZORPAY" as const,
-              paymentStatus: "Paid" as const,
+              paymentMethod: "ONLINE" as const,
+              paymentStatus: "PAID" as const,
               orderStatus: "Pending" as const,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id || razorpayOrder.id,
+              razorpaySignature: response.razorpay_signature,
             };
 
-            console.log("ORDER PAYLOAD", orderData);
+            console.log("[Razorpay Flow] Saving order to Firestore with payload:", orderData);
 
             const createdId = await createOrder(orderData, response.razorpay_payment_id);
+            console.log(`[Razorpay Flow] Firestore order document created successfully. ID: "${createdId}"`);
 
             // Clear cart
             clearCart();
@@ -426,15 +446,17 @@ export default function CheckoutPage() {
                 body: JSON.stringify({ orderId: createdId, action: "placed" }),
               });
             } catch (mailErr) {
-              console.error("Mail trigger error:", mailErr);
+              console.error("[Razorpay Flow] Mail trigger error:", mailErr);
             }
 
             toast.success("✓ Payment Successful | Order Confirmed");
             router.push(`/order-success?orderNumber=${createdId}`);
           } catch (err: any) {
-            console.error("Order save failure after online payment:", err);
+            console.error("[Razorpay Flow] Order save failure after online payment:", err);
             const errMsg = err?.message || String(err);
-            toast.error(`Payment was successful, but we failed to record your order: ${errMsg}`, { duration: 10000 });
+            toast.error(`Payment was successful, but we failed to record your order in our database: ${errMsg}`, { duration: 10000 });
+          } finally {
+            setSubmitting(false);
           }
         },
         theme: {
@@ -442,9 +464,16 @@ export default function CheckoutPage() {
         },
       };
 
+      console.log("[Razorpay Flow] Initializing Razorpay instance with options:", {
+        ...options,
+        key: "***" + options.key.slice(-4), // mask key for security in logs
+      });
+
       const razor = new (window as any).Razorpay(options);
       razor.on("payment.failed", function (response: any) {
-        toast.error(`Payment failed: ${response.error.description}`);
+        console.error("[Razorpay Flow] Payment transaction failed:", response.error);
+        toast.error(`Payment failed: ${response.error.description || "Unknown error occurred"}`);
+        setSubmitting(false);
       });
       razor.open();
     } catch (err: any) {
@@ -452,7 +481,10 @@ export default function CheckoutPage() {
       const errMsg = err?.message || String(err);
       toast.error(`Something went wrong while placing order: ${errMsg}`, { duration: 8000 });
     } finally {
-      setSubmitting(false);
+      // Only set to false if we did not trigger Razorpay (which handles it in callbacks)
+      if (paymentMethod === "COD") {
+        setSubmitting(false);
+      }
     }
   };
 

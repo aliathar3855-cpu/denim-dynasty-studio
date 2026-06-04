@@ -209,7 +209,7 @@ export default function MyOrdersPage() {
                             ₹{order.total || 0}
                           </td>
                           <td className="px-6 py-4 capitalize text-[#666666]">
-                            {order.paymentMethod === "cod" ? "COD" : "Online"}
+                            {(order.paymentMethod || "").toLowerCase() === "cod" ? "COD" : "Online"}
                           </td>
                           <td className="px-6 py-4">
                             <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${statusInfo.class}`}>
@@ -261,7 +261,7 @@ export default function MyOrdersPage() {
                         <div>
                           <span className="block text-[10px] text-neutral-400">Payment</span>
                           <span className="font-medium text-[#111111] capitalize">
-                            {order.paymentMethod === "cod" ? "Cash on Delivery" : "Online Checkout"}
+                            {(order.paymentMethod || "").toLowerCase() === "cod" ? "Cash on Delivery" : "Online Checkout"}
                           </span>
                         </div>
                       </div>

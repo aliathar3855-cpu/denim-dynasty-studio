@@ -34,9 +34,12 @@ export interface OrderData {
   couponType?: string;
   couponDiscount?: number;
   totalAmount: number;
-  paymentMethod: "COD" | "RAZORPAY";
-  paymentStatus: "Pending" | "Paid";
+  paymentMethod: "COD" | "RAZORPAY" | "ONLINE";
+  paymentStatus: "Pending" | "Paid" | "PAID";
   orderStatus: "Pending";
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  razorpaySignature?: string;
 }
 
 /**

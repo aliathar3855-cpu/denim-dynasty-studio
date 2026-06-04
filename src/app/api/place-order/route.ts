@@ -11,12 +11,20 @@ import {
   serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
+import crypto from "crypto";
 
 export async function POST(req: Request) {
   try {
     const { orderData, paymentId } = await req.json();
+    console.log("[Place Order API] Received order save request on server:", {
+      orderId: orderData?.orderId,
+      paymentMethod: orderData?.paymentMethod,
+      paymentStatus: orderData?.paymentStatus,
+      paymentId
+    });
 
     if (!orderData || !orderData.orderId || !orderData.userDetails || !orderData.items) {
+      console.error("[Place Order API] Missing order parameters:", orderData);
       return NextResponse.json({ error: "Missing required order parameters" }, { status: 400 });
     }
 
@@ -28,7 +36,43 @@ export async function POST(req: Request) {
       paymentStatus,
       orderStatus,
       couponCode,
+      razorpayPaymentId,
+      razorpayOrderId,
+      razorpaySignature,
     } = orderData;
+
+    // Cryptographic signature verification for online payments
+    if (paymentMethod === "ONLINE" || paymentMethod === "RAZORPAY") {
+      const activePaymentId = razorpayPaymentId || paymentId;
+      const activeOrderId = razorpayOrderId;
+      const activeSignature = razorpaySignature || orderData.razorpaySignature;
+
+      console.log(`[Razorpay Verification] Verifying payment details: paymentId=${activePaymentId}, orderId=${activeOrderId}, signature=${activeSignature}`);
+
+      if (!activePaymentId || !activeOrderId || !activeSignature) {
+        console.error("[Razorpay Verification] Verification failed: Missing payment credentials.");
+        return NextResponse.json({ 
+          error: `Verification failed: Missing required Razorpay details. paymentId=${activePaymentId || "missing"}, orderId=${activeOrderId || "missing"}, signature=${activeSignature || "missing"}` 
+        }, { status: 400 });
+      }
+
+      if (!process.env.RAZORPAY_KEY_SECRET) {
+        console.error("[Razorpay Verification] RAZORPAY_KEY_SECRET is not configured on the server.");
+        return NextResponse.json({ error: "Razorpay integration is not configured on the server." }, { status: 500 });
+      }
+
+      const generatedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+        .update(activeOrderId + "|" + activePaymentId)
+        .digest("hex");
+
+      if (generatedSignature !== activeSignature) {
+        console.error(`[Razorpay Verification] Signature mismatch! Generated: "${generatedSignature}", Received: "${activeSignature}"`);
+        return NextResponse.json({ error: "Razorpay payment signature verification failed. Mismatched signature." }, { status: 400 });
+      }
+
+      console.log("[Razorpay Verification] Payment signature verified successfully!");
+    }
 
     // 1. Locate coupon document ID beforehand if a coupon is provided
     let couponDocId: string | null = null;
@@ -175,6 +219,9 @@ export async function POST(req: Request) {
         paymentMethod,
         paymentStatus,
         orderStatus,
+        razorpayPaymentId: razorpayPaymentId || paymentId || "",
+        razorpayOrderId: razorpayOrderId || "",
+        razorpaySignature: razorpaySignature || "",
         createdAt: serverTimestamp(),
 
         // Legacy Schema Compatibility
@@ -197,8 +244,8 @@ export async function POST(req: Request) {
         },
         products: legacyProducts,
         total: computedTotal,
-        paymentId: paymentId || null,
-        status: "pending",
+        paymentId: paymentId || razorpayPaymentId || null,
+        status: (paymentMethod === "ONLINE" || paymentMethod === "RAZORPAY") ? "paid" : "pending",
       };
 
       const orderRef = doc(db, "orders", orderId);

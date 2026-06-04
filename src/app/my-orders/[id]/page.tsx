@@ -343,7 +343,7 @@ export default function OrderDetailsPage() {
               <div>
                 <span className="block text-[10px] text-neutral-400 uppercase font-semibold">Payment Gateway Info</span>
                 <span className="text-xs text-[#666666] font-medium capitalize">
-                  Method: {order.paymentMethod === "cod" ? "Cash on Delivery" : "Online Checkout"}
+                  Method: {(order.paymentMethod || "").toLowerCase() === "cod" ? "Cash on Delivery" : "Online Checkout"}
                   {order.paymentId && ` | Txn ID: ${order.paymentId}`}
                 </span>
               </div>

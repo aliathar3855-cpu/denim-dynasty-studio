@@ -318,7 +318,7 @@ export default function AdminOrdersPage() {
                         {/* Payment Column */}
                         <td className="px-6 py-4">
                           <span className="capitalize px-2.5 py-1 rounded-full text-xs font-semibold bg-white text-[#111111] border border-neutral-200">
-                            {order.paymentMethod === "cod" ? "COD" : "Online"}
+                            {(order.paymentMethod || "").toLowerCase() === "cod" ? "COD" : "Online"}
                           </span>
                           {order.paymentId && (
                             <div className="text-[#666666] text-[10px] mt-1 truncate max-w-[120px]">
