@@ -77,7 +77,8 @@ const normalizeOrder = (docId: string, data: any) => {
 };
 
 export default function OrderDetailsPage() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id;
   const [order, setOrder] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -85,7 +86,10 @@ export default function OrderDetailsPage() {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        if (!id) return;
+        if (!id) {
+          setLoading(false);
+          return;
+        }
         setLoading(true);
         setError("");
 
@@ -149,22 +153,27 @@ export default function OrderDetailsPage() {
   };
 
   const getStepStatus = (stepKey: string, currentStatus: string) => {
-    if (currentStatus === "cancelled") {
+    let normalizedStatus = (currentStatus || "pending").toLowerCase();
+    if (normalizedStatus === "paid") {
+      normalizedStatus = "pending";
+    }
+
+    if (normalizedStatus === "cancelled") {
       // If cancelled, check if the step was completed before cancellation (exists in history)
       const historyItem = order?.statusHistory?.find((h: any) => h.status?.toLowerCase() === stepKey.toLowerCase());
       return historyItem ? "completed" : "pending";
     }
 
     const statusOrder = ["pending", "confirmed", "packed", "shipped", "delivered"];
-    const currentIdx = statusOrder.indexOf((currentStatus || "pending").toLowerCase());
+    const currentIdx = statusOrder.indexOf(normalizedStatus);
     const stepIdx = statusOrder.indexOf(stepKey.toLowerCase());
 
     if (currentIdx === -1 || stepIdx === -1) {
       return stepKey === "pending" ? "completed" : "pending";
     }
 
-    if (stepIdx < currentIdx) return "completed";
-    if (stepIdx === currentIdx) return "active";
+    if (stepIdx <= currentIdx) return "completed";
+    if (stepIdx === currentIdx + 1) return "active";
     return "pending";
   };
 
