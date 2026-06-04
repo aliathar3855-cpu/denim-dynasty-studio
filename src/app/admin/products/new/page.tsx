@@ -27,6 +27,7 @@ export default function NewProductPage() {
   const [stockStatus, setStockStatus] = useState<"IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK">("IN_STOCK");
   const [isBestSeller, setIsBestSeller] = useState(false);
   const [category, setCategory] = useState("");
+  const [season, setSeason] = useState("All Season");
   
   // Unified images and upload state
   const [items, setItems] = useState<ImageItem[]>([]);
@@ -191,6 +192,7 @@ export default function NewProductPage() {
         originalPrice: originalPrice ? Number(originalPrice) : null,
         salePrice: Number(price),
         isBestSeller,
+        season,
       };
 
       console.log("Firestore save payload:", productPayload); // Console log: Firestore save
@@ -349,6 +351,25 @@ export default function NewProductPage() {
                 <option value="track pant">Track Pant</option>
                 <option value="3/4 pant">3/4 Pant</option>
                 <option value="cord set">Cord Set</option>
+              </select>
+            </div>
+
+            {/* Season dropdown */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#666666] mb-2">
+                Season
+              </label>
+              <select
+                value={season}
+                onChange={(e) => setSeason(e.target.value)}
+                className="w-full p-4 rounded-xl bg-white border border-neutral-300 text-[#111111] outline-none focus:border-neutral-500 transition cursor-pointer font-bold text-sm"
+                required
+              >
+                <option value="All Season">All Season</option>
+                <option value="Summer">Summer</option>
+                <option value="Monsoon">Monsoon</option>
+                <option value="Festive">Festive</option>
+                <option value="Winter">Winter</option>
               </select>
             </div>
 

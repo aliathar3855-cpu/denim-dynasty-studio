@@ -49,6 +49,7 @@ export interface Product {
   originalPrice?: number | null;
   salePrice?: number | null;
   isBestSeller?: boolean;
+  season?: string;
 }
 
 /**
@@ -78,6 +79,7 @@ const normalizeProduct = (docId: string, data: any): Product => {
     originalPrice: data.originalPrice !== undefined && data.originalPrice !== null ? Number(data.originalPrice) : undefined,
     salePrice: data.salePrice !== undefined && data.salePrice !== null ? Number(data.salePrice) : undefined,
     isBestSeller: !!data.isBestSeller,
+    season: data.season || "All Season",
   };
 };
 
@@ -172,6 +174,7 @@ export const addProduct = async (
     originalPrice: productData.originalPrice !== undefined && productData.originalPrice !== null ? Number(productData.originalPrice) : null,
     salePrice: productData.salePrice !== undefined && productData.salePrice !== null ? Number(productData.salePrice) : null,
     isBestSeller: !!productData.isBestSeller,
+    season: productData.season || "All Season",
   });
 
   return docRef.id;
@@ -214,6 +217,9 @@ export const updateProduct = async (
   }
   if (productData.isBestSeller !== undefined) {
     updatePayload.isBestSeller = !!productData.isBestSeller;
+  }
+  if (productData.season !== undefined) {
+    updatePayload.season = productData.season;
   }
 
   await updateDoc(docRef, updatePayload);

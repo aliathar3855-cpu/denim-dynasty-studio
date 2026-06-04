@@ -10,6 +10,41 @@ import { useWishlist } from "@/context/WishlistContext";
 import { brandConfig } from "@/config/brand";
 import HeroSlider from "@/components/HeroSlider";
 
+const getCurrentSeason = (): "Summer" | "Monsoon" | "Festive" | "Winter" => {
+  const month = new Date().getMonth() + 1; // 1-12
+  if (month >= 3 && month <= 6) return "Summer";
+  if (month >= 7 && month <= 9) return "Monsoon";
+  if (month >= 10 && month <= 11) return "Festive";
+  return "Winter";
+};
+
+const SEASON_CONFIG = {
+  Summer: {
+    title: "🌞 Summer Collection",
+    banner: "/banner-summer.png",
+    description: "Beat the heat with lightweight, breezy cotton styles and coordinates.",
+    gradient: "from-amber-600/40 via-black/45 to-black/85",
+  },
+  Monsoon: {
+    title: "🌧️ Monsoon Collection",
+    banner: "/banner-monsoon.png",
+    description: "Splash in comfort with fresh, quick-drying premium streetwear pieces.",
+    gradient: "from-sky-700/40 via-black/45 to-black/85",
+  },
+  Festive: {
+    title: "🎉 Festive Collection",
+    banner: "/banner-festive.png",
+    description: "Sparkle in style with premium ethnic-fusion and designer outfits.",
+    gradient: "from-purple-700/40 via-black/45 to-black/85",
+  },
+  Winter: {
+    title: "❄️ Winter Collection",
+    banner: "/banner-winter.png",
+    description: "Stay cozy with premium jackets, sweaters, and denim layering.",
+    gradient: "from-blue-700/40 via-black/45 to-black/85",
+  },
+};
+
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const { addToCart, cart } = useCart();
@@ -48,6 +83,7 @@ export default function Home() {
             stockStatus: data.stockStatus || "IN_STOCK",
             isBestSeller: !!data.isBestSeller,
             createdAt: data.createdAt,
+            season: data.season || "All Season",
           } as any;
         });
         setProducts(productList);
@@ -92,6 +128,13 @@ export default function Home() {
   const bestSellers = products.filter((p) => p.isBestSeller).length > 0
     ? products.filter((p) => p.isBestSeller).slice(0, 4)
     : products.slice(0, 4);
+
+  const currentSeasonKey = getCurrentSeason();
+  const seasonConfig = SEASON_CONFIG[currentSeasonKey];
+
+  const seasonalProducts = products.filter(
+    (p) => (p.season || "All Season") === currentSeasonKey || (p.season || "All Season") === "All Season"
+  );
 
   const renderProductCard = (p: any) => {
     const showDiscount = p.originalPrice && p.originalPrice > p.price;
@@ -228,6 +271,78 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* Seasonal Collection Section */}
+      {seasonalProducts.length > 0 && (
+        <section className="py-16 px-8 max-w-6xl mx-auto border-t border-neutral-100 flex flex-col gap-10">
+          
+          {/* Seasonal Banner */}
+          <div className="relative w-full h-[250px] sm:h-[320px] rounded-[32px] overflow-hidden shadow-md">
+            <Image
+              src={seasonConfig.banner}
+              alt={seasonConfig.title}
+              fill
+              className="object-cover"
+              sizes="100vw"
+            />
+            {/* Custom overlay with gradient matching the season */}
+            <div className={`absolute inset-0 bg-gradient-to-t ${seasonConfig.gradient}`} />
+            
+            {/* Banner details */}
+            <div className="absolute inset-0 flex flex-col justify-end p-8 sm:p-12 text-white">
+              <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#38BDF8] mb-2 md:mb-3">
+                Seasonal Spotlight
+              </span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight mb-3">
+                {seasonConfig.title}
+              </h2>
+              <p className="text-[#E5E5E5] text-xs sm:text-sm max-w-md font-medium leading-relaxed">
+                {seasonConfig.description}
+              </p>
+            </div>
+          </div>
+
+          {/* Carousel Slider */}
+          <div className="relative group/carousel">
+            {/* Left and Right navigation scroll buttons */}
+            <button
+              onClick={() => {
+                const el = document.getElementById("seasonal-scroller");
+                if (el) {
+                  el.scrollBy({ left: -320, behavior: "smooth" });
+                }
+              }}
+              className="absolute -left-4 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center w-11 h-11 bg-white hover:bg-neutral-50 text-[#111111] border border-neutral-200 rounded-full shadow-md transition hover:scale-105 active:scale-95 opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex"
+            >
+              ❮
+            </button>
+            <button
+              onClick={() => {
+                const el = document.getElementById("seasonal-scroller");
+                if (el) {
+                  el.scrollBy({ left: 320, behavior: "smooth" });
+                }
+              }}
+              className="absolute -right-4 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center w-11 h-11 bg-white hover:bg-neutral-50 text-[#111111] border border-neutral-200 rounded-full shadow-md transition hover:scale-105 active:scale-95 opacity-0 group-hover/carousel:opacity-100 cursor-pointer hidden md:flex"
+            >
+              ❯
+            </button>
+
+            {/* Scroller list */}
+            <div
+              id="seasonal-scroller"
+              className="flex gap-6 overflow-x-auto pb-4 scroll-smooth no-scrollbar snap-x snap-mandatory"
+            >
+              {seasonalProducts.map((p) => (
+                <div key={p.id} className="min-w-[240px] sm:min-w-[280px] w-[240px] sm:w-[280px] shrink-0 snap-start">
+                  {renderProductCard(p)}
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </section>
+      )}
 
       {/* New Arrivals Section */}
       {newArrivals.length > 0 && (

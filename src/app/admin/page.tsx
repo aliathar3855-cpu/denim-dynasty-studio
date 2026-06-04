@@ -15,12 +15,36 @@ export default function AdminPage() {
   const [productCount, setProductCount] = useState<number | null>(null);
   const [orderCount, setOrderCount] = useState<number | null>(null);
   const [couponCount, setCouponCount] = useState<number | null>(null);
+  const [seasonalCounts, setSeasonalCounts] = useState<Record<string, number>>({
+    "Summer": 0,
+    "Monsoon": 0,
+    "Festive": 0,
+    "Winter": 0,
+    "All Season": 0,
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const prodSnapshot = await getDocs(collection(db, "products"));
         setProductCount(prodSnapshot.size);
+
+        const counts: Record<string, number> = {
+          "Summer": 0,
+          "Monsoon": 0,
+          "Festive": 0,
+          "Winter": 0,
+          "All Season": 0,
+        };
+        prodSnapshot.docs.forEach((docItem) => {
+          const s = docItem.data().season || "All Season";
+          if (counts[s] !== undefined) {
+            counts[s]++;
+          } else {
+            counts[s] = 1;
+          }
+        });
+        setSeasonalCounts(counts);
 
         try {
           const orderSnapshot = await getDocs(collection(db, "orders"));
@@ -121,6 +145,28 @@ export default function AdminPage() {
             >
               Manage Campaigns ➔
             </Link>
+          </div>
+        </div>
+
+        {/* Products by Season Section */}
+        <div className="bg-[#f8f8f8] border border-neutral-200 p-8 rounded-3xl mb-12 shadow-sm">
+          <h3 className="text-xl font-bold mb-6 text-black tracking-tight uppercase">Products by Season</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {[
+              { label: "🌞 Summer", key: "Summer", color: "text-amber-600 bg-amber-50 border-amber-200" },
+              { label: "🌧️ Monsoon", key: "Monsoon", color: "text-sky-600 bg-sky-50 border-sky-200" },
+              { label: "🎉 Festive", key: "Festive", color: "text-purple-600 bg-purple-50 border-purple-200" },
+              { label: "❄️ Winter", key: "Winter", color: "text-blue-600 bg-blue-50 border-blue-200" },
+              { label: "👕 All Season", key: "All Season", color: "text-neutral-600 bg-neutral-50 border-neutral-250" },
+            ].map((season) => (
+              <div
+                key={season.key}
+                className={`p-5 rounded-2xl border text-center flex flex-col justify-center items-center font-bold shadow-sm ${season.color}`}
+              >
+                <span className="text-[10px] font-black uppercase tracking-wider mb-2">{season.label}</span>
+                <span className="text-3xl font-black">{seasonalCounts[season.key] || 0}</span>
+              </div>
+            ))}
           </div>
         </div>
 
