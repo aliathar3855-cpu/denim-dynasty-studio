@@ -7,15 +7,25 @@ import { db } from "@/firebase/config";
 import Link from "next/link";
 import { brandConfig } from "@/config/brand";
 import { formatSize } from "@/lib/products";
+import { useCart } from "@/context/CartContext";
 
 function OrderSuccessPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderNumber = searchParams ? searchParams.get("orderNumber") : null;
+  const { clearCart } = useCart();
 
   const [order, setOrder] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Clear cart on mount if orderNumber exists
+  useEffect(() => {
+    if (orderNumber) {
+      clearCart();
+      localStorage.removeItem("cart");
+    }
+  }, [orderNumber, clearCart]);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {

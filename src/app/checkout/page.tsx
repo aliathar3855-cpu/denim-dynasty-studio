@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { db } from "@/firebase/config";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { getProductById, formatSize } from "@/lib/products";
 import { createOrder } from "@/lib/orders";
@@ -19,8 +19,9 @@ interface EnrichedCartItem {
   quantity: number;
 }
 
-export default function CheckoutPage() {
+function CheckoutPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { cart, clearCart } = useCart();
 
   // Enriched cart item state resolved from Firestore products catalog
@@ -52,13 +53,23 @@ export default function CheckoutPage() {
   // UI state
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [autofilling, setAutofilling] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"COD" | "RAZORPAY">("RAZORPAY");
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "CASHFREE">("CASHFREE");
   const [submitting, setSubmitting] = useState(false);
 
-  // 1. Load Razorpay script dynamically
+  // Load failed/cancelled payment toast notifications on mount
+  useEffect(() => {
+    const errorParam = searchParams ? searchParams.get("error") : null;
+    if (errorParam === "payment_failed") {
+      toast.error("Online payment failed or was cancelled. Please try again.", {
+        duration: 6000,
+      });
+    }
+  }, [searchParams]);
+
+  // Load Cashfree script dynamically
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
     script.async = true;
     document.body.appendChild(script);
     return () => {
@@ -350,141 +361,74 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 2. Online Razorpay Checkout Flow
-      console.log(`[Razorpay Flow] Initiating order creation on server for subtotal: ${subtotal}, delivery: ${deliveryCharge}, discount: ${discount}, finalTotal: ${finalTotal}`);
-      const res = await fetch("/api/create-order", {
+      // 2. Online Cashfree Checkout Flow
+      console.log(`[Cashfree Flow] Initiating order session creation on server for subtotal: ${subtotal}, delivery: ${deliveryCharge}, discount: ${discount}, finalTotal: ${finalTotal}`);
+      
+      const orderData = {
+        orderId,
+        userDetails: {
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          phone: phone.replace(/[^0-9]/g, ""),
+          email: email.trim(),
+          address1: addressLine1.trim(),
+          address2: addressLine2.trim() || "",
+          pincode: pincode.replace(/[^0-9]/g, ""),
+          city: city.trim(),
+          state: state.trim(),
+          landmark: landmark.trim() || "",
+          notes: notes.trim() || "",
+        },
+        items: cartItems.map((item) => ({
+          productId: item.productId,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          selectedSize: item.selectedSize,
+          quantity: item.quantity,
+        })),
+        subtotal,
+        deliveryCharge,
+        couponCode: appliedCoupon ? appliedCoupon.code : "",
+        couponType: appliedCoupon ? appliedCoupon.type : "",
+        couponDiscount: discount,
+        totalAmount: finalTotal,
+        paymentMethod: "CASHFREE",
+      };
+
+      const res = await fetch("/api/cashfree/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: finalTotal }),
+        body: JSON.stringify({ orderData }),
       });
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        const serverError = errorData?.error || "Failed to contact Razorpay server";
+        const serverError = errorData?.error || "Failed to contact Cashfree server";
         throw new Error(serverError);
       }
 
-      const razorpayOrder = await res.json();
-      console.log("[Razorpay Flow] Razorpay order created successfully on server:", razorpayOrder);
+      const sessionData = await res.json();
+      console.log("[Cashfree Flow] Session created successfully on server:", sessionData);
 
-      const activeKeyId = razorpayOrder.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SuvDwRB1EtmEvK";
-      console.log(`[Razorpay Flow] Using key_id: "${activeKeyId}"`);
+      if (!window || !(window as any).Cashfree) {
+        throw new Error("Cashfree SDK failed to load dynamically. Please try again.");
+      }
 
-      const options = {
-        key: activeKeyId,
-        amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency,
-        name: brandConfig.brandName,
-        description: `Checkout order ${orderId}`,
-        order_id: razorpayOrder.id,
-        prefill: {
-          name: `${firstName} ${lastName}`.trim(),
-          email: email.trim(),
-          contact: phone.replace(/[^0-9]/g, ""),
-        },
-        method: {
-          upi: true,
-          card: true,
-          netbanking: true,
-          wallet: true,
-        },
-        modal: {
-          ondismiss: function () {
-            console.log(`[Razorpay Flow] Payment modal dismissed/cancelled by user for order ${orderId}`);
-            setSubmitting(false);
-          }
-        },
-        handler: async function (response: any) {
-          console.log("[Razorpay Flow] Payment success callback triggered by Razorpay. Response:", response);
-          console.log(`[Razorpay Flow] payment_id: "${response.razorpay_payment_id}", order_id: "${response.razorpay_order_id}", signature: "${response.razorpay_signature}"`);
-
-          try {
-            const orderData = {
-              orderId,
-              userDetails: {
-                firstName: firstName.trim(),
-                lastName: lastName.trim(),
-                phone: phone.replace(/[^0-9]/g, ""),
-                email: email.trim(),
-                address1: addressLine1.trim(),
-                address2: addressLine2.trim() || "",
-                pincode: pincode.replace(/[^0-9]/g, ""),
-                city: city.trim(),
-                state: state.trim(),
-                landmark: landmark.trim() || "",
-                notes: notes.trim() || "",
-              },
-              items: cartItems,
-              subtotal,
-              deliveryCharge,
-              couponCode: appliedCoupon ? appliedCoupon.code : "",
-              couponType: appliedCoupon ? appliedCoupon.type : "",
-              couponDiscount: discount,
-              totalAmount: finalTotal,
-              paymentMethod: "ONLINE" as const,
-              paymentStatus: "PAID" as const,
-              orderStatus: "Pending" as const,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpayOrderId: response.razorpay_order_id || razorpayOrder.id,
-              razorpaySignature: response.razorpay_signature,
-            };
-
-            console.log("[Razorpay Flow] Saving order to Firestore with payload:", orderData);
-
-            const createdId = await createOrder(orderData, response.razorpay_payment_id);
-            console.log(`[Razorpay Flow] Firestore order document created successfully. ID: "${createdId}"`);
-
-            // Clear cart
-            clearCart();
-            localStorage.removeItem("cart");
-
-            // Send email in background
-            try {
-              fetch("/api/send-email", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ orderId: createdId, action: "placed" }),
-              });
-            } catch (mailErr) {
-              console.error("[Razorpay Flow] Mail trigger error:", mailErr);
-            }
-
-            toast.success("✓ Payment Successful | Order Confirmed");
-            router.push(`/order-success?orderNumber=${createdId}`);
-          } catch (err: any) {
-            console.error("[Razorpay Flow] Order save failure after online payment:", err);
-            const errMsg = err?.message || String(err);
-            toast.error(`Payment was successful, but we failed to record your order in our database: ${errMsg}`, { duration: 10000 });
-          } finally {
-            setSubmitting(false);
-          }
-        },
-        theme: {
-          color: "#38BDF8",
-        },
-      };
-
-      console.log("[Razorpay Flow] Initializing Razorpay instance with options:", {
-        ...options,
-        key: "***" + options.key.slice(-4), // mask key for security in logs
+      const cashfree = (window as any).Cashfree({
+        mode: sessionData.environment === "production" ? "production" : "sandbox",
       });
 
-      const razor = new (window as any).Razorpay(options);
-      razor.on("payment.failed", function (response: any) {
-        console.error("[Razorpay Flow] Payment transaction failed:", response.error);
-        toast.error(`Payment failed: ${response.error.description || "Unknown error occurred"}`);
-        setSubmitting(false);
+      console.log("[Cashfree Flow] Invoking checkout session redirection...");
+      cashfree.checkout({
+        paymentSessionId: sessionData.payment_session_id,
+        redirectTarget: "_self",
       });
-      razor.open();
+
     } catch (err: any) {
       console.error("Payment initiation / COD placement error:", err);
-      const errMsg = err?.message || String(err);
-      toast.error(`Something went wrong while placing order: ${errMsg}`, { duration: 8000 });
-    } finally {
-      // Only set to false if we did not trigger Razorpay (which handles it in callbacks)
-      if (paymentMethod === "COD") {
-        setSubmitting(false);
-      }
+      toast.error(err.message || "Something went wrong. Please try again.");
+      setSubmitting(false);
     }
   };
 
@@ -658,9 +602,9 @@ export default function CheckoutPage() {
             <div className="flex gap-4">
               <button
                 type="button"
-                onClick={() => setPaymentMethod("RAZORPAY")}
+                onClick={() => setPaymentMethod("CASHFREE")}
                 className={
-                  paymentMethod === "RAZORPAY"
+                  paymentMethod === "CASHFREE"
                     ? "bg-[#38BDF8] text-black px-5 py-2.5 rounded-xl font-bold border border-[#38BDF8] cursor-pointer text-sm shadow-sm"
                     : "bg-[#f8f8f8] text-[#666666] border border-neutral-200 px-5 py-2.5 rounded-xl hover:text-[#38BDF8] hover:border-[#38BDF8]/40 transition cursor-pointer text-sm"
                 }
@@ -878,5 +822,20 @@ export default function CheckoutPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-white text-[#111111] flex items-center justify-center p-6 font-sans">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-black mb-4"></div>
+          <p className="text-[#666666] text-sm">Loading Checkout...</p>
+        </div>
+      </main>
+    }>
+      <CheckoutPageContent />
+    </Suspense>
   );
 }

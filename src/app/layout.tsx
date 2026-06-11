@@ -34,12 +34,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
 
-        {/* Razorpay script */}
-        <Script
-          src="https://checkout.razorpay.com/v1/checkout.js"
-          strategy="beforeInteractive"
-        />
-
         <CartProvider>
           <WishlistProvider>
             <Toaster position="top-center" reverseOrder={false} />
