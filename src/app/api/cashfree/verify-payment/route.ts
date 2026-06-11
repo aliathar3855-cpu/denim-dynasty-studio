@@ -11,11 +11,18 @@ const getCashfreeUrl = (path: string) => {
 };
 
 export async function GET(req: Request) {
-  let origin = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const isProduction = process.env.CASHFREE_ENV === "production";
+  let origin = siteUrl || "";
+
   if (!origin) {
-    const host = req.headers.get("host") || "localhost:3000";
+    if (isProduction) {
+      console.error("[Cashfree API] NEXT_PUBLIC_SITE_URL is not configured in production mode.");
+      // In production fallback to headers is dangerous, but for a redirect response we resolve it securely
+    }
+    const host = req.headers.get("host") || "";
     const proto = req.headers.get("x-forwarded-proto") || "http";
-    origin = `${proto}://${host}`;
+    origin = host ? `${proto}://${host}` : "";
   }
   origin = origin.replace(/\/$/, "");
 

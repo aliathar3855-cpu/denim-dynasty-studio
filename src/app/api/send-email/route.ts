@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     let subject = "";
     let html = "";
 
-    const trackingUrl = `${req.headers.get("origin") || "http://localhost:3000"}/my-orders/${orderNumber}`;
+    const trackingUrl = `${process.env.NEXT_PUBLIC_SITE_URL || req.headers.get("origin") || "http://localhost:3000"}/my-orders/${orderNumber}`;
 
     if (action === "placed") {
       subject = `${brandConfig.brandName}: Order Received! (${orderNumber})`;

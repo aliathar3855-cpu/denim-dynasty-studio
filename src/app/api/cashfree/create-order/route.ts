@@ -61,29 +61,49 @@ export async function POST(req: Request) {
     }
 
     // 1. Resolve host and protocol for redirect URLs, preferring NEXT_PUBLIC_SITE_URL
-    let origin = process.env.NEXT_PUBLIC_SITE_URL || "";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    const isProduction = process.env.CASHFREE_ENV === "production";
+    let origin = siteUrl || "";
+
     if (!origin) {
-      const host = req.headers.get("host") || "localhost:3000";
+      if (isProduction) {
+        console.error("[Cashfree API] NEXT_PUBLIC_SITE_URL is not configured in production mode.");
+        return NextResponse.json(
+          { 
+            error: "Server configuration error: NEXT_PUBLIC_SITE_URL environment variable is missing.",
+            details: { environment: "production" }
+          },
+          { status: 500 }
+        );
+      }
+      const host = req.headers.get("host") || "";
       const proto = req.headers.get("x-forwarded-proto") || "http";
-      origin = `${proto}://${host}`;
+      origin = host ? `${proto}://${host}` : "";
     }
     origin = origin.replace(/\/$/, "");
 
     // Validate protocol constraints for Cashfree Production env
-    const isProduction = process.env.CASHFREE_ENV === "production";
-    if (isProduction && !origin.startsWith("https://")) {
-      console.error("[Cashfree API] Insecure return/notify origin configured for Production mode:", origin);
-      return NextResponse.json(
-        { 
-          error: "Insecure URL configuration. Cashfree Production requires HTTPS.",
-          details: { 
-            origin, 
-            environment: "production",
-            solution: "Ensure NEXT_PUBLIC_SITE_URL starts with https:// in production."
-          }
-        },
-        { status: 400 }
-      );
+    if (isProduction) {
+      if (!origin.startsWith("https://")) {
+        console.error("[Cashfree API] Insecure return/notify origin configured for Production mode:", origin);
+        return NextResponse.json(
+          { 
+            error: "Insecure URL configuration. Cashfree Production requires HTTPS.",
+            details: { origin, environment: "production" }
+          },
+          { status: 400 }
+        );
+      }
+      if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+        console.error("[Cashfree API] Invalid domain configured for Cashfree Production mode:", origin);
+        return NextResponse.json(
+          { 
+            error: "Invalid URL configuration. Cashfree Production does not support localhost.",
+            details: { origin, environment: "production" }
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // 2. Locate coupon document if applicable
