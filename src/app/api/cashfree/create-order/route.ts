@@ -40,9 +40,22 @@ export async function POST(req: Request) {
     console.log(`[Cashfree Create Order API] Initiating checkout for order: ${orderId}, amount: ${orderData.totalAmount}`);
 
     if (!process.env.CASHFREE_APP_ID || !process.env.CASHFREE_SECRET_KEY) {
-      console.error("[Cashfree API] Missing Cashfree Credentials in environment variables.");
+      console.error("[Cashfree API] Missing Cashfree Credentials in environment variables. Audit details:", {
+        hasAppId: !!process.env.CASHFREE_APP_ID,
+        appIdLength: process.env.CASHFREE_APP_ID ? process.env.CASHFREE_APP_ID.length : 0,
+        hasSecretKey: !!process.env.CASHFREE_SECRET_KEY,
+        secretKeyLength: process.env.CASHFREE_SECRET_KEY ? process.env.CASHFREE_SECRET_KEY.length : 0,
+        cashfreeEnv: process.env.CASHFREE_ENV || "not_set",
+      });
       return NextResponse.json(
-        { error: "Cashfree integration is not configured on the server." },
+        { 
+          error: "Cashfree integration is not configured on the server.",
+          details: {
+            hasAppId: !!process.env.CASHFREE_APP_ID,
+            hasSecretKey: !!process.env.CASHFREE_SECRET_KEY,
+            cashfreeEnv: process.env.CASHFREE_ENV || "not_set",
+          }
+        },
         { status: 500 }
       );
     }

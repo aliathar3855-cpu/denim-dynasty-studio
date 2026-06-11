@@ -15,7 +15,10 @@ export async function POST(req: Request) {
 
     const secretKey = process.env.CASHFREE_SECRET_KEY;
     if (!secretKey) {
-      console.error("[Cashfree Webhook] CASHFREE_SECRET_KEY is not configured on the server.");
+      console.error("[Cashfree Webhook] CASHFREE_SECRET_KEY is not configured on the server. Audit details:", {
+        hasSecretKey: false,
+        cashfreeEnv: process.env.CASHFREE_ENV || "not_set",
+      });
       return NextResponse.json({ error: "Server credentials missing" }, { status: 500 });
     }
 

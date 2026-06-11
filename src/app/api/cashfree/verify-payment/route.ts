@@ -27,7 +27,13 @@ export async function GET(req: Request) {
     console.log(`[Cashfree Verify Payment] Verifying status for order: ${orderId}`);
 
     if (!process.env.CASHFREE_APP_ID || !process.env.CASHFREE_SECRET_KEY) {
-      console.error("[Cashfree API] Missing Cashfree Credentials in environment variables.");
+      console.error("[Cashfree API - Verify Payment] Missing Cashfree Credentials in environment variables. Audit details:", {
+        hasAppId: !!process.env.CASHFREE_APP_ID,
+        appIdLength: process.env.CASHFREE_APP_ID ? process.env.CASHFREE_APP_ID.length : 0,
+        hasSecretKey: !!process.env.CASHFREE_SECRET_KEY,
+        secretKeyLength: process.env.CASHFREE_SECRET_KEY ? process.env.CASHFREE_SECRET_KEY.length : 0,
+        cashfreeEnv: process.env.CASHFREE_ENV || "not_set",
+      });
       return NextResponse.redirect(`${origin}/checkout?error=credentials_missing`);
     }
 
