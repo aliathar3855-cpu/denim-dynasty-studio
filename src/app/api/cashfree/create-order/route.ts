@@ -60,10 +60,31 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. Resolve host and protocol for redirect URLs
-    const host = req.headers.get("host") || "localhost:3000";
-    const proto = req.headers.get("x-forwarded-proto") || "http";
-    const origin = `${proto}://${host}`;
+    // 1. Resolve host and protocol for redirect URLs, preferring NEXT_PUBLIC_SITE_URL
+    let origin = process.env.NEXT_PUBLIC_SITE_URL || "";
+    if (!origin) {
+      const host = req.headers.get("host") || "localhost:3000";
+      const proto = req.headers.get("x-forwarded-proto") || "http";
+      origin = `${proto}://${host}`;
+    }
+    origin = origin.replace(/\/$/, "");
+
+    // Validate protocol constraints for Cashfree Production env
+    const isProduction = process.env.CASHFREE_ENV === "production";
+    if (isProduction && !origin.startsWith("https://")) {
+      console.error("[Cashfree API] Insecure return/notify origin configured for Production mode:", origin);
+      return NextResponse.json(
+        { 
+          error: "Insecure URL configuration. Cashfree Production requires HTTPS.",
+          details: { 
+            origin, 
+            environment: "production",
+            solution: "Ensure NEXT_PUBLIC_SITE_URL starts with https:// in production."
+          }
+        },
+        { status: 400 }
+      );
+    }
 
     // 2. Locate coupon document if applicable
     let couponDocId: string | null = null;

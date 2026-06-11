@@ -11,9 +11,13 @@ const getCashfreeUrl = (path: string) => {
 };
 
 export async function GET(req: Request) {
-  const host = req.headers.get("host") || "localhost:3000";
-  const proto = req.headers.get("x-forwarded-proto") || "http";
-  const origin = `${proto}://${host}`;
+  let origin = process.env.NEXT_PUBLIC_SITE_URL || "";
+  if (!origin) {
+    const host = req.headers.get("host") || "localhost:3000";
+    const proto = req.headers.get("x-forwarded-proto") || "http";
+    origin = `${proto}://${host}`;
+  }
+  origin = origin.replace(/\/$/, "");
 
   try {
     const { searchParams } = new URL(req.url);
