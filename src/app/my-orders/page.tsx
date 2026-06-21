@@ -1,30 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { collection, query, getDocs, orderBy } from "firebase/firestore";
-import { db } from "@/firebase/config";
 import Link from "next/link";
 import Image from "next/image";
-
-const normalizeOrder = (docId: string, data: any) => {
-  let phone = "";
-  if (data.customer) {
-    phone = data.customer.phone || "";
-  } else if (data.userDetails) {
-    phone = data.userDetails.phone || "";
-  }
-  return {
-    id: docId,
-    orderNumber: data.orderNumber || data.orderId || docId,
-    customer: {
-      phone,
-    },
-    total: Number(data.total || data.totalAmount || 0),
-    status: (data.status || data.orderStatus || "pending").toLowerCase(),
-    paymentMethod: data.paymentMethod || "COD",
-    createdAt: data.createdAt,
-  };
-};
 
 export default function MyOrdersPage() {
   const [phone, setPhone] = useState("");
@@ -51,32 +29,21 @@ export default function MyOrdersPage() {
       return;
     }
 
-    const suffixInput = cleanInputPhone.slice(-10);
-
     try {
       setLoading(true);
 
-      const ordersRef = collection(db, "orders");
-      const q = query(ordersRef, orderBy("createdAt", "desc"));
-      const snapshot = await getDocs(q);
+      const res = await fetch(`/api/my-orders?phone=${encodeURIComponent(cleanInputPhone)}`);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to fetch order history.");
+      }
 
-      const allOrders = snapshot.docs.map((docItem) =>
-        normalizeOrder(docItem.id, docItem.data())
-      );
-
-      // Filter by normalized suffix matching
-      const matchedOrders = allOrders.filter((order) => {
-        const customerPhone = order.customer?.phone || "";
-        const cleanDbPhone = customerPhone.replace(/[^0-9]/g, "");
-        const suffixDb = cleanDbPhone.slice(-10);
-        return suffixInput === suffixDb;
-      });
-
-      setOrders(matchedOrders);
+      const data = await res.json();
+      setOrders(data.orders || []);
       setSearched(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error retrieving orders:", err);
-      setError("An error occurred while fetching your orders. Please try again.");
+      setError(err.message || "An error occurred while fetching your orders. Please try again.");
     } finally {
       setLoading(false);
     }

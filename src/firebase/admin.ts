@@ -1,8 +1,16 @@
 import { initializeApp, getApps, getApp, cert, applicationDefault } from "firebase-admin";
-import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
+import { getFirestore, Firestore } from "firebase-admin/firestore";
 
-let app;
-if (getApps().length === 0) {
+let app: any;
+let dbInstance: Firestore;
+
+const initAdmin = () => {
+  if (getApps().length > 0) {
+    app = getApp();
+    dbInstance = getFirestore(app);
+    return;
+  }
+
   try {
     let credential;
 
@@ -38,13 +46,32 @@ if (getApps().length === 0) {
       credential,
       projectId: process.env.FIREBASE_PROJECT_ID || "denim-dynasty-studio2",
     });
+    dbInstance = getFirestore(app);
     console.log("[Firebase Admin] SDK initialized successfully.");
   } catch (err: any) {
     console.error("[Firebase Admin Error] Failed to initialize Firebase Admin SDK:", err.message || err);
+    throw new Error("Database configuration error. The server could not load credentials.");
   }
-} else {
-  app = getApp();
-}
+};
 
-export const adminDb = getFirestore();
-export { FieldValue, Timestamp };
+export const getAdminDb = (): Firestore => {
+  if (!dbInstance) {
+    initAdmin();
+  }
+  return dbInstance;
+};
+
+// Export adminDb as a Proxy to enable transparent lazy initialization
+export const adminDb = new Proxy({} as any, {
+  get(target, prop) {
+    const instance = getAdminDb();
+    const value = Reflect.get(instance, prop);
+    if (typeof value === "function") {
+      return value.bind(instance);
+    }
+    return value;
+  }
+}) as unknown as Firestore;
+
+export { FieldValue, Timestamp } from "firebase-admin/firestore";
+

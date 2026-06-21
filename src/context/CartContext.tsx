@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useMemo,
 } from "react";
 import { toast } from "react-hot-toast";
 import { db } from "@/firebase/config";
@@ -235,18 +236,18 @@ export const CartProvider = ({
     setCart([]);
   }, []);
 
+  const value = useMemo(() => ({
+    cart,
+    addToCart,
+    removeFromCart,
+    increaseQuantity,
+    decreaseQuantity,
+    clearCart,
+    showToast,
+  }), [cart, addToCart, removeFromCart, increaseQuantity, decreaseQuantity, clearCart, showToast]);
+
   return (
-    <CartContext.Provider
-      value={{
-        cart,
-        addToCart,
-        removeFromCart,
-        increaseQuantity,
-        decreaseQuantity,
-        clearCart,
-        showToast,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
