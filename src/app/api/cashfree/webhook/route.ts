@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { db } from "@/firebase/config";
-import { doc, getDoc, runTransaction, arrayUnion } from "firebase/firestore";
+import { adminDb, FieldValue } from "@/firebase/admin";
 
 export async function POST(req: Request) {
   try {
@@ -54,20 +53,20 @@ export async function POST(req: Request) {
       console.log(`[Cashfree Webhook] Success payment notification received for Order ID: ${orderId}, Status: ${paymentStatus}`);
 
       if (orderId && paymentStatus === "SUCCESS") {
-        const orderRef = doc(db, "orders", orderId);
-        const orderSnap = await getDoc(orderRef);
+        const orderRef = adminDb.collection("orders").doc(orderId);
+        const orderSnap = await orderRef.get();
 
-        if (orderSnap.exists()) {
+        if (orderSnap.exists) {
           const orderData = orderSnap.data();
 
-          if (orderData.paymentStatus !== "PAID") {
-            await runTransaction(db, async (transaction) => {
+          if (orderData && orderData.paymentStatus !== "PAID") {
+            await adminDb.runTransaction(async (transaction: any) => {
               transaction.update(orderRef, {
                 paymentStatus: "PAID",
                 status: "paid", // legacy compatibility
                 paymentId: cfPaymentId || null,
                 paymentMethodDetails: paymentGroup || "Online",
-                statusHistory: arrayUnion({
+                statusHistory: FieldValue.arrayUnion({
                   status: "Confirmed",
                   timestamp: new Date(),
                   note: "Payment successfully verified via Webhook notification."

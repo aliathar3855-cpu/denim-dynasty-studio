@@ -1,17 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/firebase/config";
-import {
-  doc,
-  collection,
-  query,
-  where,
-  getDocs,
-  getDoc,
-  runTransaction,
-  increment,
-  serverTimestamp,
-  Timestamp,
-} from "firebase/firestore";
+import { adminDb, FieldValue, Timestamp } from "@/firebase/admin";
 
 const getCashfreeUrl = (path: string) => {
   const isProd = process.env.CASHFREE_ENV === "production";
@@ -111,9 +99,10 @@ export async function POST(req: Request) {
     let couponCodeClean = "";
     if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
       couponCodeClean = couponCode.trim().toUpperCase();
-      const couponsRef = collection(db, "coupons");
-      const q = query(couponsRef, where("code", "==", couponCodeClean));
-      const snap = await getDocs(q);
+      const snap = await adminDb
+        .collection("coupons")
+        .where("code", "==", couponCodeClean)
+        .get();
       if (snap.empty) {
         return NextResponse.json({ error: "Coupon code does not exist" }, { status: 400 });
       }
@@ -121,15 +110,15 @@ export async function POST(req: Request) {
     }
 
     // 3. Server-side validation of prices, delivery, and coupons in transaction
-    const validationResult = await runTransaction(db, async (transaction) => {
+    const validationResult = await adminDb.runTransaction(async (transaction: any) => {
       let computedSubtotal = 0;
       const verifiedItemsList = [];
 
       for (const item of items) {
-        const prodRef = doc(db, "products", item.productId);
+        const prodRef = adminDb.collection("products").doc(item.productId);
         const prodSnap = await transaction.get(prodRef);
 
-        if (!prodSnap.exists()) {
+        if (!prodSnap.exists) {
           throw new Error(`Product with ID ${item.productId} not found in database catalog`);
         }
 
@@ -155,7 +144,7 @@ export async function POST(req: Request) {
       let couponType = "";
 
       if (couponDocId) {
-        const couponRef = doc(db, "coupons", couponDocId);
+        const couponRef = adminDb.collection("coupons").doc(couponDocId);
         const couponSnap = await transaction.get(couponRef);
 
         if (!couponSnap.exists()) {
@@ -204,7 +193,7 @@ export async function POST(req: Request) {
 
         // Increment coupon count inside the transaction
         transaction.update(couponRef, {
-          usedCount: increment(1),
+          usedCount: FieldValue.increment(1),
         });
       }
 
@@ -276,7 +265,7 @@ export async function POST(req: Request) {
     }
 
     // 5. Write Pending Order payload to Firestore
-    const legacyProducts = validationResult.items.map((item) => ({
+    const legacyProducts = validationResult.items.map((item: any) => ({
       id: item.productId,
       productId: item.productId,
       name: item.name,
@@ -302,7 +291,7 @@ export async function POST(req: Request) {
       orderStatus: "Pending",
       paymentSessionId,
       cfOrderId: cashfreeResult.cf_order_id || "",
-      createdAt: serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
       statusHistory: [
         {
           status: "Pending",
@@ -334,8 +323,8 @@ export async function POST(req: Request) {
       status: "pending",
     };
 
-    const orderRef = doc(db, "orders", orderId);
-    await runTransaction(db, async (transaction) => {
+    const orderRef = adminDb.collection("orders").doc(orderId);
+    await adminDb.runTransaction(async (transaction: any) => {
       transaction.set(orderRef, orderPayload);
     });
 

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/firebase/config";
-import { doc, getDoc, runTransaction, arrayUnion } from "firebase/firestore";
+import { adminDb, FieldValue } from "@/firebase/admin";
 
 const getCashfreeUrl = (path: string) => {
   const isProd = process.env.CASHFREE_ENV === "production";
@@ -99,10 +98,10 @@ export async function GET(req: Request) {
     }
 
     // 3. Update order document status in Firestore
-    const orderRef = doc(db, "orders", orderId);
-    const orderSnap = await getDoc(orderRef);
+    const orderRef = adminDb.collection("orders").doc(orderId);
+    const orderSnap = await orderRef.get();
 
-    if (!orderSnap.exists()) {
+    if (!orderSnap.exists) {
       console.error(`[Cashfree Verify Payment] Order document not found in Firestore: ${orderId}`);
       return NextResponse.redirect(`${origin}/checkout?error=order_not_found`);
     }
@@ -111,14 +110,14 @@ export async function GET(req: Request) {
 
     if (isPaid) {
       // Avoid double-processing if already marked PAID (e.g. by webhook)
-      if (currentOrderData.paymentStatus !== "PAID") {
-        await runTransaction(db, async (transaction) => {
+      if (currentOrderData && currentOrderData.paymentStatus !== "PAID") {
+        await adminDb.runTransaction(async (transaction: any) => {
           transaction.update(orderRef, {
             paymentStatus: "PAID",
             status: "paid", // legacy compatibility
             paymentId: paymentId || null,
             paymentMethodDetails: paymentMethodDetails || "Online",
-            statusHistory: arrayUnion({
+            statusHistory: FieldValue.arrayUnion({
               status: "Confirmed",
               timestamp: new Date(),
               note: "Payment successfully verified."
@@ -132,7 +131,7 @@ export async function GET(req: Request) {
       return NextResponse.redirect(`${origin}/order-success?orderNumber=${orderId}`);
     } else {
       // Payment failed or is in pending status
-      await runTransaction(db, async (transaction) => {
+      await adminDb.runTransaction(async (transaction: any) => {
         transaction.update(orderRef, {
           paymentStatus: "FAILED",
           status: "failed", // legacy compatibility

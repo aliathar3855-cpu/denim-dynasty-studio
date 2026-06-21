@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/config";
@@ -18,50 +18,101 @@ function OrderSuccessPageContent() {
   const [order, setOrder] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const cartCleared = useRef(false);
 
-  // Clear cart on mount if orderNumber exists
+  // Clear cart on mount if orderNumber exists, exactly once using a useRef guard
   useEffect(() => {
-    if (orderNumber) {
+    if (orderNumber && !cartCleared.current) {
       clearCart();
       localStorage.removeItem("cart");
+      cartCleared.current = true;
     }
   }, [orderNumber, clearCart]);
 
   useEffect(() => {
+    let active = true;
+
     const fetchOrderDetails = async () => {
-      if (!orderNumber) {
-        setLoading(false);
+      // Validate that orderNumber exists before querying
+      if (!orderNumber || typeof orderNumber !== "string" || !orderNumber.trim()) {
+        if (active) {
+          setError("No order number was provided in the URL.");
+          setLoading(false);
+        }
         return;
       }
+
       try {
-        setLoading(true);
-        // 1. Try directly by doc ID
-        const docRef = doc(db, "orders", orderNumber);
-        const snapshot = await getDoc(docRef);
-        if (snapshot.exists()) {
-          setOrder({ id: snapshot.id, ...snapshot.data() });
-        } else {
+        if (active) {
+          setLoading(true);
+          setError("");
+        }
+
+        // Setup a 10-second timeout to prevent UI lockup
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Order lookup timed out. Please check your network connection.")), 10000)
+        );
+
+        // Fetch query promise
+        const fetchPromise = (async () => {
+          const trimmedOrderNum = orderNumber.trim();
+          // 1. Try directly by doc ID
+          const docRef = doc(db, "orders", trimmedOrderNum);
+          const snapshot = await getDoc(docRef);
+          if (snapshot.exists()) {
+            return { id: snapshot.id, ...snapshot.data() };
+          }
+
           // 2. Query fallback (by orderNumber field)
           const q = query(
             collection(db, "orders"),
-            where("orderNumber", "==", orderNumber)
+            where("orderNumber", "==", trimmedOrderNum)
           );
           const qSnapshot = await getDocs(q);
           if (!qSnapshot.empty) {
-            setOrder({ id: qSnapshot.docs[0].id, ...qSnapshot.docs[0].data() });
-          } else {
-            setError("Could not locate receipt details.");
+            return { id: qSnapshot.docs[0].id, ...qSnapshot.docs[0].data() };
           }
+
+          // 3. Query fallback (by orderId field)
+          const q2 = query(
+            collection(db, "orders"),
+            where("orderId", "==", trimmedOrderNum)
+          );
+          const qSnapshot2 = await getDocs(q2);
+          if (!qSnapshot2.empty) {
+            return { id: qSnapshot2.docs[0].id, ...qSnapshot2.docs[0].data() };
+          }
+
+          return null;
+        })();
+
+        // Race fetch against timeout
+        const orderData = await Promise.race([fetchPromise, timeoutPromise]);
+
+        if (!active) return;
+
+        if (orderData) {
+          setOrder(orderData);
+        } else {
+          setError("Could not locate receipt details for this order.");
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error retrieving order for success summary:", err);
-        setError("Failed to fetch order summary details.");
+        if (active) {
+          setError(err.message || "Failed to fetch order summary details.");
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
     fetchOrderDetails();
+
+    return () => {
+      active = false;
+    };
   }, [orderNumber]);
 
   if (loading) {
@@ -81,12 +132,12 @@ function OrderSuccessPageContent() {
         <p className="text-[#666666] text-sm mb-6 leading-relaxed">
           {error || "No order number provided in the checkout redirection."}
         </p>
-        <button
-          onClick={() => router.push("/")}
-          className="w-full bg-[#38BDF8] text-black py-3.5 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition cursor-pointer text-sm"
+        <Link
+          href="/"
+          className="block w-full text-center bg-[#38BDF8] text-black py-3.5 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition cursor-pointer text-sm"
         >
           Continue Shopping
-        </button>
+        </Link>
       </div>
     );
   }
@@ -121,7 +172,7 @@ function OrderSuccessPageContent() {
       <div className="bg-sky-50/50 border border-sky-100 rounded-2xl p-5 mb-8 flex flex-col sm:flex-row justify-between gap-4">
         <div>
           <span className="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Order Reference ID</span>
-          <span className="text-xl font-mono font-black text-black select-all">{order.orderId || order.orderNumber}</span>
+          <span className="text-xl font-mono font-black text-black select-all">{order.orderId || order.orderNumber || order.id}</span>
         </div>
         <div className="text-left sm:text-right">
           <span className="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Payment Method</span>
@@ -203,17 +254,17 @@ function OrderSuccessPageContent() {
 
       <div className="space-y-4">
         <Link
-          href={`/my-orders/${order.orderId || order.orderNumber}`}
+          href={`/my-orders/${order.id || order.orderId || order.orderNumber}`}
           className="block w-full text-center border border-neutral-200 text-neutral-750 py-3.5 rounded-xl font-bold hover:bg-neutral-50 hover:text-black transition text-sm shadow-sm"
         >
           Track Order Progress ➔
         </Link>
-        <button
-          onClick={() => router.push("/")}
-          className="w-full bg-[#38BDF8] text-black py-4 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition cursor-pointer text-sm shadow-md"
+        <Link
+          href="/"
+          className="block w-full text-center bg-[#38BDF8] text-black py-4 rounded-xl font-bold hover:bg-[#0ea5e9] hover:text-white transition cursor-pointer text-sm shadow-md"
         >
           Continue Shopping
-        </button>
+        </Link>
       </div>
     </div>
   );

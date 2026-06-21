@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useCallback,
 } from "react";
 import { toast } from "react-hot-toast";
 import { db } from "@/firebase/config";
@@ -129,7 +130,7 @@ export const CartProvider = ({
     }
   }, [cart, isLoaded]);
 
-  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+  const showToast = useCallback((message: string, type: "success" | "error" | "info" = "success") => {
     if (type === "success") {
       toast.success(message);
     } else if (type === "error") {
@@ -137,10 +138,10 @@ export const CartProvider = ({
     } else {
       toast(message);
     }
-  };
+  }, []);
 
   // Add to cart
-  const addToCart = (product: any) => {
+  const addToCart = useCallback((product: any) => {
     const id = product.id || product.productId;
     const name = product.name;
     const price = Number(product.price);
@@ -194,19 +195,19 @@ export const CartProvider = ({
     });
 
     toast.success("Product added to cart");
-  };
+  }, []);
 
   // Remove item
-  const removeFromCart = (id: string, selectedSize: string) => {
+  const removeFromCart = useCallback((id: string, selectedSize: string) => {
     setCart((prevCart) =>
       prevCart.filter(
         (item) => !(item.id === id && item.selectedSize === selectedSize)
       )
     );
-  };
+  }, []);
 
   // Increase quantity
-  const increaseQuantity = (id: string, selectedSize: string) => {
+  const increaseQuantity = useCallback((id: string, selectedSize: string) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
         item.id === id && item.selectedSize === selectedSize
@@ -214,10 +215,10 @@ export const CartProvider = ({
           : item
       )
     );
-  };
+  }, []);
 
   // Decrease quantity
-  const decreaseQuantity = (id: string, selectedSize: string) => {
+  const decreaseQuantity = useCallback((id: string, selectedSize: string) => {
     setCart((prevCart) =>
       prevCart
         .map((item) =>
@@ -227,12 +228,12 @@ export const CartProvider = ({
         )
         .filter((item) => item.quantity > 0)
     );
-  };
+  }, []);
 
   // Clear cart
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
-  };
+  }, []);
 
   return (
     <CartContext.Provider

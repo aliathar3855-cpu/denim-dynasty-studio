@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/firebase/config";
-import { collection, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { adminDb, Timestamp } from "@/firebase/admin";
 
 export async function POST(req: Request) {
   try {
@@ -10,9 +9,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ valid: false, error: "Invalid coupon code format" }, { status: 400 });
     }
 
-    const couponsRef = collection(db, "coupons");
-    const q = query(couponsRef, where("code", "==", code.trim().toUpperCase()));
-    const snapshot = await getDocs(q);
+    const snapshot = await adminDb
+      .collection("coupons")
+      .where("code", "==", code.trim().toUpperCase())
+      .get();
 
     if (snapshot.empty) {
       return NextResponse.json({ valid: false, error: "Coupon code does not exist" });

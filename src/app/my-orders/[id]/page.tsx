@@ -16,14 +16,14 @@ const normalizeOrder = (docId: string, data: any) => {
   let pincode = "";
   let email = "";
 
-  if (data.customer) {
+  if (data && data.customer && typeof data.customer === "object") {
     name = data.customer.name || `${data.customer.firstName || ""} ${data.customer.lastName || ""}`.trim();
     phone = data.customer.phone || "";
     address = data.customer.address || `${data.customer.addressLine1 || ""}${data.customer.addressLine2 ? ", " + data.customer.addressLine2 : ""}`.trim();
     city = data.customer.city || "";
     pincode = data.customer.pincode || "";
     email = data.customer.email || "";
-  } else if (data.userDetails) {
+  } else if (data && data.userDetails && typeof data.userDetails === "object") {
     name = `${data.userDetails.firstName || ""} ${data.userDetails.lastName || ""}`.trim();
     phone = data.userDetails.phone || "";
     address = `${data.userDetails.address1 || ""}${data.userDetails.address2 ? ", " + data.userDetails.address2 : ""}`.trim();
@@ -33,30 +33,30 @@ const normalizeOrder = (docId: string, data: any) => {
   }
 
   let productsList = [];
-  if (Array.isArray(data.products)) {
+  if (data && Array.isArray(data.products)) {
     productsList = data.products.map((p: any) => ({
-      name: p.name || "",
-      imageUrl: p.imageUrl || p.image || "",
-      price: Number(p.price) || 0,
-      quantity: Number(p.quantity) || 1,
-      selectedSize: p.selectedSize || ""
+      name: p?.name || "",
+      imageUrl: p?.imageUrl || p?.image || "",
+      price: Number(p?.price) || 0,
+      quantity: Number(p?.quantity) || 1,
+      selectedSize: p?.selectedSize || ""
     }));
-  } else if (Array.isArray(data.items)) {
+  } else if (data && Array.isArray(data.items)) {
     productsList = data.items.map((p: any) => ({
-      name: p.name || "",
-      imageUrl: p.image || p.imageUrl || "",
-      price: Number(p.price) || 0,
-      quantity: Number(p.quantity) || 1,
-      selectedSize: p.selectedSize || ""
+      name: p?.name || "",
+      imageUrl: p?.image || p?.imageUrl || "",
+      price: Number(p?.price) || 0,
+      quantity: Number(p?.quantity) || 1,
+      selectedSize: p?.selectedSize || ""
     }));
   }
 
-  const status = (data.status || data.orderStatus || "pending").toLowerCase();
-  const total = Number(data.total || data.totalAmount || 0);
+  const status = ((data && (data.status || data.orderStatus)) || "pending").toLowerCase();
+  const total = Number((data && (data.total || data.totalAmount)) || 0);
 
   return {
     id: docId,
-    orderNumber: data.orderNumber || data.orderId || docId,
+    orderNumber: (data && (data.orderNumber || data.orderId)) || docId,
     customer: {
       name,
       phone,
@@ -68,11 +68,11 @@ const normalizeOrder = (docId: string, data: any) => {
     products: productsList,
     total,
     status,
-    paymentMethod: data.paymentMethod || "COD",
-    paymentStatus: data.paymentStatus || "Pending",
-    paymentId: data.paymentId || null,
-    createdAt: data.createdAt,
-    statusHistory: Array.isArray(data.statusHistory) ? data.statusHistory : [],
+    paymentMethod: (data && data.paymentMethod) || "COD",
+    paymentStatus: (data && data.paymentStatus) || "Pending",
+    paymentId: (data && data.paymentId) || null,
+    createdAt: data && data.createdAt,
+    statusHistory: (data && Array.isArray(data.statusHistory)) ? data.statusHistory : [],
   };
 };
 
@@ -84,53 +84,97 @@ export default function OrderDetailsPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     const fetchOrder = async () => {
-      try {
-        if (!id) {
+      if (!id || typeof id !== "string" || !id.trim()) {
+        if (active) {
+          setError("No order identifier was provided.");
           setLoading(false);
-          return;
         }
-        setLoading(true);
-        setError("");
+        return;
+      }
 
-        let orderData: any = null;
-        let orderDocId = "";
+      try {
+        if (active) {
+          setLoading(true);
+          setError("");
+        }
 
-        // 1. Try fetching by doc ID directly
-        const docRef = doc(db, "orders", id.toString());
-        const snapshot = await getDoc(docRef);
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Database request timed out. Please check your network connection.")), 10000)
+        );
 
-        if (snapshot.exists()) {
-          orderData = snapshot.data();
-          orderDocId = snapshot.id;
-        } else {
-          // 2. Try fetching by orderNumber (fallback)
-          const q = query(
-            collection(db, "orders"),
-            where("orderNumber", "==", id.toString())
-          );
-          const qSnapshot = await getDocs(q);
-          if (!qSnapshot.empty) {
-            const docSnap = qSnapshot.docs[0];
-            orderData = docSnap.data();
-            orderDocId = docSnap.id;
+        const fetchPromise = (async () => {
+          const trimmedId = id.trim();
+          let orderData: any = null;
+          let orderDocId = "";
+
+          // 1. Try fetching by doc ID directly
+          const docRef = doc(db, "orders", trimmedId);
+          const snapshot = await getDoc(docRef);
+
+          if (snapshot.exists()) {
+            orderData = snapshot.data();
+            orderDocId = snapshot.id;
+          } else {
+            // 2. Try fetching by orderNumber (fallback)
+            const q = query(
+              collection(db, "orders"),
+              where("orderNumber", "==", trimmedId)
+            );
+            const qSnapshot = await getDocs(q);
+            if (!qSnapshot.empty) {
+              const docSnap = qSnapshot.docs[0];
+              orderData = docSnap.data();
+              orderDocId = docSnap.id;
+            } else {
+              // 3. Try fetching by orderId (fallback 2)
+              const q2 = query(
+                collection(db, "orders"),
+                where("orderId", "==", trimmedId)
+              );
+              const qSnapshot2 = await getDocs(q2);
+              if (!qSnapshot2.empty) {
+                const docSnap2 = qSnapshot2.docs[0];
+                orderData = docSnap2.data();
+                orderDocId = docSnap2.id;
+              }
+            }
           }
-        }
 
-        if (orderData) {
-          setOrder(normalizeOrder(orderDocId, orderData));
+          if (orderData) {
+            return { orderDocId, orderData };
+          }
+          return null;
+        })();
+
+        const result = await Promise.race([fetchPromise, timeoutPromise]);
+
+        if (!active) return;
+
+        if (result) {
+          setOrder(normalizeOrder(result.orderDocId, result.orderData));
         } else {
           setError("No order found with the provided identifier.");
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error loading order details:", err);
-        setError("Failed to retrieve order details. Please try again.");
+        if (active) {
+          setError(err.message || "Failed to retrieve order details. Please try again.");
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
     fetchOrder();
+
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   const formatDate = (createdAt: any) => {

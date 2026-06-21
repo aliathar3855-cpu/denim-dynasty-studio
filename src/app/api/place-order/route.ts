@@ -1,16 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/firebase/config";
-import {
-  doc,
-  collection,
-  query,
-  where,
-  getDocs,
-  runTransaction,
-  increment,
-  serverTimestamp,
-  Timestamp,
-} from "firebase/firestore";
+import { adminDb, FieldValue, Timestamp } from "@/firebase/admin";
 import crypto from "crypto";
 
 export async function POST(req: Request) {
@@ -79,9 +68,10 @@ export async function POST(req: Request) {
     let couponCodeClean = "";
     if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
       couponCodeClean = couponCode.trim().toUpperCase();
-      const couponsRef = collection(db, "coupons");
-      const q = query(couponsRef, where("code", "==", couponCodeClean));
-      const snap = await getDocs(q);
+      const snap = await adminDb
+        .collection("coupons")
+        .where("code", "==", couponCodeClean)
+        .get();
       if (snap.empty) {
         return NextResponse.json({ error: "Coupon code does not exist" }, { status: 400 });
       }
@@ -89,17 +79,17 @@ export async function POST(req: Request) {
     }
 
     // 2. Execute order validation and write inside an atomic transaction
-    const result = await runTransaction(db, async (transaction) => {
+    const result = await adminDb.runTransaction(async (transaction: any) => {
       // A. Verify item catalog prices and calculate subtotal
       let computedSubtotal = 0;
       const verifiedItemsList = [];
       const verifiedProductsMap: Record<string, any> = {};
 
       for (const item of items) {
-        const prodRef = doc(db, "products", item.productId);
+        const prodRef = adminDb.collection("products").doc(item.productId);
         const prodSnap = await transaction.get(prodRef);
 
-        if (!prodSnap.exists()) {
+        if (!prodSnap.exists) {
           throw new Error(`Product with ID ${item.productId} not found in database catalog`);
         }
 
@@ -128,10 +118,10 @@ export async function POST(req: Request) {
       let couponType = "";
 
       if (couponDocId) {
-        const couponRef = doc(db, "coupons", couponDocId);
+        const couponRef = adminDb.collection("coupons").doc(couponDocId);
         const couponSnap = await transaction.get(couponRef);
 
-        if (!couponSnap.exists()) {
+        if (!couponSnap.exists) {
           throw new Error("Coupon data could not be retrieved inside transaction");
         }
 
@@ -182,7 +172,7 @@ export async function POST(req: Request) {
 
         // Increment coupon used count
         transaction.update(couponRef, {
-          usedCount: increment(1),
+          usedCount: FieldValue.increment(1),
         });
       }
 
@@ -195,7 +185,7 @@ export async function POST(req: Request) {
         userDetails.address2 ? ", " + userDetails.address2 : ""
       }${userDetails.landmark ? " (Landmark: " + userDetails.landmark + ")" : ""}`.trim();
 
-      const legacyProducts = verifiedItemsList.map((item) => ({
+      const legacyProducts = verifiedItemsList.map((item: any) => ({
         id: item.productId,
         productId: item.productId,
         name: item.name,
@@ -222,7 +212,7 @@ export async function POST(req: Request) {
         razorpayPaymentId: razorpayPaymentId || paymentId || "",
         razorpayOrderId: razorpayOrderId || "",
         razorpaySignature: razorpaySignature || "",
-        createdAt: serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
         statusHistory: [
           {
             status: "Pending",
@@ -254,7 +244,7 @@ export async function POST(req: Request) {
         status: (paymentMethod === "ONLINE" || paymentMethod === "RAZORPAY") ? "paid" : "pending",
       };
 
-      const orderRef = doc(db, "orders", orderId);
+      const orderRef = adminDb.collection("orders").doc(orderId);
       transaction.set(orderRef, orderPayload);
 
       return { orderId };

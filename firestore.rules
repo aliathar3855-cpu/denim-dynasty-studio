@@ -2,22 +2,47 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
+    // Helper: Verify if user email is part of the admin whitelist
     function isAdmin() {
-      return request.auth != null;
+      return request.auth != null && 
+             request.auth.token.email != null && 
+             request.auth.token.email.lower() in [
+               "glacierfromno@gmail.com", 
+               "denimdynastystudio@gmail.com", 
+               "aliathar3855@gmail.com"
+             ];
     }
 
-    // Products collection:
-    // - Anyone can read/view products
-    // - Only logged-in admin users can write (create, update, delete)
+    // Products: Public read, Admin write
     match /products/{productId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Orders collection:
-    // - Anyone can create an order (during guest checkout) and fetch a single order by ID
-    // - Only logged-in admin users can list all, update (e.g. status changes), or delete orders
+    // Announcements: Public read, Admin write
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // HomepageSettings: Public read, Admin write
+    match /homepageSettings/{settingsId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Reviews: Public read and create, Admin write/delete
+    match /reviews/{reviewId} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Coupons: No public client reads or writes allowed. Only backend Admin SDK can access!
+    match /coupons/{couponId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Orders: Public create (guest checkout) and get (order tracking). No client updates or listings allowed.
     match /orders/{orderId} {
       allow create, get: if true;
       allow list, update, delete: if isAdmin();
