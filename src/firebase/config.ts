@@ -19,7 +19,10 @@ export const storage = getStorage(app);
 export const auth = getAuth(app);
 
 // Connect to Local Emulators in Development Mode (with hot-reload protection)
-if (process.env.NODE_ENV === "development") {
+if (
+  process.env.NODE_ENV === "development" &&
+  process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true"
+) {
   const g = globalThis as any;
   if (!g._EMULATORS_CONNECTED) {
     g._EMULATORS_CONNECTED = true;
