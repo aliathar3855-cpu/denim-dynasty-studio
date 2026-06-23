@@ -12,6 +12,13 @@ const initAdmin = () => {
   }
 
   try {
+    console.log("PROJECT_ID =", process.env.FIREBASE_PROJECT_ID);
+    console.log("CLIENT_EMAIL =", process.env.FIREBASE_CLIENT_EMAIL);
+    console.log("PRIVATE_KEY EXISTS =", !!process.env.FIREBASE_PRIVATE_KEY);
+    console.log(
+      "SERVICE_ACCOUNT_KEY EXISTS =",
+      !!process.env.FIREBASE_SERVICE_ACCOUNT_KEY
+    );
     let credential;
 
     // Option 1: Parse a single JSON string containing the service account credentials
